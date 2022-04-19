@@ -16,7 +16,7 @@
 Converts Oozie application workflow into Airflow's DAG
 """
 import shutil
-from typing import Dict, Type, List
+from typing import Dict, Type, List, Union
 
 import os
 
@@ -113,6 +113,7 @@ class OozieConverter:
             self.renderer.create_subworkflow_file(workflow=self.workflow, props=self.props)
         else:
             self.renderer.create_workflow_file(workflow=self.workflow, props=self.props)
+
         self.copy_extra_assets(self.workflow.nodes)
 
     def convert_nodes(self):
@@ -125,8 +126,10 @@ class OozieConverter:
         logging.info("Converting nodes to tasks and inner relations")
         for name, oozie_node in self.workflow.nodes.copy().items():
             tasks, relations = oozie_node.mapper.to_tasks_and_relations()
-            dependencies = oozie_node.mapper.required_imports()
             oozie_node.tasks = tasks
+
+            dependencies = oozie_node.mapper.required_imports()
+
             oozie_node.relations = relations
             self.workflow.task_groups[name] = self._get_task_group_type(oozie_node)(
                 name=name,
@@ -136,7 +139,7 @@ class OozieConverter:
                 downstream_names=oozie_node.downstream_names,
                 error_downstream_name=oozie_node.error_downstream_name,
             )
-            del self.workflow.nodes[name]
+            # del self.workflow.nodes[name]
 
     @staticmethod
     def _get_task_group_type(oozie_node: OozieNode) -> Type[TaskGroup]:
@@ -184,6 +187,7 @@ class OozieConverter:
                 input_directory_path=os.path.join(self.workflow.input_directory_path, HDFS_FOLDER),
                 output_directory_path=self.workflow.output_directory_path,
             )
+        logging.info("Extra assets copied.")
 
     def apply_preconvert_transformers(self):
         logging.info("Applying pre-convert transformers")

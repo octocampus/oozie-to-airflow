@@ -12,12 +12,17 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-#}
-"$DAGS_FOLDER/../data/prepare.sh "
-"-c %s -r %s "
-{% if delete is not none %}'-d %s '{% endif %}
-{% if mkdir is not none %}'-m %s '{% endif %}
-% (CONFIG['dataproc_cluster'], CONFIG['gcp_region'],
- {% if delete is not none %}shlex.quote({{ delete | to_python }}),{% endif %}
- {% if mkdir is not none %}shlex.quote({{ mkdir | to_python }}),{% endif %}
+ #}
+
+{% import "macros/props.tpl" as props_macro %}
+{{ task_id | to_var }} = hive.HiveOperator(
+    task_id={{ task_id | to_python }},
+    trigger_rule={{ trigger_rule | to_python }},
+    hql={{ hql | to_python }},
+    {% if hive_cli_conn_id %}hive_cli_conn_id={{ hive_cli_conn_id | to_python }},{% endif %}
+    mapred_queue={{ mapred_queue | to_python }},
+    hiveconfs={{ props_macro.props(action_node_properties=action_node_properties, xml_escaped=True) }},
+    mapred_job_name={{ task_id | to_python }},
 )
+
+
