@@ -31,5 +31,5 @@ jobs:
         uses: roles-ansible/check-ansible-centos-centos7-action@0.5.0
         with:
           # Paths to the ansible role or playbook you want to be tested.
-          targets: "./"
+          targets: "envs/dev/ansible/install_airflow.yml"
 
