@@ -116,12 +116,7 @@ class SparkMapper(ActionMapper):
 
     def to_tasks_and_relations(self):
 
-        """
-        application='',
-        conf=None, conn_id='spark_default', files=None, py_files=None, archives=None, driver_class_path=None, jars=None, java_class=None, packages=None, exclude_packages=None, repositories=None, total_executor_cores=None, executor_cores=None, executor_memory=None, driver_memory=None, keytab=None, principal=None, proxy_user=None, name='arrow-spark', num_executors=None, status_poll_interval=1, application_args=None, env_vars=None, verbose=False, spark_binary=None
-        """
         task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
-
         action_task = task_class(
             task_id=self.name,
             template_name="spark/spark.tpl",
@@ -129,21 +124,13 @@ class SparkMapper(ActionMapper):
                 application=self.java_jar,
                 conf=self.spark_opts,
                 spark_conn_id=self.props.config["spark_cli_conn_id"],
-                files=self.hdfs_files,
                 jars=self.jars,
-                driver_class_path=self.hdfs_archives,
                 java_class=self.java_class,
-                packages
-
-                main_class=self.java_class,
-                arguments=self.application_args,
-                hdfs_archives=self.hdfs_archives,
-                hdfs_files=self.hdfs_files,
-                job_name=self.job_name,
-                dataproc_spark_jars=self.dataproc_jars,
-                spark_opts=self.spark_opts,
+                name=self.job_name,
+                application_args=self.application_args,
             ),
         )
+
         tasks = [action_task]
         relations: List[Relation] = []
         prepare_task = self.prepare_extension.get_prepare_task()

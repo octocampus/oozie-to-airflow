@@ -85,7 +85,7 @@ GRAMMAR = r"""
     value_suffix: "." PARAM | "[" expression "]"
     first_identifier: FIRST_JAVA
     identifier: JAVA
-    function_invocation: FUNC INVOCATION_COLON FUNC "(" ( expression ( "," expression )* )? ")"
+    function_invocation: FUNC INVOCATION_COLON FUNC "(" ( expression ( "," SPACE*  expression )* )? ")"
         | FUNC "(" ( expression ( "," expression )* )? ")"
     literal: BOOL | INT | FLOAT | STRING | NULL
     BEGIN: "${" | "#{"
@@ -103,6 +103,10 @@ GRAMMAR = r"""
         | (/[0-9]/)+ EXP?
     EXP: /[eE]/ (/[\+\-]/)? (/[0-9]/)+
     NULL: "null"
+    SPACE: /\s+/
+    
+  
+    
 """
 
 

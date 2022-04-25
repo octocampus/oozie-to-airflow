@@ -20,5 +20,5 @@ class HiveLocalTask(Task):
     def required_imports() -> set[str]:
         return {
             "from airflow.utils import dates",
-            "from airflow.providers.apache.spark.operators import spark_submit"
+            "from airflow.providers.apache.hive.operators import hive",
         }

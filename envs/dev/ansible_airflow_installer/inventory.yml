@@ -1,0 +1,9 @@
+all:
+  hosts:
+    airflow.dev7:
+       ansible_user: root
+       ansible_host: 19.168.33.14
+    airflow.dev8:
+       ansible_user: root
+       ansible_host: 19.168.33.15
+

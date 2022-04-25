@@ -43,7 +43,7 @@ class TestDecisionMapper(unittest.TestCase):
         self.assertEqual("test_id", mapper.name)
         self.assertEqual(self.decision_node, mapper.oozie_node)
         # test conversion from Oozie EL to Jinja
-        self.assertEqual("{{functions.first_not_null('','')}}", next(iter(mapper.case_dict)))
+        self.assertEqual("{{functions.first_not_null('', '')}}", next(iter(mapper.case_dict)))
 
     def test_to_tasks_and_relations(self):
         mapper = self._get_decision_mapper()
@@ -58,7 +58,7 @@ class TestDecisionMapper(unittest.TestCase):
                     trigger_rule="one_success",
                     template_params={
                         "case_dict": OrderedDict(
-                            [("{{functions.first_not_null('','')}}", "task1"), ("True", "task2")]
+                            [("{{functions.first_not_null('', '')}}", "task1"), ("True", "task2")]
                         ),
                         "default_case": "task3",
                     },

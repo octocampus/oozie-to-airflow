@@ -47,7 +47,6 @@ class TestSubworkflowMapper(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # language=XML
         subworkflow_node_str = """
 <sub-workflow>
     <app-path>${nameNode}/user/${wf:user()}/${examplesRoot}/pig</app-path>

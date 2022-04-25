@@ -3,8 +3,28 @@
 - name: Install epel-release
   yum: name=epel-release state=present
 
-- name: Install rabbitmq-server
+- name: Install rabbitmq-server for centos 7
   yum: name=rabbitmq-server state=present
+  when: ansible_distribution_major_version == '7'
+
+- name: Install erlang 24 for centos 8
+  shell: |
+    yum remove -y erlang
+    curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash
+    sudo yum clean all
+    sudo yum -y makecache
+    sudo yum install -y erlang
+
+  ignore_errors: yes
+  when: ansible_distribution_major_version == '8'
+
+- name: Install rabbitmq-server for centos 8
+  shell: |
+    curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash
+    sudo yum makecache -y --disablerepo='*' --enablerepo='rabbitmq_rabbitmq-server'
+    sudo yum -y install rabbitmq-server
+
+  when: ansible_distribution_major_version == '8'
 
 - name: Create rabbitmq environment file
   copy:
