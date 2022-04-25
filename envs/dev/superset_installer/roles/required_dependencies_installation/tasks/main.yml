@@ -1,0 +1,78 @@
+---
+# tasks file for required_dependencies_installation
+- name: Check yum mirror list
+  shell: yum install -y vi
+  register: yum_worked
+  ignore_errors: yes
+
+- name: Fix yum mirror list
+  shell: |
+    cd /etc/yum.repos.d/
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+  when: yum_worked.rc != 0
+
+- name: Check if python3 is installed
+  shell: "python3 --version"
+  register: python3_check
+  ignore_errors: yes
+
+- name: if python3 is not installed, install it
+  yum:
+    state: present
+    name: python3
+  when: python3_check.rc == 1
+
+- name: Install pip3
+  yum:
+    state: present
+    name: python3-pip
+
+- name: Upgrade pip3
+  shell: "python3 -m pip install --upgrade pip"
+
+
+- name: Install Os dependencies on centos 7
+  yum:
+    state: present
+    name:
+      - gcc
+      - gcc-c++
+      - libffi-devel
+      - python3-devel
+      - python3-pip
+      - python3-wheel
+      - openssl-devel
+      - cyrus-sasl-devel
+      - openldap-devel
+
+  when: ansible_distribution_major_version == '7'
+
+- name: Install Os dependencies on centos 8
+  dnf:
+    state: present
+    name:
+      - gcc
+      - gcc-c++
+      - libffi-devel
+      - python3-devel
+      - python3-pip
+      - python3-wheel
+      - openssl-devel
+      - cyrus-sasl-devel
+      - openldap-devel
+
+  when: ansible_distribution_major_version == '8'
+
+- name: Install pyvenv
+  shell: "python3 -m pip install   virtualenv"
+
+- name: Install sqlalchemy
+  shell: "python3 -m pip install sqlalchemy==1.3.24"
+
+- name: Install dataclasses
+  shell: "python3 -m pip install dataclasses"
+
+
+
