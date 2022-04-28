@@ -9,6 +9,7 @@ Type=simple
 Environment="FLASK_APP=superset"
 User={{ superset_sys_user }}
 Environment="PATH=/home/{{ superset_sys_user }}/venv/bin:$PATH"
+Environment="SUPERSET_CONFIG_PATH=/home/{{ superset_sys_user }}/superset_config.py"
 ExecStart=/bin/bash -c ". venv/bin/activate && superset run -p {{ superset_port }}  --with-threads -h {{ superset_host }}   --reload"
 ExecReload=/bin/kill -HUP $MAINPID
 

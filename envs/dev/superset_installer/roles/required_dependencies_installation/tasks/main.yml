@@ -1,5 +1,5 @@
 ---
-# tasks file for required_dependencies_installation
+
 - name: Check yum mirror list
   shell: yum install -y vi
   register: yum_worked
@@ -10,69 +10,56 @@
     cd /etc/yum.repos.d/
     sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
     sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-
   when: yum_worked.rc != 0
 
-- name: Check if python3 is installed
-  shell: "python3 --version"
+- name: Copy packages to the host
+  copy:
+    src: "packages/centos{{ ansible_distribution_major_version }}/packages"
+    dest: "/tmp/"
+    owner: root
+    group: root
+
+    directory_mode: 0755
+
+
+
+- name: Install packages
+  shell: |
+    yum --disablerepo=*   install /tmp/packages/*.rpm -y --skip-broken
+    yum --disablerepo=*   upgrade /tmp/packages/*.rpm -y --skip-broken
+
+
+  register: yum_install_packages
+  failed_when:
+    - ("nothing provides" in yum_install_packages.stderr)
+
+- name: Check if python3.8 is installed
+
+  shell: "python3.8 --version"
   register: python3_check
   ignore_errors: yes
 
-- name: if python3 is not installed, install it
-  yum:
-    state: present
-    name: python3
-  when: python3_check.rc == 1
+- name: Python installation
+  vars:
+    python_version_default: 3.8.2
+  include_role:
+    name: ansible-python37-centos7
 
-- name: Install pip3
-  yum:
-    state: present
-    name: python3-pip
+  when: python3_check.rc != 0
 
 - name: Upgrade pip3
-  shell: "python3 -m pip install --upgrade pip"
+  shell: "python3.8 -m pip install --upgrade pip"
+  ignore_errors: yes
 
 
-- name: Install Os dependencies on centos 7
-  yum:
-    state: present
-    name:
-      - gcc
-      - gcc-c++
-      - libffi-devel
-      - python3-devel
-      - python3-pip
-      - python3-wheel
-      - openssl-devel
-      - cyrus-sasl-devel
-      - openldap-devel
-
-  when: ansible_distribution_major_version == '7'
-
-- name: Install Os dependencies on centos 8
-  dnf:
-    state: present
-    name:
-      - gcc
-      - gcc-c++
-      - libffi-devel
-      - python3-devel
-      - python3-pip
-      - python3-wheel
-      - openssl-devel
-      - cyrus-sasl-devel
-      - openldap-devel
-
-  when: ansible_distribution_major_version == '8'
 
 - name: Install pyvenv
-  shell: "python3 -m pip install   virtualenv"
-
-- name: Install sqlalchemy
-  shell: "python3 -m pip install sqlalchemy==1.3.24"
+  shell: "python3.8 -m pip install   virtualenv --no-index --find-links /tmp/packages/pip"
 
 - name: Install dataclasses
-  shell: "python3 -m pip install dataclasses"
+  shell: "python3.8 -m pip install dataclasses --no-index --find-links /tmp/packages/pip"
+
+
 
 
 

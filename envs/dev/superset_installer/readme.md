@@ -14,23 +14,17 @@ CONTENTS OF THIS FILE
 INTRODUCTION
 ------------
 
-This is a  package for installing and configuring airflow v2.2.5 on a 
+This is a  package for installing and configuring apache superset with postgresql as backend database on a
 centos machine with celery executor.
-The package performs the installation of postgresql 10, rabbitmq 3.9 and airflow 2.2.5.
-It also configures the airflow database and creates daemon services needed.
 
 
 
-* For more information on airflow with celery executor, please visit:
-  https://insaid.medium.com/set-up-celery-flower-and-rabbitmq-for-airflow-1ed552fe131f
-  https://airflow.apache.org/docs/stable/installation.html
-  
-* For more documentation on rabbitmq, please visit the following link:
-  https://www.rabbitmq.com/
+* For more information on superset, visit
+  [http://superset.apache.org/](http://superset.apache.org/)
 
-* For more information on celery, please visit the following link:
-  https://docs.celeryproject.org/en/latest/userguide/index.html
-  
+* For more information on postgresql, visit
+  [http://www.postgresql.org/](http://www.postgresql.org/)
+
 REQUIREMENTS
 ------------
 
@@ -56,67 +50,53 @@ INSTALLATION
 ```
 
 2- Update group vars according to your needs
-  
+
 3-  Make sure your Ansible machine has root access via ssh to the target machines.
-  For documentation on how to do this, please visit the following link:
-  https://docs.ansible.com/ansible/latest/intro_getting_started.html#intro-getting-started
+For documentation on how to do this, please visit the following link:
+https://docs.ansible.com/ansible/latest/intro_getting_started.html#intro-getting-started
 
 4- Make sure you have at least python 2.7.9 installed on your machine.
-  For documentation on how to do this, please visit the following link:
-  https://docs.python.org/2/install.html 
- 
+For documentation on how to do this, please visit the following link:
+https://docs.python.org/2/install.html
+
 5- Then run the playbook:
 ```
-  ansible-playbook -i inventory.yml install_airflow.yml
+  ansible-playbook -i inventory.yml install_superset.yml
 ```
 
-MONITORING 
+MONITORING
 ------------
 
 Here is a list of the services that are installed and running on the target machine:
-- posgresql-9.6.service
-- rabbitmq-server.service
-- airflow-webserver.service
-- airflow-scheduler.service
-- airflow-celery-flower.service
+- superset-server.service
+- postgresql-10.service
 
 You can start or stop some service with these commands
 ```
-  systemctl start <service_name>
-  systemctl stop <service_name> 
+  systemctl start <service-name>
+  systemctl restart <service-name>
+  systemctl stop <service-name>
 ```
 
 
-You can monitor airflow dags on airflow web ui running on port {{ airfow.webserver.port }} 
-configured in the group vars file.
+You can access superset at the following url:
 ```
-  http://IP_ADDRESS:{{ airfow.webserver.port }}
-```
-
-You can monitor celery workers on celery flower running on port  5555
-Here is the format of the url:
-```
-  http://IP_ADDRESS:5555
+  http://IP_ADDRESS:{{ superset_port }}
 ```
 
-Rabbitmq management console is available on port 15672
-```
-  http://IP_ADDRESS:15672
-```
 
-#### NB: Credentials for rabbitmq, airflow and flower are configurable in the group vars file. 
+#### NB: Credentials for admin user in superset and postgresql database are configurable in the group vars file.
 
- 
+
 CONFIGURATION
 -------------
 
-* To configure airflow, please visit the following link:
-  https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html?highlight=configure
-  
-   
+* To see more about superset configuration, please visit the following link:
+  [http://superset.apache.org/docs/configuration.html](http://superset.apache.org/docs/configuration.html)
 
-* To configure rabbitmq, please visit the following link:
-  https://www.rabbitmq.com/configure.html
+* To see more about postgresql configuration, please visit the following link:
+  [https://www.postgresql.org/docs/10/runtime-config.html](https://www.postgresql.org/docs/10/runtime-config.html)
+
 
 
 
@@ -125,15 +105,16 @@ TROUBLESHOOTING
 ---------------
 
 * If some services are not running , please check the journalctl logs.
-  For example, if airflow scheduler is not running, please check the airflow logs via this command.
+  For example, check logs via this command.
   ```
-  journalctl -u airflow-scheduler.service
+  journalctl -u superset-server.service
   ```
-  Or restart the airflow scheduler service.
+  Or restart the  service.
   ```
   systemctl restart airflow-scheduler.service
   ```
 
 FAQ
 ---
+
 

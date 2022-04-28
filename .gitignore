@@ -23,4 +23,12 @@ output-artifacts/
 
 *.box
 *.jar
+*.rpm
+*.zip
+*.whl
+*.tar.*
+*.tgz
+
+roles/*/files/packages/
+
 

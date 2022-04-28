@@ -1,9 +1,10 @@
 all:
   hosts:
-    airflow.dev7:
+    centos7:
        ansible_user: root
        ansible_host: 19.168.33.14
-    airflow.dev8:
+    centos8:
        ansible_user: root
        ansible_host: 19.168.33.15
 
+# export ANSIBLE_HOST_KEY_CHECKING=false

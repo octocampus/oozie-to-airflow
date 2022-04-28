@@ -4,8 +4,8 @@
   gather_facts: yes
   roles:
     - required_dependencies_installation
+    - postgresql_installation
     - superset_installation
-
 
 
 
