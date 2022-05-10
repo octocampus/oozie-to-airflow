@@ -94,7 +94,7 @@ class ShellMapper(ActionMapper):
             tasks, relations = self.prepend_task(prepare_task, tasks, relations)
         return tasks, relations
 
-    def required_imports(self) -> Set[str]:
+    def required_imports(self):
         dependencies = self.get_task_class(self.TASK_MAPPER).required_imports()
         prepare_dependencies = self.prepare_extension.required_imports()
 
