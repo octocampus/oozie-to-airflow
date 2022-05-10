@@ -26,7 +26,8 @@ on:
       - dev
       - master
 jobs:
-  build:
+  unittest:
+    name: Install dependencies
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -39,21 +40,38 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Display Python version
-        run: python --version
+
       - name: Install dependencies
+        run:  pip install -r requirements.txt
 
+      - name: Run tests
         run: |
-          pip install -r requirements.txt
-
-          ./bin/o2a-run-all-configurations
           git config --global url."https://".insteadOf git://
-
           pre-commit run --all-files --hook-stage=push
-          ./bin/o2a-generate-dependency-graph
-          ./bin/o2a-generate-index images
+
+  IntegrationTest:
+    name: Run tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.9.4']
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run:  pip install -r requirements.txt
+
+      - name: Generate dependency graph
+        run: ./bin/o2a-generate-dependency-graph
+
+      - name: Run conversions
+        run: |
           ./bin/o2a-run-all-conversions py
-          ./bin/o2a-generate-index output
           rm -rf output
           ./bin/o2a-run-all-conversions dot
-          ./bin/o2a-generate-index output
