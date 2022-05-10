@@ -27,7 +27,7 @@ on:
       - master
 jobs:
   unittest:
-    name: Install dependencies
+    name: Run unit tests & quality checks
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -50,7 +50,7 @@ jobs:
           pre-commit run --all-files --hook-stage=push
 
   IntegrationTest:
-    name: Run tests
+    name: Run Conversion Tests
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
