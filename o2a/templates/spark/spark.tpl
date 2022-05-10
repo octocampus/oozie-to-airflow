@@ -18,4 +18,11 @@
 {{ task_id | to_var }} = spark_submit.SparkSubmitOperator(
     task_id={{ task_id | to_python }},
     trigger_rule={{ trigger_rule | to_python }},
+    application={{ application | to_python }},
+    conf={{ conf | to_python }},
+    spark_conn_id={{ spark_conn_id | to_python }},
+    jars={{ jars | to_python }},
+    java_class={{ java_class | to_python }},
+    name={{ name | to_python }},
+    application_args={{ application_args | to_python }},
 )

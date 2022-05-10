@@ -28,18 +28,15 @@ from lark import Lark, Tree, Token
 from .functions import evaluate_function
 
 
-
 EL_CONSTANTS = {"KB": "1024", "MB": "1024 ** 2", "GB": "1024 ** 3", "TB": "1024 ** 4", "PB": "1024 ** 5"}
 
 GRAMMAR = r"""
     start: (lvalue (start)?)* | (rvalue (start)?)* | literal_expression (rvalue (start)?)?
     lvalue: BEGIN lvalue_inner END
-   
     rvalue: (BEGIN expression END)+
-    lvalue_inner: identifier 
+    lvalue_inner: identifier
         | non_literal_lvalue_prefix (value_suffix)*
     literal_expression: literal_component (/[\$\#]/)?
-    env_var: /\$\{/ identifier /\}/
     literal_component: ((/[^\$\#]/)* (/[\#\$]/)? (/[^\$\#\{]/)+)+
         | (/[^\$\#]/)* (/[\$\#][^\{]/)
         | (/[^\$\#]/)* /\\\\/ (/[\$\#]/)?
@@ -85,7 +82,7 @@ GRAMMAR = r"""
     value_suffix: "." PARAM | "[" expression "]"
     first_identifier: FIRST_JAVA
     identifier: JAVA
-    function_invocation: FUNC INVOCATION_COLON FUNC "(" ( expression ( "," SPACE*  expression )* )? ")"
+    function_invocation: FUNC INVOCATION_COLON FUNC "(" ( expression ( "," expression )* )? ")"
         | FUNC "(" ( expression ( "," expression )* )? ")"
     literal: BOOL | INT | FLOAT | STRING | NULL
     BEGIN: "${" | "#{"
@@ -103,10 +100,7 @@ GRAMMAR = r"""
         | (/[0-9]/)+ EXP?
     EXP: /[eE]/ (/[\+\-]/)? (/[0-9]/)+
     NULL: "null"
-    SPACE: /\s+/
-    
-  
-    
+    %ignore " "
 """
 
 
@@ -339,6 +333,12 @@ def translate(expression: str, functions_module: str = "functions", quote: bool 
     ast_tree = _parser(expression)
     translation = _translate_el(ast_tree, functions_module)
     translation = _purify(translation)
+
+    # Here we handle missing or necessary spaces before {{
+    if " ${" not in expression and " #{" not in expression:
+        translation = translation.replace(" {{", "{{")
+    elif " {{" not in translation:
+        translation = translation.replace("{{", " {{")
 
     if quote:
         return "'" + translation + "'"

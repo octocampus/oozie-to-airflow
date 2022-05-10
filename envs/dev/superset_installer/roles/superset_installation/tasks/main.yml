@@ -1,3 +1,17 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ---
 # tasks file for postgres
 
@@ -8,7 +22,7 @@
     - (create_superset_user.rc != 0)
     - ("already exists" not in create_superset_user.stderr)
 
-- name: Set airflow user password
+- name: Set superset user password
   shell: echo "{{ superset_sys_user }}:{{ superset_sys_password }}" | chpasswd
 
 - name: Create virtualenv
@@ -16,12 +30,15 @@
   become_method: su
   become_user: "{{ superset_sys_user }}"
   shell: "python3.8 -m  venv /home/{{ superset_sys_user }}/venv"
+  become_flags: '-s /bin/bash'
 
 - name: Activate virtualenv
   become: true
   become_method: su
   become_user: "{{ superset_sys_user }}"
   shell: . /home/{{ superset_sys_user }}/venv/bin/activate
+  become_flags: '-s /bin/bash'
+
 
 - name: Upgrade virtualenv pip
   become: true
@@ -29,13 +46,13 @@
   become_user: "{{ superset_sys_user }}"
   shell: /home/{{ superset_sys_user }}/venv/bin/python3.8 -m pip install --upgrade pip
   ignore_errors: true
+  become_flags: '-s /bin/bash'
 
 - name: Install dataclasses
   shell: "/home/{{ superset_sys_user }}/venv/bin/python3.8 -m pip  install  dataclasses --no-index --find-links /tmp/packages/pip"
 
 - name: downgrad MarkupSafe==2.0.1
   shell: "/home/{{ superset_sys_user }}/venv/bin/python3.8 -m pip install MarkupSafe==2.0.1 --no-index --find-links /tmp/packages/pip"
-
 
 
 - name: Install psycopg2
@@ -46,6 +63,7 @@
   become_method: su
   become_user: "{{ superset_sys_user }}"
   shell: /home/{{ superset_sys_user }}/venv/bin/python3.8 -m  pip install apache-superset --no-index --find-links /tmp/packages/pip
+  become_flags: '-s /bin/bash'
 
 
 - name: Build query for superset db in postgres
@@ -83,7 +101,7 @@
   become_method: su
   become_user: "{{ superset_sys_user }}"
   shell: source /home/{{ superset_sys_user }}/.bashrc
-
+  become_flags: '-s /bin/bash'
 
 
 - name: Initialize superset database
@@ -92,6 +110,8 @@
   become_user: "{{ superset_sys_user }}"
   shell:  |
     . ~/venv/bin/activate &&  superset db upgrade
+  become_flags: '-s /bin/bash'
+
   environment:
       SUPERSET_CONFIG_PATH: /home/{{ superset_sys_user }}/superset_config.py
 
@@ -110,6 +130,7 @@
   environment:
     SUPERSET_CONFIG_PATH: /home/{{ superset_sys_user }}/superset_config.py
     FLASK_APP: superset
+  become_flags: '-s /bin/bash'
 
 - name: Load exemples
   become: true
@@ -120,6 +141,7 @@
   ignore_errors: true
   environment:
         SUPERSET_CONFIG_PATH: /home/{{ superset_sys_user }}/superset_config.py
+  become_flags: '-s /bin/bash'
 
   when: superset_load_examples == True
 
@@ -131,12 +153,14 @@
   shell: . ~/venv/bin/activate && superset init
   environment:
         SUPERSET_CONFIG_PATH: /home/{{ superset_sys_user }}/superset_config.py
+  become_flags: '-s /bin/bash'
 
 - name: Copy daemon file
   template:
     src: superset-server.service.j2
     dest: /etc/systemd/system/superset-server.service
     owner: "{{ superset_sys_user }}"
+  become_flags: '-s /bin/bash'
 
 - name: Reload daemon
   shell: systemctl daemon-reload
@@ -159,4 +183,3 @@
 
 - name: Check superset service status
   shell: systemctl status superset-server
-

@@ -52,7 +52,7 @@ class TestShellMapper(unittest.TestCase):
             <argument>$VAR2</argument>
             <env-var>VAR1=value1</env-var>
             <env-var>VAR2=value2</env-var>
-        
+
         </shell>
         """
         self.shell_node = ET.fromstring(shell_node_str)
@@ -115,10 +115,6 @@ class TestShellMapper(unittest.TestCase):
                     trigger_rule="one_success",
                     template_params={
                         "bash_command": "echo arg1 $VAR2",
-                        "action_node_properties": {
-                            "mapred.job.queue.name": "{{queueName}}",
-                            "mapred.map.output.compress": "false",
-                        },
                         "env": {
                             "VAR1": "value1",
                             "VAR2": "value2",
