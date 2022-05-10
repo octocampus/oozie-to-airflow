@@ -45,7 +45,10 @@ jobs:
 
         run: |
           pip install -r requirements.txt
+
           ./bin/o2a-run-all-configurations
+          git config --global url."https://".insteadOf git://
+
           pre-commit run --all-files --hook-stage=push
           ./bin/o2a-generate-dependency-graph
           ./bin/o2a-generate-index images
