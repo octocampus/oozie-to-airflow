@@ -41,7 +41,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: install required packages
+        run:  apt install libxml2-utils
+
+      - name: Install python  dependencies
         run:  pip install -r requirements.txt
 
       - name: Run tests
@@ -64,6 +67,9 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
+
+      - name: install required packages
+        run:  apt install libxml2-utils
 
       - name: Install dependencies
         run:  pip install -r requirements.txt
