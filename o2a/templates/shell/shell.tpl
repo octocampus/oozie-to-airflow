@@ -1,3 +1,4 @@
+
 {#
   Copyright 2019 Google LLC
 
@@ -17,6 +18,9 @@
 {{ task_id | to_var }} = bash.BashOperator(
     task_id={{ task_id | to_python }},
     trigger_rule={{ trigger_rule | to_python }},
-    bash_command=shlex.quote({{ bash_command | to_python }}),
+    bash_command={{ bash_command | to_python }},
     {% if env %}   env={{ env | to_python }}, {% endif %}
 )
+
+
+

@@ -54,13 +54,13 @@ repos:
           - --comment-style
           - "{# | | #}"
       - id: forbid-tabs
-  - repo: local
-    hooks:
-      - id: yamllint
-        name: Check yaml files with yamllint
-        entry: yamllint -c yamllint-config.yml .
-        language: python
-        types: [file, yaml]
+  #- repo: local
+  #  hooks:
+  #    - id: yamllint
+  #      name: Check yaml files with yamllint
+  #      entry: yamllint -c yamllint-config.yml .
+  #      language: python
+  #      types: [file, yaml]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.2.3
     hooks:

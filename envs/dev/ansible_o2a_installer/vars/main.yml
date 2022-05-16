@@ -1,0 +1,3 @@
+github_repo_url: "https://github.com/cedkoffeto/oozie-to-airflow.git"
+dest_dir: "/usr/local/src/"
+
