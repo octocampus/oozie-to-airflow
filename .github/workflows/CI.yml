@@ -42,7 +42,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: install required packages
-        run:  apt install libxml2-utils
+        run:  sudo apt-get install -y libxml2-utils
 
       - name: Install python  dependencies
         run:  pip install -r requirements.txt
