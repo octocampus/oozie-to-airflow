@@ -21,6 +21,3 @@
     bash_command={{ bash_command | to_python }},
     {% if env %}   env={{ env | to_python }}, {% endif %}
 )
-
-
-
