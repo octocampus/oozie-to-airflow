@@ -50,7 +50,7 @@ jobs:
           pre-commit run --all-files --hook-stage=push
 
   IntegrationTest:
-    name: Run Conversion Tests
+    name: Run Conversions Tests
     runs-on: ${{ matrix.os }}
     needs: [ unittest ]
     strategy:
