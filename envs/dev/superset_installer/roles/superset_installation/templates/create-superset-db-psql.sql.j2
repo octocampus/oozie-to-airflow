@@ -1,0 +1,7 @@
+DROP DATABASE IF EXISTS {{ postgresql.superset_db }};
+CREATE DATABASE {{ postgresql.superset_db }};
+
+DROP USER IF EXISTS {{ postgresql.superset_user }};
+CREATE USER {{ postgresql.superset_user }} WITH ENCRYPTED PASSWORD '{{ postgresql.superset_password }}';
+
+GRANT ALL PRIVILEGES ON DATABASE {{ postgresql.superset_db }} TO {{ postgresql.superset_user }};

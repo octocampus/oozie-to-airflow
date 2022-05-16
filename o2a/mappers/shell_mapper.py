@@ -48,6 +48,7 @@ class ShellMapper(ActionMapper):
         ActionMapper.__init__(self, oozie_node=oozie_node, name=name, props=props, **kwargs)
         self._parse_oozie_node()
         self.prepare_extension: PrepareMapperExtension = PrepareMapperExtension(self)
+        self.env_vars = self.get_env_vars()
 
     def _parse_oozie_node(self):
         self.resource_manager = get_tag_el_text(self.oozie_node, TAG_RESOURCE)
@@ -55,12 +56,13 @@ class ShellMapper(ActionMapper):
 
         cmd_txt = get_tag_el_text(self.oozie_node, TAG_CMD)
         args = get_tags_el_array_from_text(self.oozie_node, TAG_ARG)
-        cmd = " ".join([cmd_txt] + args)
-        self.bash_command = el_parser.translate(cmd, quote=False)
+        translated_args = [el_parser.translate(arg) for arg in args]
 
-        self.env_vars = self.get_env_vars()
+        self.bash_command = " ".join([cmd_txt] + translated_args)
 
-    def get_env_vars(self):
+        self.env_vars = self.get_env_vars() or {}
+
+    def get_env_vars(self) -> dict:
         """
         Returns a list of environment variables to be used in the shell command.
         example: <env-var>VAR1=VALUE1</env-var>
@@ -69,18 +71,19 @@ class ShellMapper(ActionMapper):
         env_var_nodes = find_nodes_by_tag(self.oozie_node, "env-var")
         env_vars = dict()
         for env_var_node in env_var_nodes:
-            node_txt = el_parser.translate(env_var_node.text, quote=False)
+            node_txt = el_parser.translate(str(env_var_node.text), quote=False)
             name, value = node_txt.split("=")
             env_vars[name] = value
         return env_vars
 
     def to_tasks_and_relations(self):
         task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
+        print(self.env_vars)
         action_task = task_class(
             task_id=self.name,
             template_name="shell/shell.tpl",
             template_params=dict(
-                bash_command=self.bash_command, action_node_properties=self.props.action_node_properties,
+                bash_command=self.bash_command,
                 env=self.env_vars,
             ),
         )
@@ -91,7 +94,7 @@ class ShellMapper(ActionMapper):
             tasks, relations = self.prepend_task(prepare_task, tasks, relations)
         return tasks, relations
 
-    def required_imports(self) -> Set[str]:
+    def required_imports(self):
         dependencies = self.get_task_class(self.TASK_MAPPER).required_imports()
         prepare_dependencies = self.prepare_extension.required_imports()
 

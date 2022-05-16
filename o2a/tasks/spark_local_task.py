@@ -20,6 +20,5 @@ class SparkLocalTask(Task):
     @staticmethod
     def required_imports() -> set[str]:
         return {
-            "from airflow.contrib.operators import dataproc_operator",
-            "from airflow.operators import dummy_operator",
+            "from airflow.providers.apache.spark.operators import SparkSubmitOperator"
         }

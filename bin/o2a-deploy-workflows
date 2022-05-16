@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+SERVER_IP_ADDRESS="51.15.239.192"
+SERVER_USER_NAME="root"
+SERVER_DAGS_PATH="/home/airflow/dags"
+
+FAILED_WORKFLOWS=""
+
+set -euo pipefail
+MY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+O2A_DIR="$( cd "${MY_DIR}/.." && pwd )"
+
+
+./bin/o2a-confirm
+pushd "${O2A_DIR}"
+
+echo "Deploying airflow dags to server"
+
+for WORKFLOW in "$@"; do
+    DAG_ID=$(  basename "${WORKFLOW}" )
+
+    echo "Uploading ${WORKFLOW}"
+    scp -r "${WORKFLOW}" "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}:${SERVER_DAGS_PATH}/${DAG_ID}"
+    echo "Testing ${DAG_ID}"
+    #ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}" "python3 -c 'from airflow.models import DagBag; d = DagBag();'"
+
+
+    ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}" airflow dags test "${DAG_ID} now --show-dagrun -S ${SERVER_DAGS_PATH}/${DAG_ID}"
+    echo "Deleting ${WORKFLOW}"
+    ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}"   airflow dags delete -y "${DAG_ID}"
+
+    ERR=$?
+    set -e
+    if [[ ${ERR} != "0" ]]; then
+        FAILED_WORKFLOWS="${FAILED_WORKFLOWS} ${WORKFLOW}"
+    fi
+done
+
+
+
+function basename {
+    shopt -s extglob
+    __=${1%%+(/)}
+    [[ -z $__ ]] && __=/ || __=${__##*/}
+}

@@ -67,7 +67,7 @@
                 </property>
             </configuration>
             <exec>echo</exec>
-            <argument> ${queueName} $IP_ADDR</argument>
+            <argument>$IP_ADDR</argument>
             <env-var>IP_ADDR=127.0.0.1</env-var>
             <capture-output/> <!-- This can be ignored by the converter -->
         </shell>

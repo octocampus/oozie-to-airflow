@@ -15,7 +15,7 @@
 """Base mapper - it is a base class for all mappers actions, and logic alike"""
 from abc import ABC
 from copy import deepcopy
-from typing import Any, List, Set, Tuple, Type, Dict
+from typing import Any, List, Set, Tuple, Type, Dict, Optional
 from xml.etree.ElementTree import Element
 
 
@@ -27,7 +27,9 @@ from o2a.o2a_libs.property_utils import PropertySet
 class BaseMapper(ABC):
     """The Base Mapper class - parent for all mappers."""
 
-    TASK_MAPPER = {}
+    TASK_MAPPER: Dict[str, Type[Task]] = {
+        'local': Task
+    }
 
     # pylint: disable = unused-argument
     def __init__(self, oozie_node: Element, name: str, dag_name: str, props: PropertySet, **kwargs: Any):
@@ -67,7 +69,7 @@ class BaseMapper(ABC):
         """
         return None
 
-    def get_task_class(self, task_mapper: Dict[str, Any]) -> Type[Task]:
+    def get_task_class(self, task_mapper: Dict[str, Any]) -> Optional[Any]:
         if "context_type" in self.props.config:
             return task_mapper[self.props.config["context_type"]]
 

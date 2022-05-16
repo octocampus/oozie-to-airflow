@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Representation of Airflow tasks"""
-from typing import Dict, Any
+from typing import Any, Dict, Set, Optional
 
 from airflow.utils.trigger_rule import TriggerRule
 
@@ -59,5 +59,5 @@ class Task:  # pylint: disable=too-few-public-methods
         return False
 
     @staticmethod
-    def required_imports() -> set[str]:
+    def required_imports() -> Optional[Set[str]]:
         return None
