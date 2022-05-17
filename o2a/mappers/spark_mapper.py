@@ -41,6 +41,7 @@ SPARK_TAG_CLASS = "class"
 SPARK_TAG_JAR = "jar"
 
 
+
 class SparkMapper(ActionMapper):
     """Maps Spark Action"""
 
@@ -53,9 +54,9 @@ class SparkMapper(ActionMapper):
 
     def __init__(self, oozie_node: ET.Element, name: str, props: PropertySet, **kwargs):
         ActionMapper.__init__(self, oozie_node=oozie_node, name=name, props=props, **kwargs)
-        self.java_class: Optional[str] = None
-        self.java_jar: Optional[str] = None
-        self.job_name: Optional[str] = None
+        self.java_class: Optional[str]
+        self.java_jar: Optional[str]
+        self.job_name: Optional[str]
         self.jars: List[str] = []
         self.application_args: List[str] = []
         self.file_extractor = FileExtractor(oozie_node=oozie_node, props=self.props)
@@ -121,12 +122,11 @@ class SparkMapper(ActionMapper):
             task_id=self.name,
             template_name="spark/spark.tpl",
             template_params=dict(
-                application=self.java_jar,
-                conf=self.spark_opts,
-                spark_conn_id=self.props.config["spark_cli_conn_id"],
-                jars=self.jars,
-                java_class=self.java_class,
+                conf=self.props,
                 name=self.job_name,
+                java_class=self.java_class,
+                spark_conn_id=self.props.config["spark_conn_id"],
+                jars=self.java_jar,
                 application_args=self.application_args,
             ),
         )
@@ -144,4 +144,3 @@ class SparkMapper(ActionMapper):
         prepare_dependencies = self.prepare_extension.required_imports()
 
         return dependencies.union(prepare_dependencies)
-

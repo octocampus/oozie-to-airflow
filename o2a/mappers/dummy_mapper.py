@@ -30,7 +30,7 @@ class DummyMapper(BaseMapper):
     """
 
     def __init__(
-        self, oozie_node: Element, name: str, dag_name: str, props: Optional[PropertySet] = None, **kwargs
+        self, oozie_node: Element, name: str, dag_name: str, props: Optional[PropertySet], **kwargs
     ):
         super().__init__(
             oozie_node=oozie_node,
@@ -46,4 +46,4 @@ class DummyMapper(BaseMapper):
         return tasks, relations
 
     def required_imports(self) -> Set[str]:
-        return {"from airflow.operators import dummy_operator"}
+        return {"from airflow.operators import dummy"}

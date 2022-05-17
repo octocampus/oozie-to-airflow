@@ -90,7 +90,7 @@
 			<subject>WORKFLOW ${workflowName} FAILED</subject>
 			<body>The workflow with Id=${wf:id()} failed. Latest error message: ${wf:errorMessage(wf:lastErrorNode())}</body>
 		</email>
-		<ok to="killJob"/>
+		<ok to="killJob" />
 		<error to="killJob"/>
 	</action>
 

@@ -16,7 +16,7 @@
 Converts Oozie application workflow into Airflow's DAG
 """
 import shutil
-from typing import Dict, Type, List, Union
+from typing import Dict, Type, List
 
 import os
 
@@ -101,6 +101,7 @@ class OozieConverter:
         """
         self.retrieve_lib_jar_libraries()
         self.property_parser.parse_property()
+
         self.parser.parse_workflow()
         self.apply_preconvert_transformers()
         self.convert_nodes()
