@@ -24,3 +24,5 @@ typing~=3.7.4.3
 tzlocal==2.1 # pyup: ignore
 Werkzeug==1.0.1 # pyup: ignore
 yamllint==1.25.0
+
+python-dateutil~=2.8.2

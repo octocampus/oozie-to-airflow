@@ -306,6 +306,7 @@ def _purify(sentence: str) -> str:
     sentence = sentence.replace("}} /", "}}/")
     sentence = sentence.replace("/ {{", "/{{")
     sentence = sentence.replace("}} .", "}}.")
+    sentence = sentence.replace("}} _", "}}_")
     sentence = sentence.replace(", {{", ",{{")
 
     return sentence

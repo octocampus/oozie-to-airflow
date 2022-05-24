@@ -31,6 +31,7 @@ from o2a.converter.relation import Relation
 from o2a.converter.renderers import BaseRenderer
 from o2a.converter.task_group import TaskGroup, ControlTaskGroup, ActionTaskGroup
 from o2a.converter.workflow import Workflow
+from o2a.converter.Coordinator import Coordinator
 from o2a.utils.file_utils import get_lib_files
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.transformers.base_transformer import BaseWorkflowTransformer
@@ -67,6 +68,12 @@ class OozieConverter:
         user: str = None,
         initial_props: PropertySet = None,
     ):
+
+        self.coordinator = Coordinator(
+            dag_name=dag_name,
+            input_directory_path=input_directory_path,
+            output_directory_path=output_directory_path
+        )
         self.workflow = Workflow(
             dag_name=dag_name,
             input_directory_path=input_directory_path,

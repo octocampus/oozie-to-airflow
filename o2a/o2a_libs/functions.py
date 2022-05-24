@@ -20,11 +20,12 @@ import json
 
 import o2a.o2a_libs.el_wf_functions as wf_functions
 import o2a.o2a_libs.el_fs_functions as fs_functions
-
+import o2a.o2a_libs.el_coord_functions as coord_functions
 
 # Used for functions.wf.f_name pattern in templates
 wf = wf_functions  # pylint:disable=invalid-name
 fs = fs_functions  # pylint:disable=invalid-name
+coord = coord_functions
 
 
 def first_not_null(str_one, str_two):
