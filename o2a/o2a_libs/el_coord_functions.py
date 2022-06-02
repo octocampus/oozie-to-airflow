@@ -14,14 +14,8 @@
 # limitations under the License.
 """All Coord EL functions"""
 
-from typing import Optional, Set
 
-from jinja2 import contextfunction
 
-from airflow.models import TaskInstance, DagRun, DAG
-from airflow.utils.db import provide_session
-from airflow import AirflowException
-from datetime import timedelta
 
 
 def minutes(n: int) -> str:

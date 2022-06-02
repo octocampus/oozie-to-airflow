@@ -13,14 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for all functions module"""
-import datetime
 import unittest
 
 from parameterized import parameterized
 
 import o2a.o2a_libs.functions as functions
-from o2a.o2a_libs.el_wf_functions import _reverse_task_map
-from datetime import timedelta
 
 
 class TestElCoordFunctions(unittest.TestCase):

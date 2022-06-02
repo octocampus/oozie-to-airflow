@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Coordinator"""
-import os
-from collections import OrderedDict
-from typing import Set, Dict, Type, List, Optional
+from typing import List, Optional, Set, Type
 
-from o2a.converter.constants import HDFS_FOLDER, LIB_FOLDER
+from o2a.converter.data_events import InputEvent, OutputEvent
+from o2a.converter.dataset import Dataset
 from o2a.converter.oozie_node import OozieNode
-from o2a.converter.relation import Relation
 from o2a.converter.task_group import TaskGroup
-from o2a.utils.file_utils import get_lib_files
 
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
@@ -43,7 +40,7 @@ class Coordinator:
         }
         self.input_directory_path = input_directory_path
         self.root_node = None
-        
+
         self.name: str
         self.start: str
         self.end: str
@@ -54,7 +51,10 @@ class Coordinator:
         self.concurrency: Optional[int]
         self.execution: Optional[str]
 
-        self.datasets: Optional[List]
+        self.datasets: Optional[List[Dataset]] = None
+        self.input_events: Optional[List[InputEvent]] = None
+        self.output_events: Optional[List[OutputEvent]] = None
+
 
     def get_root_node(self):
         tree = ET.parse(self.coordinator_file)

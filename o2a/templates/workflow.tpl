@@ -25,6 +25,8 @@ JOB_PROPS={{ job_properties | to_python }}
 
 TASK_MAP={{ task_map | to_python }}
 
+
+
 TEMPLATE_ENV = {**CONFIG, **JOB_PROPS, "functions": functions, "task_map": TASK_MAP }
 
 with models.DAG(

@@ -86,7 +86,7 @@ class WorkflowXmlParser:
         Upon reaching the end node, the workflow is considered completed successfully.
         Thus it gets mapped to a dummy node that always completes.
         """
-        mapper = EndMapper(oozie_node=end_node, name=end_node.attrib["name"], dag_name=self.workflow.dag_name)
+        mapper = EndMapper(oozie_node=end_node, name=end_node.attrib["name"], dag_name=self.workflow.dag_name, props=PropertySet({}))
         oozie_control_node = OozieControlNode(mapper)
 
         mapper.on_parse_node()

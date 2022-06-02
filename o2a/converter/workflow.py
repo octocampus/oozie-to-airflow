@@ -15,8 +15,9 @@
 """Workflow"""
 import os
 from collections import OrderedDict
-from typing import Set, Dict, Type, List
+from typing import Set, Dict, Type, List, Optional
 
+from o2a.converter.Coordinator import Coordinator
 from o2a.converter.constants import HDFS_FOLDER, LIB_FOLDER
 from o2a.converter.oozie_node import OozieNode
 from o2a.converter.relation import Relation
@@ -59,6 +60,8 @@ class Workflow:
         }
         self.library_folder = os.path.join(self.input_directory_path, HDFS_FOLDER, LIB_FOLDER)
         self.jar_files = get_lib_files(self.library_folder, extension=".jar")
+
+        self.coordinator = Optional[Coordinator]
 
     def get_nodes_by_type(self, mapper_type: Type):
         return [node for node in self.nodes.values() if isinstance(node.mapper, mapper_type)]

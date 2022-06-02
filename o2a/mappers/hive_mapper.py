@@ -25,6 +25,7 @@ from o2a.converter.task import Task
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.mappers.extensions.prepare_mapper_extension import PrepareMapperExtension
 from o2a.o2a_libs.property_utils import PropertySet
+from o2a.utils import el_utils
 from o2a.utils.file_archive_extractors import ArchiveExtractor, FileExtractor
 
 # pylint: disable=too-many-instance-attributes
@@ -107,7 +108,10 @@ class HiveMapper(ActionMapper):
         source_script_file_path = os.path.join(input_directory_path, self.script)
         destination_script_file_path = os.path.join(output_directory_path, self.script)
         os.makedirs(os.path.dirname(destination_script_file_path), exist_ok=True)
-        shutil.copy(source_script_file_path, destination_script_file_path)
+        shutil.copy(
+            el_utils.resolve_job_properties_in_string(source_script_file_path, self.props),
+            el_utils.resolve_job_properties_in_string(destination_script_file_path, self.props)
+        )
 
         logging.info(f"Copied {self.script} to {destination_script_file_path}")
 

@@ -21,7 +21,7 @@ from copy import deepcopy
 from typing import List, Optional, Tuple, Union, Dict
 from urllib.parse import urlparse
 
-from jinja2 import StrictUndefined, Environment
+from jinja2 import StrictUndefined, Environment, Template
 from jinja2.exceptions import UndefinedError
 
 from o2a.converter.exceptions import ParseException
@@ -103,6 +103,15 @@ def comma_separated_string_to_list(line: str) -> Union[List[str], str]:
     return values[0] if len(values) <= 1 else values
 
 
+def resolve_job_properties_in_string(string: str, props: PropertySet) -> str:
+    """
+    Resolve sub workflow app name based on properties set
+    """
+    el_string = el_parser.translate(string)
+    template = Template(el_string)
+    return template.render(props.job_properties)
+
+
 def _resolve_name_node(translation: str, props: PropertySet) -> Tuple[Optional[str], int]:
     """
     Check if props include nameNode, nameNode1 or nameNode2 value.
@@ -138,11 +147,11 @@ def normalize_path(url: str, props: PropertySet, allow_no_schema=False, translat
         output = url_parts.path
 
     allowed_schemas = {"hdfs", ""} if allow_no_schema else {"hdfs"}
-    if url_parts.scheme not in allowed_schemas:
-        raise ParseException(
-            f"Unknown path format. The URL should be provided in the following format: "
-            f"hdfs://localhost:9200/path. Current value: {url_with_var}"
-        )
+    #if url_parts.scheme not in allowed_schemas:
+    #    raise ParseException(
+    #        f"Unknown path format. The URL should be provided in the following format: "
+    #        f"hdfs://localhost:9200/path. Current value: {url_with_var}"
+    #    )
 
     return output
 

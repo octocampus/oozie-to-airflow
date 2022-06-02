@@ -36,7 +36,7 @@ class PropertySet:
         job_properties: Dict[str, str] = None,
         config: Dict[str, str] = None,
         action_node_properties: Dict[str, str] = None,
-    ):
+    ) -> object:
         self.job_properties: Dict[str, str] = job_properties or {}
         self.config: Dict[str, str] = config or {}
         self.action_node_properties: Dict[str, str] = action_node_properties or {}
@@ -44,9 +44,9 @@ class PropertySet:
     @property
     def xml_escaped(self):
         escaped_ps: PropertySet = copy.deepcopy(self)
-        escaped_ps.job_properties = {k: escape(v) for k, v in escaped_ps.job_properties.items()}
+        escaped_ps.job_properties = {k: self.__escape(v)  for k, v in escaped_ps.job_properties.items()}
         escaped_ps.action_node_properties = {
-            k: escape(v) for k, v in escaped_ps.action_node_properties.items()
+            k: self.__escape(v) for k, v in escaped_ps.action_node_properties.items()
         }
         return escaped_ps
 
@@ -76,3 +76,6 @@ class PropertySet:
             and self.job_properties == other.job_properties
             and self.action_node_properties == other.action_node_properties
         )
+
+    @staticmethod
+    def __escape(v): return escape(v) if isinstance(v, str) else [escape(el) for el in v ] if isinstance(v, list) else v

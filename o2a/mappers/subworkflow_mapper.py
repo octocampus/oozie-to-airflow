@@ -27,8 +27,7 @@ from o2a.definitions import EXAMPLES_PATH
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.transformers.base_transformer import BaseWorkflowTransformer
-from o2a.utils import xml_utils
-
+from o2a.utils import xml_utils, el_utils
 
 TAG_APP = "app-path"
 
@@ -73,10 +72,15 @@ class SubworkflowMapper(ActionMapper):
 
     def _parse_oozie_node(self):
         app_path = xml_utils.get_tag_el_text(self.oozie_node, TAG_APP)
-        _, _, self.app_name = app_path.rpartition("/")
-        # TODO: hacky: we should calculate it deriving from input_directory_path and comparing app-path
-        # TODO: but for now we assume app is in "examples"
-        app_path = os.path.join(EXAMPLES_PATH, self.app_name)
+        resolved_app_path = el_utils.resolve_job_properties_in_string(app_path, self.props)
+
+        app_directory_path, _, self.app_name = resolved_app_path.rpartition("/")
+        _, _, app_directory_name = app_directory_path.rpartition("/")
+
+        parent_path, _, _ = self.input_directory_path.rpartition("/")
+
+        app_path = os.path.join(parent_path, app_directory_name)
+
         logging.info(f"Converting subworkflow from {app_path}")
         converter = OozieConverter(
             input_directory_path=app_path,

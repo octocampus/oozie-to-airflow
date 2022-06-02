@@ -23,7 +23,7 @@ import os
 import logging
 
 
-from o2a.converter import workflow_xml_parser
+from o2a.converter import workflow_xml_parser, coordinator_xml_parser
 from o2a.converter.constants import HDFS_FOLDER
 from o2a.converter.oozie_node import OozieNode, OozieControlNode, OozieActionNode
 from o2a.converter.property_parser import PropertyParser
@@ -32,6 +32,7 @@ from o2a.converter.renderers import BaseRenderer
 from o2a.converter.task_group import TaskGroup, ControlTaskGroup, ActionTaskGroup
 from o2a.converter.workflow import Workflow
 from o2a.converter.Coordinator import Coordinator
+from o2a.utils import el_utils
 from o2a.utils.file_utils import get_lib_files
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.transformers.base_transformer import BaseWorkflowTransformer
@@ -69,11 +70,20 @@ class OozieConverter:
         initial_props: PropertySet = None,
     ):
 
+
         self.coordinator = Coordinator(
-            dag_name=dag_name,
             input_directory_path=input_directory_path,
-            output_directory_path=output_directory_path
         )
+
+        self.coordinator_parser = coordinator_xml_parser.CoordinatorXmlParser(
+            props={},
+            action_mapper=action_mapper,
+            renderer=renderer,
+            coordinator=self.coordinator,
+            transformers=transformers
+
+        )
+
         self.workflow = Workflow(
             dag_name=dag_name,
             input_directory_path=input_directory_path,
@@ -94,6 +104,7 @@ class OozieConverter:
             transformers=self.transformers,
         )
 
+
     def retrieve_lib_jar_libraries(self):
         logging.info(f"Looking for jar libraries for the workflow in {self.workflow.library_folder}.")
         self.workflow.jar_files = get_lib_files(self.workflow.library_folder, extension=".jar")
@@ -106,6 +117,8 @@ class OozieConverter:
         """
         Starts the process of converting the workflow.
         """
+        #self.coordinator_parser.parse_coordinator()
+
         self.retrieve_lib_jar_libraries()
         self.property_parser.parse_property()
 
@@ -122,7 +135,7 @@ class OozieConverter:
         else:
             self.renderer.create_workflow_file(workflow=self.workflow, props=self.props)
 
-        self.copy_extra_assets(self.workflow.nodes)
+        # self.copy_extra_assets(self.workflow.nodes) # TODO update this function to copy script folder in all workflows
 
     def convert_nodes(self):
         """
@@ -189,12 +202,17 @@ class OozieConverter:
         """
         Copies additional assets needed to execute a workflow, eg. Pig scripts.
         """
-        for node in nodes.values():
-            logging.info(f"Copies additional assets for the node: {node.name}")
-            node.mapper.copy_extra_assets(
-                input_directory_path=os.path.join(self.workflow.input_directory_path, HDFS_FOLDER),
-                output_directory_path=self.workflow.output_directory_path,
-            )
+
+        shutil.copy(
+            el_utils.resolve_job_properties_in_string(os.path.join(self.workflow.input_directory_path, "scripts"), self.props),
+            el_utils.resolve_job_properties_in_string(os.path.join(self.workflow.output_directory_path,"scripts"), self.props)
+        )
+        #for node in nodes.values():
+        #    logging.info(f"Copies additional assets for the node: {node.name}")
+        #    node.mapper.copy_extra_assets(
+        #        input_directory_path=os.path.join(self.workflow.input_directory_path, HDFS_FOLDER),
+        #        output_directory_path=self.workflow.output_directory_path,
+        #    )
         logging.info("Extra assets copied.")
 
     def apply_preconvert_transformers(self):

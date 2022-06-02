@@ -15,6 +15,8 @@ pydeps==1.9.13
 pylint==2.6.0
 pytest==6.2.1
 pytest-cov==2.11.1
+
+python-dateutil~=2.8.2
 safety==1.10.3
 setuptools~=58.5.3
 sshtunnel==0.4.0
@@ -24,5 +26,3 @@ typing~=3.7.4.3
 tzlocal==2.1 # pyup: ignore
 Werkzeug==1.0.1 # pyup: ignore
 yamllint==1.25.0
-
-python-dateutil~=2.8.2
