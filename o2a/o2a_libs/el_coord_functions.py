@@ -22,12 +22,12 @@ def minutes(n: int):
 
 def hours(n: int):
     if n == 1: return "@hourly"
-    return datetime.timedelta(hours={n})
+    return datetime.timedelta(hours=n)
 
 
 def days(n: int):
     if n == 1: return "@daily"
-    return datetime.timedelta(days={n})
+    return datetime.timedelta(days=n)
 
 
 def months(n: int):
