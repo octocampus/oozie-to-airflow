@@ -18,21 +18,18 @@
 
 def minutes(n: int):
     import datetime
-    return datetime.timedelta(minutes=n)
+    return f"*/{n} * * * *"
 
 
 def hours(n: int):
     if n == 1: return "@hourly"
+    return f"0 */{n} * * *"
 
-    import datetime
-    return datetime.timedelta(hours=n)
 
 
 def days(n: int):
     if n == 1: return "@daily"
-
-    import datetime
-    return datetime.timedelta(days=n)
+    return f"0 * */{n} * *"
 
 
 def months(n: int):
