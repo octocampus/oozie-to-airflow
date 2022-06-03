@@ -70,7 +70,6 @@ class OozieConverter:
         initial_props: PropertySet = None,
     ):
 
-
         self.coordinator = Coordinator(
             input_directory_path=input_directory_path,
         )
@@ -90,6 +89,7 @@ class OozieConverter:
             output_directory_path=output_directory_path,
         )
         self.renderer = renderer
+
         self.transformers = transformers or []
         # Propagate the configuration in case initial property set is passed
         job_properties = {} if not initial_props else initial_props.job_properties
@@ -104,7 +104,6 @@ class OozieConverter:
             transformers=self.transformers,
         )
 
-
     def retrieve_lib_jar_libraries(self):
         logging.info(f"Looking for jar libraries for the workflow in {self.workflow.library_folder}.")
         self.workflow.jar_files = get_lib_files(self.workflow.library_folder, extension=".jar")
@@ -117,12 +116,14 @@ class OozieConverter:
         """
         Starts the process of converting the workflow.
         """
-        #self.coordinator_parser.parse_coordinator()
+        self.coordinator_parser.parse_coordinator()
 
         self.retrieve_lib_jar_libraries()
         self.property_parser.parse_property()
 
         self.parser.parse_workflow()
+        self.schedule_workflow()
+
         self.apply_preconvert_transformers()
         self.convert_nodes()
         self.apply_postconvert_transformers()
@@ -175,6 +176,8 @@ class OozieConverter:
         for task_group in self.workflow.task_groups.values():
             self.workflow.dependencies.update(task_group.dependencies)
 
+        self.workflow.dependencies.update(self.coordinator.dependencies)
+
     def convert_relations(self) -> None:
         logging.info("Converting relations between tasks groups.")
         for task_group in self.workflow.task_groups.values():
@@ -224,3 +227,7 @@ class OozieConverter:
         logging.info("Applying post-convert transformers")
         for transformer in self.transformers:
             transformer.process_workflow_after_convert_nodes(self.workflow, props=self.props)
+
+    def schedule_workflow(self):
+        logging.info(f"Applying scheduling params to {self.workflow.dag_name} ")
+        self.workflow.schedule_interval = self.coordinator.frequency

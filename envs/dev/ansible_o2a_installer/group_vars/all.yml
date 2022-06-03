@@ -12,5 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-github_repo_url: "https://github.com/cedkoffeto/oozie-to-airflow.git"
+github_repo_url: "https://github.com/octocampus/oozie-to-airflow.git"
 dest_dir: "/usr/local/src/o2a"

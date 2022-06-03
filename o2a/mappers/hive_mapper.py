@@ -65,7 +65,8 @@ class HiveMapper(ActionMapper):
         super().on_parse_node()
         self._parse_config()
         self.query = get_tag_el_text(self.oozie_node, TAG_QUERY)
-        self.script = get_tag_el_text(self.oozie_node, TAG_SCRIPT)
+        self.script = el_utils.resolve_job_properties_in_string(get_tag_el_text(self.oozie_node, TAG_SCRIPT), self.props)
+
         if not self.query and not self.script:
             raise ParseException(f"Action Configuration does not include {TAG_SCRIPT} or {TAG_QUERY} element")
 

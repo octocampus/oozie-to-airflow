@@ -45,7 +45,7 @@ class Coordinator:
         self.start: str
         self.end: str
         self.timezone: str
-        self.frequency: str
+        self.frequency: str = None
 
         self.timeout: Optional[int]
         self.concurrency: Optional[int]
@@ -122,3 +122,4 @@ class Coordinator:
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
         return False
+

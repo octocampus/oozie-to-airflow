@@ -61,7 +61,9 @@ class Workflow:
         self.library_folder = os.path.join(self.input_directory_path, HDFS_FOLDER, LIB_FOLDER)
         self.jar_files = get_lib_files(self.library_folder, extension=".jar")
 
-        self.coordinator = Optional[Coordinator]
+        self.coordinator: Optional[Coordinator] = None
+
+        self.schedule_interval: Optional[str] = None
 
     def get_nodes_by_type(self, mapper_type: Type):
         return [node for node in self.nodes.values() if isinstance(node.mapper, mapper_type)]
@@ -125,3 +127,7 @@ class Workflow:
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
         return False
+
+    def schedule_workflow(self):
+        if self.coordinator:
+            self.schedule_interval = self.coordinator.frequency

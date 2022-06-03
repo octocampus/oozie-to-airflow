@@ -13,33 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """All Coord EL functions"""
+import datetime
 
 
+def minutes(n: int):
+    return datetime.timedelta(minutes=n)
 
 
-
-def minutes(n: int) -> str:
-    return f"datetime.timedelta(minutes={n})"
-
-
-def hours(n: int) -> str:
+def hours(n: int):
     if n == 1: return "@hourly"
-    return f"datetime.timedelta(hours={n})"
+    return datetime.timedelta(hours={n})
 
 
-def days(n: int) -> str:
+def days(n: int):
     if n == 1: return "@daily"
-    return f"datetime.timedelta(days={n})"
+    return datetime.timedelta(days={n})
 
 
-def months(n: int) -> str:
+def months(n: int):
     if n == 1: return "@monthly"
     return f"0 * * */{n} *"
 
 
-def end_of_days(n: int) -> str:
+def end_of_days(n: int):
     return f"59 23 */{n} * *"
 
 
-def end_of_months(n: int) -> str:
+def end_of_months(n: int):
     return f"59 23 L */{n} *"

@@ -158,6 +158,9 @@ class CoordinatorXmlParser:
 
     def parse_coordinator(self):
         """Parses coordinator replacing invalid characters in the names of the nodes"""
+
+        self.parse_coordinator_attributes()
+
         tree = ET.parse(self.coordinator_file)
         root = tree.getroot()
         for node in tree.iter():
@@ -325,5 +328,12 @@ class CoordinatorXmlParser:
             "app_path": app_path,
             "configuration": configuration_properties
         }
+
+    def parse_coordinator_attributes(self):
+        self.parse_start_attribute()
+        self.parse_end_attribute()
+        self.parse_timezone_attribute()
+        self.parse_coordinator_frequency()
+
 
 
