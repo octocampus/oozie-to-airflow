@@ -13,20 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """All Coord EL functions"""
-import datetime
+
 
 
 def minutes(n: int):
+    import datetime
     return datetime.timedelta(minutes=n)
 
 
 def hours(n: int):
     if n == 1: return "@hourly"
+
+    import datetime
     return datetime.timedelta(hours=n)
 
 
 def days(n: int):
     if n == 1: return "@daily"
+
+    import datetime
     return datetime.timedelta(days=n)
 
 

@@ -1,5 +1,5 @@
 <coordinator-app name="coord_${env}_${workflowName}"
-				 frequency="${coord:days(2)}"
+				 frequency="${coord:days(1)}"
 				 start="${start}" end="${end}" timezone="${timezone}"
 				 xmlns="uri:oozie:coordinator:0.5" xmlns:sla="uri:oozie:sla:0.2">
 	<controls>
