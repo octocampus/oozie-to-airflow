@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 @dataclass()
@@ -16,9 +16,9 @@ def get_dataset_name_from_task_doc(doc):
     return doc.split('=')[1]
 
 
-def find_dataset_by_name(datasets: List, name: str):
+def find_dataset_by_name(datasets: List[Dataset], name: str) -> Optional[Dataset]:
     for dataset in datasets:
-        if dataset['name'] == name: return dataset
+        if dataset.name == name: return dataset
 
     return None
 

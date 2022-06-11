@@ -55,7 +55,7 @@ def current(context=None, n: str = None):
     CA_NT: coordinator action creation (materialization) nominal time
     coord:current(int n) = DS_II + DS_FREQ * ( (CA_NT - DS_II) div DS_FREQ + n)
     """
-    datasets: Optional[List] = context.get('datasets')
+    datasets: Optional[List[Dataset]] = context.get('datasets')
     if datasets is None:
         raise AirflowException("No datasets!")
 
@@ -65,7 +65,7 @@ def current(context=None, n: str = None):
 
     dataset = find_dataset_by_name(datasets, dataset_name)
 
-    return f"{dataset['name']}-{n}"
+    return f"{dataset.name}-{n}"
 
 
 
