@@ -48,7 +48,7 @@ def end_of_months(n: str) -> str:
 
 
 @contextfunction
-def current(context=None, session=None, n: str=None):
+def current(context=None, n: str = None):
     """
     DS_II : dataset initial-instance (datetime)
     DS_FREQ: dataset frequency (minutes)
