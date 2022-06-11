@@ -59,9 +59,9 @@ def current(context=None, session=None, n: str=None ):
     if datasets is None:
         raise AirflowException("No datasets!")
 
-    ti: Optional[BaseOperator] = context.get('ti', None)  # pylint:disable=invalid-name
+    task: Optional[BaseOperator] = context.get('task', None)  # pylint:disable=invalid-name
 
-    dataset_name = get_dataset_name_from_task_doc(ti.doc)
+    dataset_name = get_dataset_name_from_task_doc(task.doc)
 
     dataset = find_dataset_by_name(datasets, dataset_name)
 
