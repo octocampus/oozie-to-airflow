@@ -23,7 +23,6 @@ from o2a.converter.task_group import TaskGroup
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 
-
 class Coordinator:
     """Class for Coordinator"""
 
@@ -36,15 +35,15 @@ class Coordinator:
 
         self.coordinator_file = None
         self.dependencies = dependencies or {
-
+            "import pendulum"
         }
         self.input_directory_path = input_directory_path
         self.root_node = None
 
         self.name: str
-        self.start: str
-        self.end: str
-        self.timezone: str
+        self.start: str = None
+        self.end: str = None
+        self.timezone: str = None
         self.frequency: str = None
 
         self.timeout: Optional[int]

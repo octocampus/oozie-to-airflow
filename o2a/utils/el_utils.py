@@ -108,6 +108,9 @@ def resolve_job_properties_in_string(string: str, props: PropertySet) -> str:
     Resolve sub workflow app name based on properties set
     """
     el_string = el_parser.translate(string)
+    for char in ['@', '*']:
+        if char in el_string: el_string = re.sub('[{}]', '', el_string)
+
     template = Template(el_string)
     return template.render(props.job_properties)
 

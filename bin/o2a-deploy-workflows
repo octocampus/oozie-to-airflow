@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-SERVER_IP_ADDRESS="51.15.239.192"
+SERVER_IP_ADDRESS="19.168.33.15"
 SERVER_USER_NAME="root"
 SERVER_DAGS_PATH="/home/airflow/dags"
+
+
 
 FAILED_WORKFLOWS=""
 
@@ -19,15 +21,19 @@ echo "Deploying airflow dags to server"
 for WORKFLOW in "$@"; do
     DAG_ID=$(  basename "${WORKFLOW}" )
 
+    #echo "Deleting ${WORKFLOW}"
+    #ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}"   airflow dags delete -y "${DAG_ID}"
+
     echo "Uploading ${WORKFLOW}"
     scp -r "${WORKFLOW}" "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}:${SERVER_DAGS_PATH}/${DAG_ID}"
     echo "Testing ${DAG_ID}"
-    #ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}" "python3 -c 'from airflow.models import DagBag; d = DagBag();'"
+    ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}" "python3 -c 'from airflow.models import DagBag; d = DagBag();'"
 
 
     ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}" airflow dags test "${DAG_ID} now --show-dagrun -S ${SERVER_DAGS_PATH}/${DAG_ID}"
-    echo "Deleting ${WORKFLOW}"
-    ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}"   airflow dags delete -y "${DAG_ID}"
+
+    #echo "Deleting ${WORKFLOW}"
+    #ssh -t "${SERVER_USER_NAME}@${SERVER_IP_ADDRESS}"   airflow dags delete -y "${DAG_ID}"
 
     ERR=$?
     set -e
@@ -35,7 +41,6 @@ for WORKFLOW in "$@"; do
         FAILED_WORKFLOWS="${FAILED_WORKFLOWS} ${WORKFLOW}"
     fi
 done
-
 
 
 function basename {

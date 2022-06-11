@@ -31,8 +31,9 @@ TEMPLATE_ENV = {**CONFIG, **JOB_PROPS, "functions": functions, "task_map": TASK_
 
 with models.DAG(
     {{ dag_name | to_python }},
-    schedule_interval={% if schedule_interval %}{{ schedule_interval }}{% else %}None{% endif %},  # Change to suit your needs
-    start_date=dates.days_ago({{ start_days_ago }}),  # Change to suit your needs
+    schedule_interval={% if schedule_interval %}{{ schedule_interval | to_python }}{% else %}None{% endif %},  # Change to suit your needs
+    start_date={% if start_date %}pendulum.parse({{ start_date | to_python }}){% else %}None{% endif %},
+    end_date={% if end_date %}pendulum.parse({{ end_date | to_python }}){% else %}None{% endif %},
     user_defined_macros=TEMPLATE_ENV
 ) as dag:
 

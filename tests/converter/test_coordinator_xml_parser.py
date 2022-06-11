@@ -155,7 +155,7 @@ class TestCoordinatorXmlParser(unittest.TestCase):
         expected = [
             Dataset(
                 name='din',
-                frequency='{{functions.coord.end_of_days(1)}}',
+                frequency='59 23 */1 * *',
                 initial_instance='2009-01-02T08:00Z',
                 timezone='America/Los_Angeles',
                 uri_template='{{baseFsURI}}/{{YEAR}}/{{MONTH}}/{{DAY}}/{{HOUR}}/{{MINUTE}}',
@@ -163,7 +163,7 @@ class TestCoordinatorXmlParser(unittest.TestCase):
             ),
             Dataset(
                 name='dout',
-                frequency='{{functions.coord.minutes(30)}}',
+                frequency='*/30 * * * *',
                 initial_instance='2009-01-02T08:00Z',
                 timezone='UTC',
                 uri_template='{{baseFsURI}}/{{YEAR}}/{{MONTH}}/{{DAY}}/{{HOUR}}/{{MINUTE}}',

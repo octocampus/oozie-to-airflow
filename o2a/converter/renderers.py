@@ -28,6 +28,8 @@ from isort.api import sort_file
 
 # pylint: disable=wrong-import-position
 # Hack to get rid of INFO level messages printed by blib2to3 when loading grammar
+from o2a.utils import el_utils
+
 logging.getLogger("blib2to3.pgen2.driver").setLevel(logging.CRITICAL)
 # pylint: enable=wrong-import-position
 
@@ -120,11 +122,12 @@ class PythonRenderer(BaseRenderer):
             task_group.name: [task.task_id for task in task_group.tasks]
             for task_group in workflow.task_groups.values()
         }
-
         content = render_template(
             template_name=template_name,
             dag_name=workflow.dag_name,
-            schedule_interval=workflow.schedule_interval,
+            schedule_interval=el_utils.resolve_job_properties_in_string(workflow.schedule_interval, props),
+            start_date=el_utils.resolve_job_properties_in_string(workflow.start_date, props),
+            end_date=el_utils.resolve_job_properties_in_string(workflow.end_date, props),
             start_days_ago=self.start_days_ago,
             job_properties=converted_job_properties,
             config=props.config,

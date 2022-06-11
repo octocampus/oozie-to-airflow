@@ -15,6 +15,7 @@
 """Parsing module """
 import logging
 import os
+import re
 
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
@@ -31,7 +32,7 @@ from o2a.mappers.action_mapper import ActionMapper
 
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.transformers.base_transformer import BaseWorkflowTransformer
-from o2a.utils import xml_utils
+from o2a.utils import xml_utils, el_utils
 from o2a.o2a_libs import el_parser
 from o2a.utils.config_extractors import extract_properties_from_configuration_node
 
@@ -104,7 +105,9 @@ class CoordinatorXmlParser:
 
     def parse_coordinator_frequency(self):
         frequency = self.coordinator.root_node.attrib[COORD_FREQ_ATTRIB]
-        self.coordinator.frequency = el_parser.translate(frequency)
+
+        el_frequency = el_parser.translate(frequency)
+        self.coordinator.frequency = el_frequency
 
     def parse_node(self, node):
         """
@@ -203,10 +206,9 @@ class CoordinatorXmlParser:
         name = dataset_node.attrib["name"]
         return el_parser.translate(name)
 
-    @staticmethod
-    def parse_dataset_frequency(dataset_node):
+    def parse_dataset_frequency(self, dataset_node):
         frequency = dataset_node.attrib["frequency"]
-        return el_parser.translate(frequency)
+        return el_utils.resolve_job_properties_in_string(frequency, self.props)
 
     @staticmethod
     def parse_dataset_initial_instance(dataset_node):

@@ -15,6 +15,7 @@
 """
 EL functions map module.
 """
+import logging
 import re
 import json
 
@@ -155,6 +156,12 @@ FUNCTION_MAP = {
     "wf_app_path": "{{nameNode}}/user/{{functions.wf.user()}}/{{examplesRoot}}/apps/hive",
     "concat": concat,
     "trim": trim,
+    "coord_minutes": coord.minutes,
+    "coord_hours": coord.hours,
+    "coord_days": coord.days,
+    "coord_months": coord.months,
+    'coord_end_of_days': coord.end_of_days,
+    'coord_end_of_months': coord.end_of_months,
 }
 
 
@@ -163,6 +170,8 @@ def evaluate_function(name: str, args: tuple) -> str:
     This function handles cases of el-function that can be seen as
     string to string transformation.
     """
+    logging.info(f"Evaluating function {name}")
+
     func = FUNCTION_MAP.get(name, None)
     if func:
         if isinstance(func, str):

@@ -74,15 +74,6 @@ class OozieConverter:
             input_directory_path=input_directory_path,
         )
 
-        self.coordinator_parser = coordinator_xml_parser.CoordinatorXmlParser(
-            props={},
-            action_mapper=action_mapper,
-            renderer=renderer,
-            coordinator=self.coordinator,
-            transformers=transformers
-
-        )
-
         self.workflow = Workflow(
             dag_name=dag_name,
             input_directory_path=input_directory_path,
@@ -96,6 +87,15 @@ class OozieConverter:
         job_properties["user.name"] = user or os.environ["USER"]
         self.props = PropertySet(job_properties=job_properties)
         self.property_parser = PropertyParser(props=self.props, workflow=self.workflow)
+
+        self.coordinator_parser = coordinator_xml_parser.CoordinatorXmlParser(
+            props=self.props,
+            action_mapper=action_mapper,
+            renderer=renderer,
+            coordinator=self.coordinator,
+            transformers=transformers
+
+        )
         self.parser = workflow_xml_parser.WorkflowXmlParser(
             props=self.props,
             action_mapper=action_mapper,
@@ -117,7 +117,6 @@ class OozieConverter:
         Starts the process of converting the workflow.
         """
         self.coordinator_parser.parse_coordinator()
-
         self.retrieve_lib_jar_libraries()
         self.property_parser.parse_property()
 
@@ -136,7 +135,7 @@ class OozieConverter:
         else:
             self.renderer.create_workflow_file(workflow=self.workflow, props=self.props)
 
-        # self.copy_extra_assets(self.workflow.nodes) # TODO update this function to copy script folder in all workflows
+        self.copy_extra_assets(self.workflow.nodes)
 
     def convert_nodes(self):
         """
@@ -206,10 +205,16 @@ class OozieConverter:
         Copies additional assets needed to execute a workflow, eg. Pig scripts.
         """
 
-        shutil.copy(
-            el_utils.resolve_job_properties_in_string(os.path.join(self.workflow.input_directory_path, "scripts"), self.props),
-            el_utils.resolve_job_properties_in_string(os.path.join(self.workflow.output_directory_path,"scripts"), self.props)
+        input_script_path = el_utils.resolve_job_properties_in_string(
+            os.path.join(self.workflow.input_directory_path, "scripts"),
+            self.props
         )
+
+        if os.path.exists(input_script_path):
+            shutil.copytree(
+                input_script_path,
+                el_utils.resolve_job_properties_in_string(os.path.join(self.workflow.output_directory_path, "scripts"), self.props)
+            )
         #for node in nodes.values():
         #    logging.info(f"Copies additional assets for the node: {node.name}")
         #    node.mapper.copy_extra_assets(
@@ -230,4 +235,7 @@ class OozieConverter:
 
     def schedule_workflow(self):
         logging.info(f"Applying scheduling params to {self.workflow.dag_name} ")
+
         self.workflow.schedule_interval = self.coordinator.frequency
+        self.workflow.start_date = self.coordinator.start
+        self.workflow.end_date = self.coordinator.end

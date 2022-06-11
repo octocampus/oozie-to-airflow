@@ -195,10 +195,6 @@
   shell: systemctl start airflow-celery-flower.service
 
 
-
-
-
-
 - name: Check airflow webserver daemon
   shell: systemctl status airflow-webserver.service
   register: webserver_status

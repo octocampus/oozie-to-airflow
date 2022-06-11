@@ -64,6 +64,8 @@ class Workflow:
         self.coordinator: Optional[Coordinator] = None
 
         self.schedule_interval: Optional[str] = None
+        self.start_date: Optional[str] = None
+        self.end_date: Optional[str] = None
 
     def get_nodes_by_type(self, mapper_type: Type):
         return [node for node in self.nodes.values() if isinstance(node.mapper, mapper_type)]
