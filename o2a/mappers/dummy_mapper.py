@@ -30,7 +30,7 @@ class DummyMapper(BaseMapper):
     """
 
     def __init__(
-        self, oozie_node: Element, name: str, dag_name: str, props: Optional[PropertySet], **kwargs
+        self, oozie_node: Element, name: str, dag_name: str, props: Optional[PropertySet] = None, **kwargs
     ):
         super().__init__(
             oozie_node=oozie_node,

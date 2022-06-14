@@ -25,9 +25,11 @@ JOB_PROPS={{ job_properties | to_python }}
 
 TASK_MAP={{ task_map | to_python }}
 
+{% include "datasets.tpl" %}
 
 
-TEMPLATE_ENV = {**CONFIG, **JOB_PROPS, "functions": functions, "task_map": TASK_MAP }
+
+TEMPLATE_ENV = {**CONFIG, **JOB_PROPS, "functions": functions, "task_map": TASK_MAP, "datasets": DATASETS }
 
 with models.DAG(
     {{ dag_name | to_python }},

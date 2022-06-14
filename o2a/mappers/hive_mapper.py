@@ -46,7 +46,6 @@ class HiveMapper(ActionMapper):
         "local": HiveLocalTask,
         "ssh": Task,
         "gcp": Task,
-
     }
 
     def __init__(self, oozie_node: Element, name: str, props: PropertySet, **kwargs):
@@ -65,9 +64,10 @@ class HiveMapper(ActionMapper):
         super().on_parse_node()
         self._parse_config()
         self.query = get_tag_el_text(self.oozie_node, TAG_QUERY)
+
         self.script = self.__get_output_script_path(get_tag_el_text(self.oozie_node, TAG_SCRIPT))
 
-        if not self.query and not self.script:
+        if not (self.script or self.query):
             raise ParseException(f"Action Configuration does not include {TAG_SCRIPT} or {TAG_QUERY} element")
 
         if self.query and self.script:
@@ -111,7 +111,7 @@ class HiveMapper(ActionMapper):
         os.makedirs(os.path.dirname(destination_script_file_path), exist_ok=True)
         shutil.copy(
             el_utils.resolve_job_properties_in_string(source_script_file_path, self.props),
-            el_utils.resolve_job_properties_in_string(destination_script_file_path, self.props)
+            el_utils.resolve_job_properties_in_string(destination_script_file_path, self.props),
         )
 
         logging.info(f"Copied {self.script} to {destination_script_file_path}")
@@ -122,9 +122,12 @@ class HiveMapper(ActionMapper):
 
         return dependencies.union(prepare_dependencies)
 
-    def __get_output_script_path(self, input_script_path: str) -> str :
+    def __get_output_script_path(self, input_script_path: str) -> str:
         resolved_input_script_path = el_utils.resolve_job_properties_in_string(input_script_path, self.props)
-        _, _, script_name = resolved_input_script_path.rpartition("/")
 
-        return "/".join(["scripts", script_name])
+        if resolved_input_script_path:
+            _, _, script_name = resolved_input_script_path.rpartition("/")
 
+            return "/".join(["scripts", script_name])
+
+        return None

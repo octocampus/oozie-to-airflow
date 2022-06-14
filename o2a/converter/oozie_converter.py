@@ -24,7 +24,6 @@ import logging
 
 
 from o2a.converter import workflow_xml_parser, coordinator_xml_parser
-from o2a.converter.constants import HDFS_FOLDER
 from o2a.converter.oozie_node import OozieNode, OozieControlNode, OozieActionNode
 from o2a.converter.property_parser import PropertyParser
 from o2a.converter.relation import Relation
@@ -78,6 +77,7 @@ class OozieConverter:
             dag_name=dag_name,
             input_directory_path=input_directory_path,
             output_directory_path=output_directory_path,
+            coordinator=self.coordinator,
         )
         self.renderer = renderer
 
@@ -93,8 +93,7 @@ class OozieConverter:
             action_mapper=action_mapper,
             renderer=renderer,
             coordinator=self.coordinator,
-            transformers=transformers
-
+            transformers=transformers,
         )
         self.parser = workflow_xml_parser.WorkflowXmlParser(
             props=self.props,
@@ -206,16 +205,17 @@ class OozieConverter:
         """
 
         input_script_path = el_utils.resolve_job_properties_in_string(
-            os.path.join(self.workflow.input_directory_path, "scripts"),
-            self.props
+            os.path.join(self.workflow.input_directory_path, "scripts"), self.props
         )
 
         if os.path.exists(input_script_path):
             shutil.copytree(
                 input_script_path,
-                el_utils.resolve_job_properties_in_string(os.path.join(self.workflow.output_directory_path, "scripts"), self.props)
+                el_utils.resolve_job_properties_in_string(
+                    os.path.join(self.workflow.output_directory_path, "scripts"), self.props
+                ),
             )
-        #for node in nodes.values():
+        # for node in nodes.values():
         #    logging.info(f"Copies additional assets for the node: {node.name}")
         #    node.mapper.copy_extra_assets(
         #        input_directory_path=os.path.join(self.workflow.input_directory_path, HDFS_FOLDER),

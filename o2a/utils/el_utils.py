@@ -25,7 +25,7 @@ from jinja2 import StrictUndefined, Environment, Template
 from jinja2.exceptions import UndefinedError
 
 from o2a.converter.exceptions import ParseException
-from o2a.o2a_libs import el_parser
+from o2a.o2a_libs import el_parser, functions
 from o2a.o2a_libs.property_utils import PropertySet
 
 
@@ -107,12 +107,18 @@ def resolve_job_properties_in_string(string: str, props: PropertySet) -> str:
     """
     Resolve sub workflow app name based on properties set
     """
+    if not string:
+        return None
+
+    template_env = {**props.config, **props.job_properties, "functions": functions}
+
     el_string = el_parser.translate(string)
-    for char in ['@', '*']:
-        if char in el_string: el_string = re.sub('[{}]', '', el_string)
+    for char in ["@", "*"]:
+        if char in el_string:
+            el_string = re.sub("[{}]", "", el_string)
 
     template = Template(el_string)
-    return template.render(props.job_properties)
+    return template.render(template_env)
 
 
 def _resolve_name_node(translation: str, props: PropertySet) -> Tuple[Optional[str], int]:
@@ -150,11 +156,11 @@ def normalize_path(url: str, props: PropertySet, allow_no_schema=False, translat
         output = url_parts.path
 
     allowed_schemas = {"hdfs", ""} if allow_no_schema else {"hdfs"}
-    #if url_parts.scheme not in allowed_schemas:
-    #    raise ParseException(
-    #        f"Unknown path format. The URL should be provided in the following format: "
-    #        f"hdfs://localhost:9200/path. Current value: {url_with_var}"
-    #    )
+    if url_parts.scheme not in allowed_schemas:
+        raise ParseException(
+            f"Unknown path format. The URL should be provided in the following format: "
+            f"hdfs://localhost:9200/path. Current value: {url_with_var}"
+        )
 
     return output
 

@@ -14,11 +14,9 @@
 # limitations under the License.
 """All Coord EL functions"""
 from airflow import AirflowException
-from airflow.models import TaskInstance, BaseOperator
-from airflow.models.base import Operator
-from airflow.utils.session import provide_session
+from airflow.models import BaseOperator
 from jinja2 import contextfunction
-from typing import Set, Optional, List
+from typing import List, Optional
 
 from o2a.converter.dataset import Dataset, find_dataset_by_name, get_dataset_name_from_task_doc
 
@@ -55,19 +53,14 @@ def current(context=None, n: str = None):
     CA_NT: coordinator action creation (materialization) nominal time
     coord:current(int n) = DS_II + DS_FREQ * ( (CA_NT - DS_II) div DS_FREQ + n)
     """
-    datasets: Optional[List[Dataset]] = context.get('datasets')
+    datasets: Optional[List[Dataset]] = context.get("datasets")
     if datasets is None:
         raise AirflowException("No datasets!")
 
-    task: Optional[BaseOperator] = context.get('task', None)  # pylint:disable=invalid-name
+    task: Optional[BaseOperator] = context.get("task", None)  # pylint:disable=invalid-name
 
     dataset_name = get_dataset_name_from_task_doc(task.doc)
 
     dataset = find_dataset_by_name(datasets, dataset_name)
 
     return f"{dataset.name}-{n}"
-
-
-
-
-

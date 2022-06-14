@@ -23,7 +23,6 @@ from o2a.converter.oozie_converter import OozieConverter
 from o2a.converter.relation import Relation
 from o2a.converter.renderers import BaseRenderer
 from o2a.converter.task import Task
-from o2a.definitions import EXAMPLES_PATH
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.transformers.base_transformer import BaseWorkflowTransformer
@@ -73,13 +72,16 @@ class SubworkflowMapper(ActionMapper):
     def _parse_oozie_node(self):
         app_path = xml_utils.get_tag_el_text(self.oozie_node, TAG_APP)
         resolved_app_path = el_utils.resolve_job_properties_in_string(app_path, self.props)
+        if resolved_app_path[-1:-5] == ".xml":
+            app_directory_path, _, _ = resolved_app_path.rpartition("/")
+        else:
+            app_directory_path = resolved_app_path
 
-        app_directory_path, _, self.app_name = resolved_app_path.rpartition("/")
-        _, _, app_directory_name = app_directory_path.rpartition("/")
+        _, _, self.app_name = app_directory_path.rpartition("/")
 
         parent_path, _, _ = self.input_directory_path.rpartition("/")
 
-        app_path = os.path.join(parent_path, app_directory_name)
+        app_path = os.path.join(parent_path, self.app_name)
 
         logging.info(f"Converting subworkflow from {app_path}")
         converter = OozieConverter(

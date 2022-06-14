@@ -27,6 +27,9 @@ from o2a.converter.oozie_converter import OozieConverter
 from o2a.converter.constants import HDFS_FOLDER
 from o2a.converter.renderers import PythonRenderer, DotRenderer
 from o2a.transformers.add_node_notificaton_transformer import AddNodeNotificationTransformer
+from o2a.transformers.add_workflow_data_events_sensors_transformer import (
+    AddWorkflowDataEventsSensorsTransformer,
+)
 from o2a.transformers.add_workflow_notificaton_transformer import AddWorkflowNotificationTransformer
 from o2a.transformers.remove_end_transformer import RemoveEndTransformer
 from o2a.transformers.remove_fork_transformer import RemoveForkTransformer
@@ -106,6 +109,7 @@ Otherwise please provide it.
     )
 
     transformers = [
+        AddWorkflowDataEventsSensorsTransformer(),
         RemoveInaccessibleNodeTransformer(),
         RemoveEndTransformer(),
         RemoveKillTransformer(),

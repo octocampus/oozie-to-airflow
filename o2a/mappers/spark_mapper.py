@@ -41,7 +41,6 @@ SPARK_TAG_CLASS = "class"
 SPARK_TAG_JAR = "jar"
 
 
-
 class SparkMapper(ActionMapper):
     """Maps Spark Action"""
 
@@ -49,7 +48,6 @@ class SparkMapper(ActionMapper):
         "local": SparkLocalTask,
         "ssh": Task,
         "gcp": Task,
-
     }
 
     def __init__(self, oozie_node: ET.Element, name: str, props: PropertySet, **kwargs):
@@ -122,10 +120,12 @@ class SparkMapper(ActionMapper):
             task_id=self.name,
             template_name="spark/spark.tpl",
             template_params=dict(
-                conf=self.props,
+                conf=self.props.merged,
                 name=self.job_name,
                 java_class=self.java_class,
-                spark_conn_id=self.props.config["spark_conn_id"],
+                spark_conn_id=self.props.config["spark_conn_id"]
+                if "spark_conn_id" in self.props.config
+                else "spark_default_conn_id",
                 jars=self.java_jar,
                 application_args=self.application_args,
             ),

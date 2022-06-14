@@ -26,7 +26,7 @@ import o2a.o2a_libs.el_coord_functions as coord_functions
 # Used for functions.wf.f_name pattern in templates
 wf = wf_functions  # pylint:disable=invalid-name
 fs = fs_functions  # pylint:disable=invalid-name
-coord = coord_functions
+coord = coord_functions # pylint:disable=invalid-name
 
 
 def first_not_null(str_one, str_two):
@@ -160,8 +160,8 @@ FUNCTION_MAP = {
     "coord_hours": coord.hours,
     "coord_days": coord.days,
     "coord_months": coord.months,
-    'coord_end_of_days': coord.end_of_days,
-    'coord_end_of_months': coord.end_of_months,
+    "coord_end_of_days": coord.end_of_days,
+    "coord_end_of_months": coord.end_of_months,
 }
 
 

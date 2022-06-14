@@ -37,6 +37,7 @@ class Workflow:
         nodes: Dict[str, OozieNode] = None,
         task_groups: Dict[str, TaskGroup] = None,
         dependencies: Set[str] = None,
+        coordinator: Optional[Coordinator] = None,
     ) -> None:
         self.input_directory_path = input_directory_path
         self.output_directory_path = output_directory_path
@@ -61,7 +62,7 @@ class Workflow:
         self.library_folder = os.path.join(self.input_directory_path, HDFS_FOLDER, LIB_FOLDER)
         self.jar_files = get_lib_files(self.library_folder, extension=".jar")
 
-        self.coordinator: Optional[Coordinator] = None
+        self.coordinator: Optional[Coordinator] = coordinator
 
         self.schedule_interval: Optional[str] = None
         self.start_date: Optional[str] = None

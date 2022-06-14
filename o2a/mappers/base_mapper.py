@@ -27,9 +27,7 @@ from o2a.o2a_libs.property_utils import PropertySet
 class BaseMapper(ABC):
     """The Base Mapper class - parent for all mappers."""
 
-    TASK_MAPPER: Dict[str, Type[Task]] = {
-        'local': Task
-    }
+    TASK_MAPPER: Dict[str, Type[Task]] = {"local": Task}
 
     # pylint: disable = unused-argument
     def __init__(self, oozie_node: Element, name: str, dag_name: str, props: PropertySet, **kwargs: Any):

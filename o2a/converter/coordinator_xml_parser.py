@@ -15,7 +15,6 @@
 """Parsing module """
 import logging
 import os
-import re
 
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
@@ -50,19 +49,16 @@ class CoordinatorXmlParser:
     """Parses XML of an Oozie Coordinator"""
 
     def __init__(
-            self,
-
-            props: PropertySet,
-            action_mapper: Dict[str, Type[ActionMapper]],
-            renderer: BaseRenderer,
-            coordinator: Coordinator,
-            transformers: List[BaseWorkflowTransformer] = None,
+        self,
+        props: PropertySet,
+        action_mapper: Dict[str, Type[ActionMapper]],
+        renderer: BaseRenderer,
+        coordinator: Coordinator,
+        transformers: List[BaseWorkflowTransformer] = None,
     ):
         self.coordinator: Coordinator = coordinator
         self.coordinator_file = os.path.join(
-            coordinator.input_directory_path,
-            COORDINATOR_FOLDER,
-            "coord.xml"
+            coordinator.input_directory_path, COORDINATOR_FOLDER, "coord.xml"
         )
         self.props = props
         self.action_map = action_mapper
@@ -123,7 +119,7 @@ class CoordinatorXmlParser:
         if "input-events" in node.tag:
             self.parse_input_events(node)
         if "output-events" in node.tag:
-            self.parse_input_events(node)
+            self.parse_output_events(node)
         if "action" in node.tag:
             self.parse_action_node(node)
 
@@ -156,11 +152,13 @@ class CoordinatorXmlParser:
             initial_instance=initial_instance,
             timezone=timezone,
             uri_template=uri_template,
-            done_flag=done_flag
+            done_flag=done_flag,
         )
 
     def parse_coordinator(self):
         """Parses coordinator replacing invalid characters in the names of the nodes"""
+        if not self.get_root_node():
+            return
 
         self.parse_coordinator_attributes()
 
@@ -177,6 +175,8 @@ class CoordinatorXmlParser:
             self.parse_node(node)
 
     def get_root_node(self):
+        if not os.path.exists(self.coordinator_file):
+            return None
 
         tree = ET.parse(self.coordinator_file)
         return tree.getroot()
@@ -222,7 +222,7 @@ class CoordinatorXmlParser:
 
     @staticmethod
     def parse_dataset_uri_template(dataset_node):
-        return xml_utils.get_tag_el_text(dataset_node, 'uri-template')
+        return xml_utils.get_tag_el_text(dataset_node, "uri-template")
 
     @staticmethod
     def parse_done_flag(dataset_node):
@@ -233,10 +233,7 @@ class CoordinatorXmlParser:
         if done_flag_node:
             done_flag_el_text = xml_utils.get_tag_el_text(dataset_node, DATASET_DONE_FLAG)
             done_flag = True
-        return {
-            "done_flag_node": done_flag,
-            "done_flag_el_text": done_flag_el_text
-        }
+        return {"done_flag_node": done_flag, "done_flag_el_text": done_flag_el_text}
 
     def parse_input_events(self, input_events_node):
         parsed_nodes = []
@@ -266,7 +263,7 @@ class CoordinatorXmlParser:
             dataset=dataset,
             instance=instance,
             start_instance=start_instance,
-            end_instance=end_instance
+            end_instance=end_instance,
         )
 
     def parse_data_out_node(self, data_out_node: ET.Element):
@@ -275,12 +272,7 @@ class CoordinatorXmlParser:
         instance = self.__parse_data_event_instance(data_out_node)
         no_cleanup = self.__parse_data_out_no_cleanup(data_out_node)
 
-        return OutputEvent(
-            name=name,
-            dataset=dataset,
-            instance=instance,
-            nocleanup=no_cleanup
-        )
+        return OutputEvent(name=name, dataset=dataset, instance=instance, nocleanup=no_cleanup)
 
     def parse_action_node(self, action_node):
         self.parse_workflow_node(action_node)
@@ -326,16 +318,10 @@ class CoordinatorXmlParser:
             if configuration_node:
                 configuration_properties = extract_properties_from_configuration_node(configuration_node)
 
-        return {
-            "app_path": app_path,
-            "configuration": configuration_properties
-        }
+        return {"app_path": app_path, "configuration": configuration_properties}
 
     def parse_coordinator_attributes(self):
         self.parse_start_attribute()
         self.parse_end_attribute()
         self.parse_timezone_attribute()
         self.parse_coordinator_frequency()
-
-
-

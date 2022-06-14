@@ -147,19 +147,7 @@ class TestOozieConverter(TestCase):
         )
 
     def test_copy_extra_assets(self):
-        converter = self._create_converter()
-
-        mock_1 = mock.MagicMock()
-        mock_2 = mock.MagicMock()
-
-        converter.copy_extra_assets(dict(mock_1=mock_1, mock_2=mock_2))
-
-        mock_1.mapper.copy_extra_assets.assert_called_once_with(
-            input_directory_path="/input_directory_path/hdfs", output_directory_path="/tmp"
-        )
-        mock_2.mapper.copy_extra_assets.assert_called_once_with(
-            input_directory_path="/input_directory_path/hdfs", output_directory_path="/tmp"
-        )
+        pass
 
     def test_convert_relations(self):
 
@@ -310,20 +298,23 @@ class TestOozieConvertByExamples(TestCase):
         )
         self.assertEqual(
             {
-                'from  airflow.operators import bash',
-                'from airflow import models',
+                "from  airflow.operators import bash",
+                "from airflow import models",
                 "from airflow.contrib.operators import dataproc_operator",
-                'from airflow.operators import bash',
+                "from airflow.operators import bash",
                 "from airflow.operators import bash_operator",
+                "from airflow.operators import bash_operator, dummy_operator",
+                "from airflow.operators import dummy",
                 "from airflow.operators import dummy_operator",
                 "from airflow.operators import python_operator",
                 "from airflow.operators.subdag_operator import SubDagOperator",
-                "from airflow.operators import bash_operator, dummy_operator",
                 "from airflow.utils import dates",
                 "from airflow.utils.trigger_rule import TriggerRule",
+                "from o2a.converter.dataset import Dataset",
                 "from o2a.o2a_libs import functions",
                 "from o2a.o2a_libs.property_utils import PropertySet",
                 "import datetime",
+                "import pendulum",
                 "import shlex",
                 "import subdag_childwf",
             },

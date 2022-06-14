@@ -21,15 +21,7 @@ import o2a.o2a_libs.functions as functions
 
 
 class TestElCoordFunctions(unittest.TestCase):
-
-
-    @parameterized.expand(
-        [
-            ("3", "*/3 * * * *"),
-            ("65", "*/65 * * * *"),
-            ("60", "*/60 * * * *")
-        ]
-    )
+    @parameterized.expand([("3", "*/3 * * * *"), ("65", "*/65 * * * *"), ("60", "*/60 * * * *")])
     def test_minutes(self, n, expected):
         self.assertEqual(expected, functions.coord.minutes(n))
 
@@ -37,13 +29,7 @@ class TestElCoordFunctions(unittest.TestCase):
         expected = "@hourly"
         self.assertEqual(expected, functions.coord.hours("1"))
 
-    @parameterized.expand(
-        [
-            ("3", "0 */3 * * *"),
-            ("24", "0 */24 * * *"),
-            ("25", "0 */25 * * *")
-        ]
-    )
+    @parameterized.expand([("3", "0 */3 * * *"), ("24", "0 */24 * * *"), ("25", "0 */25 * * *")])
     def test_hours(self, n, expected):
         self.assertEqual(expected, functions.coord.hours(n))
 
@@ -51,23 +37,11 @@ class TestElCoordFunctions(unittest.TestCase):
         expected = "@daily"
         self.assertEqual(expected, functions.coord.days("1"))
 
-    @parameterized.expand(
-        [
-            ("3", "0 0 */3 * *"),
-            ("31", "0 0 */31 * *"),
-            ("33","0 0 */33 * *")
-        ]
-    )
+    @parameterized.expand([("3", "0 0 */3 * *"), ("31", "0 0 */31 * *"), ("33", "0 0 */33 * *")])
     def test_days(self, n, expected):
         self.assertEqual(expected, functions.coord.days(n))
 
-    @parameterized.expand(
-        [
-            ("3",),
-            ("31",),
-            ("33",)
-        ]
-    )
+    @parameterized.expand([("3",), ("31",), ("33",)])
     def test_end_of_days(self, n):
         expected = f"59 23 */{n} * *"
         self.assertEqual(expected, functions.coord.end_of_days(n))
@@ -77,24 +51,12 @@ class TestElCoordFunctions(unittest.TestCase):
         self.assertEqual(expected, functions.coord.months("1"))
 
     @parameterized.expand(
-        [
-            ("3", "0 0 1 */3 *"),
-            ("0", "0 0 1 */0 *"),
-            ("31", "0 0 1 */31 *"),
-            ("33", "0 0 1 */33 *")
-        ]
+        [("3", "0 0 1 */3 *"), ("0", "0 0 1 */0 *"), ("31", "0 0 1 */31 *"), ("33", "0 0 1 */33 *")]
     )
     def test_months(self, n, expected):
         self.assertEqual(expected, functions.coord.months(n))
 
-    @parameterized.expand(
-        [
-            ("3",),
-            ("0",),
-            ("31",),
-            ("33",)
-        ]
-    )
+    @parameterized.expand([("3",), ("0",), ("31",), ("33",)])
     def test_end_of_months(self, n):
         expected = f"59 23 L */{n} *"
         self.assertEqual(expected, functions.coord.end_of_months(n))

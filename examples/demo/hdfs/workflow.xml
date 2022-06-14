@@ -69,7 +69,7 @@
 
     <action name="subworkflow-node">
         <sub-workflow>
-            <app-path>${nameNode}/user/${wf:user()}/${examplesRoot}/apps/childwf</app-path>
+            <app-path>${nameNode}/user/${wf:user()}/${examplesRoot}/shell/childwf</app-path>
             <propagate-configuration/>
             <configuration>
                 <property>

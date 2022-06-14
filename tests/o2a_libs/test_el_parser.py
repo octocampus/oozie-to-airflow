@@ -172,14 +172,14 @@ class TestElParser(unittest.TestCase):
     def test_rendering(self, input_sentence, translation, output_sentence, kwargs):
         translated = translate(input_sentence, functions_module="functions")
 
-        print('input_sentence:', input_sentence)
-        print('translation:', translation)
-        print('translated:', translated)
+        print("input_sentence:", input_sentence)
+        print("translation:", translation)
+        print("translated:", translated)
         self.assertEqual(translation, translated)
         render = Template(translated).render(**kwargs)
 
-        print('render:', render)
-        print('output_sentence:', output_sentence)
+        print("render:", render)
+        print("output_sentence:", output_sentence)
 
         self.assertEqual(output_sentence, render)
 

@@ -14,6 +14,7 @@
 # limitations under the License.
 """Tests give mapper"""
 import ast
+import os
 import unittest
 from typing import Dict
 from xml.etree import ElementTree as ET
@@ -146,7 +147,7 @@ class TestHiveMapper(unittest.TestCase):
                     template_name="hive/hive.tpl",
                     trigger_rule="one_success",
                     template_params={
-                        "hql": "script.q",
+                        "hql": "scripts/script.q",
                         "mapred_queue": "default",
                         "hive_cli_conn_id": "hive_cli_default",
                     },
@@ -220,6 +221,8 @@ class TestHiveMapper(unittest.TestCase):
             self.hive_node.append(element)
 
         mapper = self._get_hive_mapper(job_properties=self.job_properties, config=self.config)
+        os.makedirs(os.path.join(mapper.input_directory_path, "scripts/script.q"), exist_ok=True)
+
         mapper.on_parse_node()
 
         tasks, relations = mapper.to_tasks_and_relations()
@@ -259,6 +262,8 @@ class TestHiveMapper(unittest.TestCase):
             self.hive_node.append(element)
 
         mapper = self._get_hive_mapper(job_properties=self.job_properties, config=self.config)
+        os.makedirs(os.path.join(mapper.input_directory_path, "scripts/script.q"), exist_ok=True)
+
         with self.assertRaisesRegex(
             ParseException,
             "Action Configuration include script and query element. Only one can be set at the same time.",

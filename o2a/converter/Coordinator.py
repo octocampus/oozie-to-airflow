@@ -23,20 +23,18 @@ from o2a.converter.task_group import TaskGroup
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
 
+
 class Coordinator:
     """Class for Coordinator"""
 
     def __init__(
-            self,
-            input_directory_path: str,
-            dependencies: Set[str] = None,
-
+        self,
+        input_directory_path: str,
+        dependencies: Set[str] = None,
     ) -> None:
 
         self.coordinator_file = None
-        self.dependencies = dependencies or {
-            "import pendulum"
-        }
+        self.dependencies = dependencies or {"import pendulum", "from o2a.converter.dataset import Dataset"}
         self.input_directory_path = input_directory_path
         self.root_node = None
 
@@ -53,7 +51,6 @@ class Coordinator:
         self.datasets: Optional[List[Dataset]] = None
         self.input_events: Optional[List[InputEvent]] = None
         self.output_events: Optional[List[OutputEvent]] = None
-
 
     def get_root_node(self):
         tree = ET.parse(self.coordinator_file)
@@ -73,8 +70,8 @@ class Coordinator:
         result = []
         for task_group in self.task_groups.values():
             if (
-                    target_task_group.name in task_group.downstream_names
-                    or target_task_group.name == task_group.error_downstream_name
+                target_task_group.name in task_group.downstream_names
+                or target_task_group.name == task_group.error_downstream_name
             ):
                 result.append(task_group)
         return result
@@ -121,4 +118,3 @@ class Coordinator:
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__
         return False
-

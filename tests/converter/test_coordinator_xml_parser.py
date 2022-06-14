@@ -33,16 +33,17 @@ from o2a.converter import coordinator_xml_parser
 
 class TestCoordinatorXmlParser(unittest.TestCase):
     def setUp(self):
-        props = PropertySet(job_properties={
-            "env": "${env}",
-            "year": "2022",
-            "start": "${year}-05-03T20:56:35.450686Z",
-            "end": "${year}-12-03T20:56:35.450686Z"
-        }, config={})
-
-        coordinator = Coordinator(
-            input_directory_path=EXAMPLE_DEMO_PATH
+        props = PropertySet(
+            job_properties={
+                "env": "${env}",
+                "year": "2022",
+                "start": "${year}-05-03T20:56:35.450686Z",
+                "end": "${year}-12-03T20:56:35.450686Z",
+            },
+            config={},
         )
+
+        coordinator = Coordinator(input_directory_path=EXAMPLE_DEMO_PATH)
         self.parser = coordinator_xml_parser.CoordinatorXmlParser(
             coordinator=coordinator, props=props, action_mapper=ACTION_MAP, renderer=mock.MagicMock()
         )
@@ -70,13 +71,14 @@ class TestCoordinatorXmlParser(unittest.TestCase):
 
         self.assertEqual(expected_timezone, actual_timezone)
 
-    @parameterized.expand([
-        ("<controls></controls>", "-1"),
-        ("<controls><timeout>10</timeout></controls>", "10"),
-        ("<controls><timeout>-1</timeout></controls>", "-1"),
-        ("<controls><timeout></timeout></controls>", "-1")
-
-    ])
+    @parameterized.expand(
+        [
+            ("<controls></controls>", "-1"),
+            ("<controls><timeout>10</timeout></controls>", "10"),
+            ("<controls><timeout>-1</timeout></controls>", "-1"),
+            ("<controls><timeout></timeout></controls>", "-1"),
+        ]
+    )
     def test_parse_timeout(self, controls_node_str, expected):
         controls_node = ET.fromstring(controls_node_str)
         self.parser.parse_timeout(controls_node)
@@ -85,13 +87,14 @@ class TestCoordinatorXmlParser(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
-    @parameterized.expand([
-        ("<controls></controls>", "1"),
-        ("<controls><concurrency>10</concurrency></controls>", "10"),
-        ("<controls><concurrency>-1</concurrency></controls>", "-1"),
-        ("<controls><concurrency></concurrency></controls>", "1")
-
-    ])
+    @parameterized.expand(
+        [
+            ("<controls></controls>", "1"),
+            ("<controls><concurrency>10</concurrency></controls>", "10"),
+            ("<controls><concurrency>-1</concurrency></controls>", "-1"),
+            ("<controls><concurrency></concurrency></controls>", "1"),
+        ]
+    )
     def test_parse_concurrency(self, controls_node_str: ET.Element, expected: int):
         controls_node = ET.fromstring(controls_node_str)
         self.parser.parse_concurrency(controls_node)
@@ -100,14 +103,15 @@ class TestCoordinatorXmlParser(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
-    @parameterized.expand([
-        ("<controls></controls>", "FIFO"),
-        ("<controls><execution></execution></controls>", "FIFO"),
-        ("<controls><execution>FIFO</execution></controls>", "FIFO"),
-        ("<controls><execution>LIFO</execution></controls>", "LIFO"),
-        ("<controls><execution>NONE</execution></controls>", "NONE")
-
-    ])
+    @parameterized.expand(
+        [
+            ("<controls></controls>", "FIFO"),
+            ("<controls><execution></execution></controls>", "FIFO"),
+            ("<controls><execution>FIFO</execution></controls>", "FIFO"),
+            ("<controls><execution>LIFO</execution></controls>", "LIFO"),
+            ("<controls><execution>NONE</execution></controls>", "NONE"),
+        ]
+    )
     def test_parse_execution(self, controls_node_str: ET.Element, expected: int):
         controls_node = ET.fromstring(controls_node_str)
         self.parser.parse_execution(controls_node)
@@ -116,13 +120,14 @@ class TestCoordinatorXmlParser(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
-    @parameterized.expand([
-        ("<controls></controls>", 12),
-        ("<controls><throttle></throttle></controls>", 12),
-        ("<controls><throttle>4</throttle></controls>", 4),
-        ("<controls><throttle>1</throttle></controls>", 1),
-
-    ])
+    @parameterized.expand(
+        [
+            ("<controls></controls>", 12),
+            ("<controls><throttle></throttle></controls>", 12),
+            ("<controls><throttle>4</throttle></controls>", 4),
+            ("<controls><throttle>1</throttle></controls>", 1),
+        ]
+    )
     def test_parse_throttle(self, controls_node_str: ET.Element, expected: int):
         controls_node = ET.fromstring(controls_node_str)
         self.parser.parse_throttle(controls_node)
@@ -148,27 +153,27 @@ class TestCoordinatorXmlParser(unittest.TestCase):
          <uri-template>${baseFsURI}/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}</uri-template>
          <done-flag></done-flag>
     </dataset>
-</datasets>       
+</datasets>
         """
         datasets_node = ET.fromstring(datasets_node_str)
 
         expected = [
             Dataset(
-                name='din',
-                frequency='59 23 */1 * *',
-                initial_instance='2009-01-02T08:00Z',
-                timezone='America/Los_Angeles',
-                uri_template='{{baseFsURI}}/{{YEAR}}/{{MONTH}}/{{DAY}}/{{HOUR}}/{{MINUTE}}',
-                done_flag={'done_flag_node': False, 'done_flag_el_text': None}
+                name="din",
+                frequency="59 23 */1 * *",
+                initial_instance="2009-01-02T08:00Z",
+                timezone="America/Los_Angeles",
+                uri_template="{{baseFsURI}}/{{YEAR}}/{{MONTH}}/{{DAY}}/{{HOUR}}/{{MINUTE}}",
+                done_flag={"done_flag_node": False, "done_flag_el_text": None},
             ),
             Dataset(
-                name='dout',
-                frequency='*/30 * * * *',
-                initial_instance='2009-01-02T08:00Z',
-                timezone='UTC',
-                uri_template='{{baseFsURI}}/{{YEAR}}/{{MONTH}}/{{DAY}}/{{HOUR}}/{{MINUTE}}',
-                done_flag={'done_flag_node': True, 'done_flag_el_text': None}
-            )
+                name="dout",
+                frequency="*/30 * * * *",
+                initial_instance="2009-01-02T08:00Z",
+                timezone="UTC",
+                uri_template="{{baseFsURI}}/{{YEAR}}/{{MONTH}}/{{DAY}}/{{HOUR}}/{{MINUTE}}",
+                done_flag={"done_flag_node": True, "done_flag_el_text": None},
+            ),
         ]
 
         self.parser.parse_datasets_node(datasets_node)
@@ -199,20 +204,19 @@ class TestCoordinatorXmlParser(unittest.TestCase):
 
         expected = [
             InputEvent(
-                name='input',
-                dataset='logs',
-                instance='2009-01-02T08:00Z',
+                name="input",
+                dataset="logs",
+                instance="2009-01-02T08:00Z",
                 start_instance=None,
-                end_instance=None
+                end_instance=None,
             ),
             InputEvent(
-                name='input',
-                dataset='logs',
+                name="input",
+                dataset="logs",
                 instance=None,
-                start_instance='{{functions.coord.current(-6)}}',
-                end_instance='{{functions.coord.current(0)}}'
-            )
-
+                start_instance="{{functions.coord.current(-6)}}",
+                end_instance="{{functions.coord.current(0)}}",
+            ),
         ]
 
         actual = self.parser.coordinator.input_events
@@ -239,18 +243,12 @@ class TestCoordinatorXmlParser(unittest.TestCase):
 
         expected = [
             OutputEvent(
-                name='output',
-                dataset='siteAccessStats',
-                instance='{{functions.coord.current(0)}}',
-                nocleanup=False
+                name="output",
+                dataset="siteAccessStats",
+                instance="{{functions.coord.current(0)}}",
+                nocleanup=False,
             ),
-            OutputEvent(
-                name='input',
-                dataset='logs',
-                instance=None,
-                nocleanup=False
-            )
-
+            OutputEvent(name="input", dataset="logs", instance=None, nocleanup=False),
         ]
 
         actual = self.parser.coordinator.output_events
@@ -282,13 +280,12 @@ class TestCoordinatorXmlParser(unittest.TestCase):
         action_node = ET.fromstring(action_node_str)
 
         expected = {
-            'app_path': 'hdfs://bar:8020/usr/joe/logsprocessor-wf',
-            'configuration': {
-                'wfInput': "{{functions.coord.data_in('input')}}",
-                'wfOutput': "{{functions.coord.data_out('output')}}"
-            }
+            "app_path": "hdfs://bar:8020/usr/joe/logsprocessor-wf",
+            "configuration": {
+                "wfInput": "{{functions.coord.data_in('input')}}",
+                "wfOutput": "{{functions.coord.data_out('output')}}",
+            },
         }
         actual = self.parser.parse_workflow_node(action_node)
 
         self.assertEqual(expected, actual)
-

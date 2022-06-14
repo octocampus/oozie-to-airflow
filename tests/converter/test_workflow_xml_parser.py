@@ -459,7 +459,6 @@ class TestOozieExamples(unittest.TestCase):
                         "fail": NodeExpectedResult(downstream_names=[]),
                         "shell1-node": NodeExpectedResult(downstream_names=["shell2-node"], error_xml="fail"),
                         "shell2-node": NodeExpectedResult(downstream_names=["end"], error_xml="fail"),
-
                     },
                     job_properties={"nameNode": "hdfs://"},
                     config={},
@@ -526,7 +525,8 @@ class TestOozieExamples(unittest.TestCase):
         name_func=lambda func, num, p: f"{func.__name__}_{num}_{p.args[0].name}",
     )
     @mock.patch("uuid.uuid4", return_value="1234")
-    def test_parse_workflow_examples(self, case: WorkflowExpectedResult, _):
+    @mock.patch("o2a.o2a_libs.el_wf_functions.user", return_value="user")
+    def test_parse_workflow_examples(self, case: WorkflowExpectedResult, _, __):
         workflow = Workflow(
             input_directory_path=path.join(EXAMPLES_PATH, case.name),
             output_directory_path="/tmp",

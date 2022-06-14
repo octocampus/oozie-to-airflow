@@ -42,6 +42,7 @@ def _create_workflow():
             )
         ),
         dependencies={"import IMPORT"},
+        coordinator=mock.MagicMock(),
     )
 
 
@@ -85,6 +86,9 @@ class PythonRendererTestCase(unittest.TestCase):
             relations=workflow.task_group_relations,
             schedule_interval=None,
             start_days_ago=None,
+            start_date=mock.ANY,
+            end_date=mock.ANY,
+            datasets=mock.ANY,
             template_name="workflow.tpl",
             task_map={"DAG_NAME_A": ["task_name"]},
         )
@@ -105,13 +109,16 @@ class PythonRendererTestCase(unittest.TestCase):
         render_template_mock.assert_called_once_with(
             config=mock.ANY,
             dag_name=mock.ANY,
-            dependencies=mock.ANY,
             job_properties=mock.ANY,
             task_groups=mock.ANY,
             relations=mock.ANY,
             schedule_interval=mock.ANY,
             start_days_ago=mock.ANY,
+            end_date=mock.ANY,
+            start_date=mock.ANY,
+            datasets=mock.ANY,
             template_name="subworkflow.tpl",
+            dependencies=mock.ANY,
             task_map={"DAG_NAME_A": ["task_name"]},
         )
 

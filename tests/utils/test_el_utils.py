@@ -181,15 +181,9 @@ key5=test
     def test_escape_python_string(self, input_string, expected_string):
         self.assertEqual(expected_string, escape_string_with_python_escapes(input_string))
 
-    @parameterized.expand(
-        [
-            ("{{sworkflow}}",)
-        ]
-    )
+    @parameterized.expand([("{{sworkflow}}",)])
     def resolve_job_properties_in_string(self, app_name: str):
-        job_properties = {
-            "sworkflow": "sub_workflow_app"
-        }
+        job_properties = {"sworkflow": "sub_workflow_app"}
         props = PropertySet(job_properties)
 
         expected = "sub_workflow_app"

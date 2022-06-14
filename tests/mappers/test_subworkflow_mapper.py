@@ -34,7 +34,12 @@ class TestSubworkflowMapper(TestCase):
         "oozie.wf.application.path": "hdfs:///user/pig/examples/pig",
     }
 
-    main_properties = {"examplesRoot": "examples", "nameNode": "hdfs://", "resourceManager": "localhost:8032"}
+    main_properties = {
+        "oozie.wf.application.path": "hdfs:///user/pig/examples/pig",
+        "examplesRoot": "examples",
+        "nameNode": "hdfs://",
+        "resourceManager": "localhost:8032",
+    }
 
     config = {
         "dataproc_cluster": "test_cluster",
@@ -49,7 +54,7 @@ class TestSubworkflowMapper(TestCase):
     def setUpClass(cls):
         subworkflow_node_str = """
 <sub-workflow>
-    <app-path>${nameNode}/user/${wf:user()}/${examplesRoot}/pig</app-path>
+    <app-path>${nameNode}/user/${examplesRoot}/pig</app-path>
     <propagate-configuration />
     <configuration>
         <property>
@@ -68,6 +73,7 @@ class TestSubworkflowMapper(TestCase):
     @mock.patch("o2a.utils.el_utils.extract_evaluate_properties")
     def test_create_mapper_jinja(self, parse_els):
         # Given
+
         parse_els.side_effect = [self.subworkflow_properties, self.config]
         # When
         mapper = self._get_subwf_mapper()
@@ -81,7 +87,7 @@ class TestSubworkflowMapper(TestCase):
         self.assertEqual("localhost:8032", mapper.props.merged["resourceManager"])
         self.assertIsNotNone(mapper.props.merged["user.name"])
 
-    @mock.patch("o2a.utils.el_utils.extract_evaluate_properties")
+    @mock.patch("o2a.o2a_libs.el_wf_functions.user", return_value="user")
     def test_create_mapper_jinja_no_propagate(self, parse_els):
         # Given
         parse_els.side_effect = [self.subworkflow_properties, self.config]

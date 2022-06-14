@@ -21,6 +21,7 @@ from unittest import TestCase
 from parameterized import parameterized
 from airflow.utils.trigger_rule import TriggerRule
 
+from o2a.converter.dataset import Dataset
 from o2a.converter.task import Task
 from o2a.converter.relation import Relation
 from o2a.converter.task_group import TaskGroup
@@ -142,6 +143,7 @@ class BaseTestCases:  # pylint: disable=R0903
             This test allows you to check if all the parameters specified in the `DEFAULT_TEMPLATE_PARAMS`
             field are used in the template specified by the `TEMPLATE_NAME` field.
             """
+
         """
             original_view = render_template(self.TEMPLATE_NAME, **self.DEFAULT_TEMPLATE_PARAMS)
 
@@ -175,6 +177,7 @@ class BaseTestCases:  # pylint: disable=R0903
             walk_recursively_and_mutate([])
 
 """
+
 
 class DecisionTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
     TEMPLATE_NAME = "decision.tpl"
@@ -228,6 +231,7 @@ class FsOpTempalteTestCase(BaseTestCases.BaseTemplateTestCase):
         "action_node_properties": {"key": "value"},
     }
 
+
 """
     def test_minimal_green_path(self):
         res = render_template(self.TEMPLATE_NAME, **self.DEFAULT_TEMPLATE_PARAMS)
@@ -247,9 +251,10 @@ class FsOpTempalteTestCase(BaseTestCases.BaseTemplateTestCase):
         self.assertValidPython(res)
 """
 
+
 class GitTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
 
-    """   TEMPLATE_NAME = "git.tpl"
+    """TEMPLATE_NAME = "git.tpl"
 
     DEFAULT_TEMPLATE_PARAMS = {
         "task_id": "TASK_ID",
@@ -284,8 +289,8 @@ class GitTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
         template_params = mutate(self.DEFAULT_TEMPLATE_PARAMS, mutations=mutation)
         res = render_template(self.TEMPLATE_NAME, **template_params)
         self.assertValidPython(res)
+    """
 
-"""
 
 class HiveTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
     TEMPLATE_NAME = "hive/hive.tpl"
@@ -294,21 +299,15 @@ class HiveTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
         "task_id": "AA",
         "trigger_rule": "dummy",
         "hql": "id.q",
-        "mapred_queue":"default",
+        "mapred_queue": "default",
         "hive_cli_conn_id": "hive_cli_default",
-
     }
 
     def test_green_path(self):
         res = render_template(self.TEMPLATE_NAME, **self.DEFAULT_TEMPLATE_PARAMS)
         self.assertValidPython(res)
 
-    @parameterized.expand(
-        [
-            ({"hive_cli_conn_id": "hive_local"},),
-            ({"hql": "SELECT * FROM sales"},)
-        ]
-    )
+    @parameterized.expand([({"hive_cli_conn_id": "hive_local"},), ({"hql": "SELECT * FROM sales"},)])
     def test_optional_parameters(self, mutation):
         template_params = mutate(self.DEFAULT_TEMPLATE_PARAMS, mutation)
         res = render_template(self.TEMPLATE_NAME, **template_params)
@@ -323,7 +322,6 @@ class HiveTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
             ({"hive_cli_conn_id": 'A"'},),
         ]
     )
-
     def test_escape_character(self, mutation):
         template_params = mutate(self.DEFAULT_TEMPLATE_PARAMS, mutation)
         res = render_template(self.TEMPLATE_NAME, **template_params)
@@ -492,8 +490,7 @@ class SparkTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
         "task_id": "AA",
         "application": "/lib/spark-examples_2.10-1.1.0.jar",
         "conf": {
-            "spark.executor.extraJavaOptions": "-XX:+HeapDumpOnOutOfMemoryError "
-                                               "-XX:HeapDumpPath=/tmp"
+            "spark.executor.extraJavaOptions": "-XX:+HeapDumpOnOutOfMemoryError " "-XX:HeapDumpPath=/tmp"
         },
         "spark_conn_id": "spark_default",
         "jars": [],
@@ -614,7 +611,10 @@ class WorkflowTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
         job_properties={"user.name": "USER"},
         config={},
         relations={Relation(from_task_id="TASK_1", to_task_id="TASK_2")},
-        schedule_interval=3,
+        schedule_interval=None,
+        datasets=None,
+        start_date=None,
+        end_date=None,
         start_days_ago=3,
         task_map={"oozie-task": ["airflow-task"]},
     )
@@ -646,4 +646,34 @@ class SubWorkflowTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
 
     def test_green_path(self):
         res = render_template(self.TEMPLATE_NAME, **self.DEFAULT_TEMPLATE_PARAMS)
+        self.assertValidPython(res)
+
+
+class DatasetsTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
+    TEMPLATE_NAME = "datasets.tpl"
+
+    DEFAULT_TEMPLATE_PARAMS = {
+        "datasets": [
+            Dataset(
+                name="inputdataset",
+                frequency="frequency",
+                initial_instance="initial_instance",
+                timezone="timezone",
+                uri_template="uri_template",
+                done_flag="done_flag",
+            ),
+            Dataset(
+                name="inputdataset2",
+                frequency="frequency",
+                initial_instance="initial_instance",
+                timezone="timezone",
+                uri_template="uri_template",
+                done_flag="done_flag",
+            ),
+        ]
+    }
+
+    def test_green_path(self):
+        res = render_template(self.TEMPLATE_NAME, **self.DEFAULT_TEMPLATE_PARAMS)
+        print(res)
         self.assertValidPython(res)
