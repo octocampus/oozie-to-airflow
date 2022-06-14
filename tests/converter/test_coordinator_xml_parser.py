@@ -26,7 +26,7 @@ from o2a.converter.dataset import Dataset
 from o2a.converter.mappers import ACTION_MAP
 
 from o2a.definitions import EXAMPLE_DEMO_PATH
-from o2a.converter.Coordinator import Coordinator
+from o2a.converter.coordinator import Coordinator
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.converter import coordinator_xml_parser
 
@@ -95,7 +95,7 @@ class TestCoordinatorXmlParser(unittest.TestCase):
             ("<controls><concurrency></concurrency></controls>", "1"),
         ]
     )
-    def test_parse_concurrency(self, controls_node_str: ET.Element, expected: int):
+    def test_parse_concurrency(self, controls_node_str: str, expected: str):
         controls_node = ET.fromstring(controls_node_str)
         self.parser.parse_concurrency(controls_node)
 
@@ -112,7 +112,7 @@ class TestCoordinatorXmlParser(unittest.TestCase):
             ("<controls><execution>NONE</execution></controls>", "NONE"),
         ]
     )
-    def test_parse_execution(self, controls_node_str: ET.Element, expected: int):
+    def test_parse_execution(self, controls_node_str: str, expected: str):
         controls_node = ET.fromstring(controls_node_str)
         self.parser.parse_execution(controls_node)
 
@@ -128,7 +128,7 @@ class TestCoordinatorXmlParser(unittest.TestCase):
             ("<controls><throttle>1</throttle></controls>", 1),
         ]
     )
-    def test_parse_throttle(self, controls_node_str: ET.Element, expected: int):
+    def test_parse_throttle(self, controls_node_str: str, expected: int):
         controls_node = ET.fromstring(controls_node_str)
         self.parser.parse_throttle(controls_node)
 
@@ -146,7 +146,9 @@ class TestCoordinatorXmlParser(unittest.TestCase):
     def test_parse_datasets_nodes(self):
         datasets_node_str = """
 <datasets>
-    <dataset name="din" frequency="${coord:endOfDays(1)}" initial-instance="2009-01-02T08:00Z" timezone="America/Los_Angeles" >
+    <dataset name="din" frequency="${coord:endOfDays(1)}"
+        initial-instance="2009-01-02T08:00Z" timezone="America/Los_Angeles" >
+
          <uri-template>${baseFsURI}/${YEAR}/${MONTH}/${DAY}/${HOUR}/${MINUTE}</uri-template>
     </dataset>
     <dataset name="dout" frequency="${coord:minutes(30)}" initial-instance="2009-01-02T08:00Z" timezone="UTC">

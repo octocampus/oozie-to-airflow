@@ -18,7 +18,7 @@ Add Data events Transformer
 from typing import Optional, List
 
 from o2a.converter.data_events import InputEvent
-from o2a.converter.dataset import find_dataset_by_name
+from o2a.converter.dataset import find_dataset_by_name, Dataset
 from o2a.converter.task import Task
 from o2a.converter.task_group import TaskGroup
 from o2a.converter.workflow import Workflow
@@ -35,11 +35,13 @@ class AddWorkflowDataEventsSensorsTransformer(BaseWorkflowTransformer):
     """
 
     def process_workflow_after_convert_nodes(self, workflow: Workflow, props: PropertySet):
-        input_events: Optional[InputEvent] = workflow.coordinator.input_events
-        if not input_events:
-            return
+        if workflow.coordinator:
+            input_events: Optional[List[InputEvent]] = workflow.coordinator.input_events
 
-        self._add_input_events_sensors_task_group(input_events, workflow, props)
+            if not input_events:
+                return
+
+            self._add_input_events_sensors_task_group(input_events, workflow, props)
 
     @classmethod
     def _add_input_events_sensors_task_group(cls, input_events, workflow, props: Optional[PropertySet]):
@@ -56,16 +58,24 @@ class AddWorkflowDataEventsSensorsTransformer(BaseWorkflowTransformer):
     def _create_input_events_task_group(
         workflow: Workflow, input_events: List[InputEvent], props
     ) -> TaskGroup:
+        """
+        Creates airflow sensors in a taskgroup to replace input event in oozie
+        """
+
         tasks: List[Task] = []
 
         for input_event in input_events:
-            dataset = find_dataset_by_name(datasets=workflow.coordinator.datasets, name=input_event.dataset)
+            datasets: Optional[List[Dataset]] = None
+            if workflow.coordinator and workflow.coordinator.datasets:
+                datasets = workflow.coordinator.datasets
+
+            dataset: Optional[Dataset] = find_dataset_by_name(datasets=datasets, name=input_event.dataset)
             task = Task(
                 task_id=input_event.name,
                 template_name="input_events_sensor.tpl",
                 template_params=dict(
-                    filepath=dataset.uri_template,
-                    doc=f"dataset_name={dataset.name}",
+                    filepath=dataset.uri_template,  # type: ignore
+                    doc=f"dataset_name={dataset.name}",  # type: ignore
                     poke_interval="60",
                     timeout=props.config["data_events_sensors_timeout"]
                     if "data_events_sensors_mode" in props.config

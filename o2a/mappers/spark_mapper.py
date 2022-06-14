@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Maps Spark action to Airflow Dag"""
-from typing import Dict, List, Optional, Set, Type
+from typing import Any, Dict, List, Optional, Type
 
 import xml.etree.ElementTree as ET
 
@@ -138,7 +138,7 @@ class SparkMapper(ActionMapper):
             tasks, relations = self.prepend_task(prepare_task, tasks, relations)
         return tasks, relations
 
-    def required_imports(self) -> Set[str]:
+    def required_imports(self) -> Any:
         # Bash are for the potential prepare statement
         dependencies = self.get_task_class(self.TASK_MAPPER).required_imports()
         prepare_dependencies = self.prepare_extension.required_imports()

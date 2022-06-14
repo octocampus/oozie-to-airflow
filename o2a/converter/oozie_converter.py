@@ -30,7 +30,7 @@ from o2a.converter.relation import Relation
 from o2a.converter.renderers import BaseRenderer
 from o2a.converter.task_group import TaskGroup, ControlTaskGroup, ActionTaskGroup
 from o2a.converter.workflow import Workflow
-from o2a.converter.Coordinator import Coordinator
+from o2a.converter.coordinator import Coordinator
 from o2a.utils import el_utils
 from o2a.utils.file_utils import get_lib_files
 from o2a.mappers.action_mapper import ActionMapper
@@ -134,7 +134,7 @@ class OozieConverter:
         else:
             self.renderer.create_workflow_file(workflow=self.workflow, props=self.props)
 
-        self.copy_extra_assets(self.workflow.nodes)
+        self.copy_extra_assets()
 
     def convert_nodes(self):
         """
@@ -199,7 +199,7 @@ class OozieConverter:
         for node in self.workflow.task_groups.values():
             node.add_state_handler_if_needed()
 
-    def copy_extra_assets(self, nodes: Dict[str, OozieNode]):
+    def copy_extra_assets(self):
         """
         Copies additional assets needed to execute a workflow, eg. Pig scripts.
         """

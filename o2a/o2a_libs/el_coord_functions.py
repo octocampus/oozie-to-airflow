@@ -21,32 +21,32 @@ from typing import List, Optional
 from o2a.converter.dataset import Dataset, find_dataset_by_name, get_dataset_name_from_task_doc
 
 
-def minutes(n: str) -> str:
+def minutes(n: str) -> str:  # pylint:disable=invalid-name
     return f"*/{n} * * * *"
 
 
-def hours(n: str) -> str:
+def hours(n: str) -> str:  # pylint:disable=invalid-name
     return "@hourly" if n == "1" else f"0 */{n} * * *"
 
 
-def days(n: str) -> str:
+def days(n: str) -> str:  # pylint:disable=invalid-name
     return "@daily" if n == "1" else f"0 0 */{n} * *"
 
 
-def months(n: str) -> str:
+def months(n: str) -> str:  # pylint:disable=invalid-name
     return "@monthly" if n == "1" else f"0 0 1 */{n} *"
 
 
-def end_of_days(n: str) -> str:
+def end_of_days(n: str) -> str:  # pylint:disable=invalid-name
     return f"59 23 */{n} * *"
 
 
-def end_of_months(n: str) -> str:
+def end_of_months(n: str) -> str:  # pylint:disable=invalid-name
     return f"59 23 L */{n} *"
 
 
 @contextfunction
-def current(context=None, n: str = None):
+def current(context=None, n: str = None):  # pylint:disable=invalid-name
     """
     DS_II : dataset initial-instance (datetime)
     DS_FREQ: dataset frequency (minutes)
@@ -57,10 +57,13 @@ def current(context=None, n: str = None):
     if datasets is None:
         raise AirflowException("No datasets!")
 
-    task: Optional[BaseOperator] = context.get("task", None)  # pylint:disable=invalid-name
+    task: Optional[BaseOperator] = context.get("task", None)  # pylint:disable
+    if task:
+        dataset_name = get_dataset_name_from_task_doc(task.doc)
 
-    dataset_name = get_dataset_name_from_task_doc(task.doc)
+        dataset = find_dataset_by_name(datasets, dataset_name)
 
-    dataset = find_dataset_by_name(datasets, dataset_name)
+        if dataset:
+            return f"{dataset.name}-{n}"
 
-    return f"{dataset.name}-{n}"
+    return None

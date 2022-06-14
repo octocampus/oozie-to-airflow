@@ -20,13 +20,13 @@ import os
 import xml.etree.ElementTree as ET
 
 # noinspection PyPackageRequirements
-from typing import Dict, List, Type
+from typing import Dict, List, Type, Optional
 
 from o2a.converter.data_events import InputEvent, OutputEvent
 from o2a.converter.dataset import Dataset
 
 from o2a.converter.renderers import BaseRenderer
-from o2a.converter.Coordinator import Coordinator
+from o2a.converter.coordinator import Coordinator
 from o2a.mappers.action_mapper import ActionMapper
 
 from o2a.o2a_libs.property_utils import PropertySet
@@ -292,11 +292,11 @@ class CoordinatorXmlParser:
         return xml_utils.get_tag_el_text(data_event_node, "instance")
 
     @staticmethod
-    def __parse_input_event_start_instance(data_in_node) -> str:
+    def __parse_input_event_start_instance(data_in_node) -> Optional[str]:
         return xml_utils.get_tag_el_text(data_in_node, "start-instance")
 
     @staticmethod
-    def __parse_input_event_end_instance(data_in_node) -> str:
+    def __parse_input_event_end_instance(data_in_node) -> Optional[str]:
         return xml_utils.get_tag_el_text(data_in_node, "end-instance")
 
     @staticmethod

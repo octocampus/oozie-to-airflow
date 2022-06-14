@@ -16,7 +16,7 @@
 import logging
 import os
 import shutil
-from typing import Dict, Set, Optional, List, Type
+from typing import Any, Dict, List, Optional, Type
 
 from xml.etree.ElementTree import Element
 
@@ -116,13 +116,13 @@ class HiveMapper(ActionMapper):
 
         logging.info(f"Copied {self.script} to {destination_script_file_path}")
 
-    def required_imports(self) -> Set[str]:
+    def required_imports(self) -> Any:
         dependencies = self.get_task_class(self.TASK_MAPPER).required_imports()
         prepare_dependencies = self.prepare_extension.required_imports()
 
-        return dependencies.union(prepare_dependencies)
+        return dependencies.union(prepare_dependencies)  # pylint:disable
 
-    def __get_output_script_path(self, input_script_path: str) -> str:
+    def __get_output_script_path(self, input_script_path: str) -> Optional[str]:
         resolved_input_script_path = el_utils.resolve_job_properties_in_string(input_script_path, self.props)
 
         if resolved_input_script_path:

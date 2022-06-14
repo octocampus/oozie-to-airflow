@@ -15,7 +15,7 @@
 """Base mapper - it is a base class for all mappers actions, and logic alike"""
 from abc import ABC
 from copy import deepcopy
-from typing import Any, List, Set, Tuple, Type, Dict, Optional
+from typing import Any, Dict, List, Set, Tuple, Type
 from xml.etree.ElementTree import Element
 
 
@@ -67,7 +67,7 @@ class BaseMapper(ABC):
         """
         return None
 
-    def get_task_class(self, task_mapper: Dict[str, Any]) -> Optional[Any]:
+    def get_task_class(self, task_mapper: Dict[str, Any]) -> Any:
         if "context_type" in self.props.config:
             return task_mapper[self.props.config["context_type"]]
 

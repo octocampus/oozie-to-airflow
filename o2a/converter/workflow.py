@@ -17,7 +17,7 @@ import os
 from collections import OrderedDict
 from typing import Set, Dict, Type, List, Optional
 
-from o2a.converter.Coordinator import Coordinator
+from o2a.converter.coordinator import Coordinator
 from o2a.converter.constants import HDFS_FOLDER, LIB_FOLDER
 from o2a.converter.oozie_node import OozieNode
 from o2a.converter.relation import Relation

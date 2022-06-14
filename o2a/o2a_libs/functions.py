@@ -19,6 +19,7 @@ import logging
 import re
 import json
 
+
 import o2a.o2a_libs.el_wf_functions as wf_functions
 import o2a.o2a_libs.el_fs_functions as fs_functions
 import o2a.o2a_libs.el_coord_functions as coord_functions
@@ -26,7 +27,7 @@ import o2a.o2a_libs.el_coord_functions as coord_functions
 # Used for functions.wf.f_name pattern in templates
 wf = wf_functions  # pylint:disable=invalid-name
 fs = fs_functions  # pylint:disable=invalid-name
-coord = coord_functions # pylint:disable=invalid-name
+coord = coord_functions  # pylint:disable=invalid-name
 
 
 def first_not_null(str_one, str_two):
@@ -96,9 +97,9 @@ def timestamp():
     i.e.: 1997-07-16T19:20:30.45Z
     """
     import datetime
-    import pytz
+    import pendulum
 
-    return datetime.datetime.now(pytz.utc).isoformat()
+    return datetime.datetime.now(pendulum.tz.UTC).isoformat()
 
 
 def to_json_str(py_map: dict):

@@ -18,7 +18,7 @@ import logging
 import os
 import re
 from copy import deepcopy
-from typing import List, Optional, Tuple, Union, Dict
+from typing import List, Optional, Tuple, Union, Dict, Any
 from urllib.parse import urlparse
 
 from jinja2 import StrictUndefined, Environment, Template
@@ -103,14 +103,14 @@ def comma_separated_string_to_list(line: str) -> Union[List[str], str]:
     return values[0] if len(values) <= 1 else values
 
 
-def resolve_job_properties_in_string(string: str, props: PropertySet) -> str:
+def resolve_job_properties_in_string(string: Optional[str], props: PropertySet) -> Any:
     """
     Resolve sub workflow app name based on properties set
     """
     if not string:
         return None
 
-    template_env = {**props.config, **props.job_properties, "functions": functions}
+    template_env: Dict = {**props.config, **props.job_properties, "functions": functions}
 
     el_string = el_parser.translate(string)
     for char in ["@", "*"]:
@@ -118,6 +118,7 @@ def resolve_job_properties_in_string(string: str, props: PropertySet) -> str:
             el_string = re.sub("[{}]", "", el_string)
 
     template = Template(el_string)
+
     return template.render(template_env)
 
 
