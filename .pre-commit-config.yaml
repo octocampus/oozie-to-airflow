@@ -76,11 +76,6 @@ repos:
         pass_filenames: false
         stages: [push]
         always_run: true
-      - id: check-bash-syntax
-        name: Check Shell scripts syntax corectness
-        language: docker_image
-        entry: koalaman/shellcheck:stable -e SC1091 -e SC2181
-        types: [shell]
       - id: validate-all-workflows
         name: Validates all oozie workflows
         language: system
