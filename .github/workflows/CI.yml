@@ -41,7 +41,7 @@ jobs:
     IntegrationTest:
         name: Run Conversion Tests
         runs-on: ${{ matrix.os }}
-        needs: [unittest]
+        needs: [Unittest]
         strategy:
             matrix:
                 os: [ubuntu-latest]
