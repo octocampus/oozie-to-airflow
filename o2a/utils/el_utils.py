@@ -158,7 +158,11 @@ def normalize_path(url: str, props: PropertySet, allow_no_schema=False, translat
 
     allowed_schemas = {"hdfs", ""} if allow_no_schema else {"hdfs"}
     if url_parts.scheme not in allowed_schemas:
-        raise ParseException(
+        # raise ParseException(
+        #    f"Unknown path format. The URL should be provided in the following format: "
+        #    f"hdfs://localhost:9200/path. Current value: {url_with_var}"
+        # )
+        logging.warning(
             f"Unknown path format. The URL should be provided in the following format: "
             f"hdfs://localhost:9200/path. Current value: {url_with_var}"
         )

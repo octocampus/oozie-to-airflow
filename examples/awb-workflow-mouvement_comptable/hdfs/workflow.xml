@@ -76,7 +76,7 @@
 
 	<action name="sub-wf-checkInputFile" cred="hive-creds,hs2-creds">
 		<sub-workflow>
-			<app-path>${sworkflowAppUri}/${sworkflow}
+			<app-path>hdfs://master:8020/awb_ingestion/workflows/awb-workflow-purge_daily
 			</app-path>
 			<propagate-configuration />
 		</sub-workflow>

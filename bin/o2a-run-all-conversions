@@ -20,10 +20,7 @@ pushd "${O2A_DIR}"
 
 OUTPUT_FORMAT=${1-py}
 
-for EXAMPLE in $(find examples -name workflow.xml | cut -d "/" -f 2)
-do
-    "${MY_DIR}/o2a-run-sys-test" --phase prepare-configuration -a "${EXAMPLE}"
-done
+
 for EXAMPLE in $(find examples -name workflow.xml | cut -d "/" -f 2)
 do
     if [[ "${OUTPUT_FORMAT}" == "py" ]]; then

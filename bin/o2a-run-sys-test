@@ -479,21 +479,8 @@ function verify_arguments {
     fi
 
     #################### Check python version ##########################################
-    if [[ ${_ALLOWED_PHASES:=} != *" ${PHASE} "* ]]; then
-        echo
-        echo "ERROR! Allowed phases are [${_ALLOWED_PHASES}]. Used: '${PHASE}'"
-        echo
-        usage
-        exit 1
-    fi
 
-    if [[ ${_ALLOWED_APPLICATIONS:=} != *" ${LOCAL_APP_NAME} "* ]]; then
-        echo
-        echo "ERROR! Allowed applications are [${_ALLOWED_APPLICATIONS}]. Used: '${LOCAL_APP_NAME}'"
-        echo
-        usage
-        exit 1
-    fi
+
 }
 
 function header {
