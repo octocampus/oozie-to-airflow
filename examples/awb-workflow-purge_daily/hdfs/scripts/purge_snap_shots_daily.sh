@@ -14,7 +14,7 @@ echo -e "list_snapshots '${TABLE}-SnapShot.*'" | hbase shell -n  | grep -v " ${T
 	echo $datefichier
 	if [[ "$datefichier" < "$dateretention" || "$datefichier" == "$dateretention" ]] ; then
 	echo "delete_snapshot '$line'" | hbase shell
-	echo " Snap '$line' supprimée "
+	echo " Snap '$line' supprimé "
 	fi
 done
 
