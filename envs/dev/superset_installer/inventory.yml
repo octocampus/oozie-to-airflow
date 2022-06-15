@@ -14,10 +14,7 @@
 # limitations under the License.
 
 all:
-  hosts:
-    edge.dev:
-      ansible_user: root
-      ansible_host: 51.15.239.192
-
-
-# export ANSIBLE_HOST_KEY_CHECKING=false
+    hosts:
+        edge.dev:
+            ansible_user: root
+            ansible_host: 51.15.239.192

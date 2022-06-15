@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
-  remote_user: root
-  roles:
-    - superset_installation
+    - hosts: localhost
+      remote_user: root
+      roles:
+          - superset_installation

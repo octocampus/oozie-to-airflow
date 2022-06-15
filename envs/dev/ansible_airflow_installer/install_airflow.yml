@@ -1,8 +1,8 @@
 ---
 
-- hosts: all
-  gather_facts: true
-  roles:
-    - required_dependencies_installation
-    - rabbitmq_installation
-    - airflow_installation
+    - hosts: all
+      gather_facts: true
+      roles:
+          - required_dependencies_installation
+          - rabbitmq_installation
+          - airflow_installation

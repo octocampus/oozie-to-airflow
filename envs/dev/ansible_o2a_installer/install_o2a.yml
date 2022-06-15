@@ -1,23 +1,23 @@
 ---
 
-- hosts: all
-  gather_facts: true
-  tasks:
-    - name: Install git if not installed
-      yum:
-        state: present
-        name: git
-    - name: Download source code from github
-      ansible.builtin.git:
-        repo: '{{ github_repo_url }}'
-        dest: '{{ dest_dir }}'
-        version: dev
+    - hosts: all
+      gather_facts: true
+      tasks:
+          - name: Install git if not installed
+            yum:
+                state: present
+                name: git
+          - name: Download source code from github
+            ansible.builtin.git:
+                repo: '{{ github_repo_url }}'
+                dest: '{{ dest_dir }}'
+                version: dev
 
-    - name: install o2a dependencies
-      shell: cd {{ dest_dir }} && pip install -r requirements.txt
+          - name: install o2a dependencies
+            shell: cd {{ dest_dir }} && pip install -r requirements.txt
 
-    - name: Copy o2a module  to /usr/local/bin
-      copy:
-        src: '{{ dest_dir }}/o2a'
-        dest: /usr/local/bin
-        remote_src: true
+          - name: Copy o2a module  to /usr/local/bin
+            copy:
+                src: '{{ dest_dir }}/o2a'
+                dest: /usr/local/bin
+                remote_src: true

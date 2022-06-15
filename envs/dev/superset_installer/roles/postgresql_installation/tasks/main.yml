@@ -1,50 +1,49 @@
 ---
 # tasks file for postgres
-- name: Check if postgres 10 is installed
-  command: /usr/pgsql-10/bin/postgresql-10-setup --version
-  register: postgres_version
-  ignore_errors: true
+    - name: Check if postgres 10 is installed
+      command: /usr/pgsql-10/bin/postgresql-10-setup --version
+      register: postgres_version
+      ignore_errors: true
 
-- block:
-    - name: Install postgresql packages for centos 7
-      shell: yum --disablerepo=* localinstall /tmp/packages/postgresql/*.rpm -y
-        --skip-broken
+    - block:
+          - name: Install postgresql packages for centos 7
+            shell: yum --disablerepo=* localinstall /tmp/packages/postgresql/*.rpm -y --skip-broken
 
-    - name: Init postgres db
+          - name: Init postgres db
+            shell: |
+                rm -rf /var/lib/pgsql/10/data
+                /usr/pgsql-10/bin/postgresql-10-setup initdb
+
+      when: postgres_version.rc != 0
+
+    - name: Trust local connections in pg_hba.conf
+      vars:
+          ansible_python_interpreter: /usr/local/bin/python3.8
+
+      community.postgresql.postgresql_pg_hba:
+          dest: /var/lib/pgsql/10/data/pg_hba.conf
+          state: present
+          contype: host
+          databases: all
+          users: all
+          address: 127.0.0.1/32
+          method: trust
+
+
+    - name: Enable postgresql service
+      service:
+          enabled: true
+          name: postgresql-10
+          state: started
+
+    - name: Check if postgresql service is running
       shell: |
-        rm -rf /var/lib/pgsql/10/data
-        /usr/pgsql-10/bin/postgresql-10-setup initdb
+          systemctl status postgresql-10
+          if [ $? -eq 0 ]; then
+            echo "Postgresql service is running"
+          else
+            echo "Postgresql service is not running"
+          fi
+      register: service_status
 
-  when: postgres_version.rc != 0
-
-- name: Trust local connections in pg_hba.conf
-  vars:
-    ansible_python_interpreter: /usr/local/bin/python3.8
-
-  community.postgresql.postgresql_pg_hba:
-    dest: /var/lib/pgsql/10/data/pg_hba.conf
-    state: present
-    contype: host
-    databases: all
-    users: all
-    address: 127.0.0.1/32
-    method: trust
-
-
-- name: Enable postgresql service
-  service:
-    enabled: true
-    name: postgresql-10
-    state: started
-
-- name: Check if postgresql service is running
-  shell: |
-    systemctl status postgresql-10
-    if [ $? -eq 0 ]; then
-      echo "Postgresql service is running"
-    else
-      echo "Postgresql service is not running"
-    fi
-  register: service_status
-
-- debug: msg="{{ service_status.stdout_lines }}"
+    - debug: msg="{{ service_status.stdout_lines }}"

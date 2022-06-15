@@ -1,88 +1,74 @@
 ---
 repos:
-  - repo: https://github.com/ambv/black
-    rev: 22.3.0
-    hooks:
-      - id: black
-        name: Formats python files using black
-        language_version: python3.9.4
-  - repo: https://github.com/lyz-code/yamlfix
-    rev: 0.9.0
-    hooks:
-      - id: yamlfix
-        name: yamlfix
-        entry: yamlfix
-        language: python
-        language_version: python3
-        types: [yaml]
-  - repo: local
-    hooks:
-      - id: yamllint
-        name: Check yaml files with yamllint
-        entry: yamllint -c yamllint-config.yml .
-        stages: [push]
-        language: python
-        types: [file, yaml]
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.3
-    hooks:
-      - id: flake8
-        exclude: ^(examples/|output/)
-      - id: check-executables-have-shebangs
-      - id: check-merge-conflict
-      - id: check-xml
-        exclude: ^(examples/|output/)
-      - id: debug-statements
-      - id: detect-private-key
-      - id: fix-encoding-pragma
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-      - id: requirements-txt-fixer
-      - id: trailing-whitespace
-  - repo: meta
-    hooks:
-      - id: check-hooks-apply
-  - repo: git://github.com/luismayta/pre-commit-mypy
-    rev: 0.1.1
-    hooks:
-      - id: mypy
-        name: Checks typing annotations consistency with mypy
-        require_serial: true
-  - repo: https://github.com/pre-commit/mirrors-pylint
-    rev: v3.0.0a5
-    hooks:
-      - id: pylint
-        name: Checks for common programming errors with pylint
-        exclude: ^(examples/|output/)
-        files: \.py$
-        args:
-          - --fail-under=7
-  - repo: https://github.com/thlorenz/doctoc.git
-    rev: v2.2.0
-    hooks:
-      - id: doctoc
-        files: ^README\.md|CONTRIBUTING\.md$
-        args:
-          - --maxlevel
-          - '2'
-  - repo: local
-    hooks:
-      - id: autoflake
-        name: Autoflake - removes unused imports and variables
-        entry: autoflake
-        language: python
-        files: \.py$
-        args: [--in-place, --remove-all-unused-imports, --remove-unused-variable,
-          --recursive]
-      - id: pytest
-        name: Runs all unit tests with pytest
-        entry: ./bin/o2a-run-all-unit-tests
-        language: script
-        pass_filenames: false
-        stages: [push]
-        always_run: true
-      - id: validate-all-workflows
-        name: Validates all oozie workflows
-        language: system
-        entry: ./bin/o2a-validate-all-workflows
-        files: \workflow.xml$
+    - repo: https://github.com/ambv/black
+      rev: 22.3.0
+      hooks:
+          - id: black
+            name: Formats python files using black
+            language_version: python3.9.4
+    - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+      rev: 0.2.1  # or other specific tag
+      hooks:
+          - id: yamlfmt
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v2.2.3
+      hooks:
+          - id: flake8
+            exclude: ^(examples/|output/)
+          - id: check-executables-have-shebangs
+          - id: check-merge-conflict
+          - id: check-xml
+            exclude: ^(examples/|output/)
+          - id: debug-statements
+          - id: detect-private-key
+          - id: fix-encoding-pragma
+          - id: end-of-file-fixer
+          - id: mixed-line-ending
+          - id: requirements-txt-fixer
+          - id: trailing-whitespace
+    - repo: meta
+      hooks:
+          - id: check-hooks-apply
+    - repo: git://github.com/luismayta/pre-commit-mypy
+      rev: 0.1.1
+      hooks:
+          - id: mypy
+            name: Checks typing annotations consistency with mypy
+            require_serial: true
+    - repo: https://github.com/pre-commit/mirrors-pylint
+      rev: v3.0.0a5
+      hooks:
+          - id: pylint
+            name: Checks for common programming errors with pylint
+            exclude: ^(examples/|output/)
+            files: \.py$
+            args:
+                - --fail-under=7
+    - repo: https://github.com/thlorenz/doctoc.git
+      rev: v2.2.0
+      hooks:
+          - id: doctoc
+            files: ^README\.md|CONTRIBUTING\.md$
+            args:
+                - --maxlevel
+                - '2'
+    - repo: local
+      hooks:
+          - id: autoflake
+            name: Autoflake - removes unused imports and variables
+            entry: autoflake
+            language: python
+            files: \.py$
+            args: [--in-place, --remove-all-unused-imports, --remove-unused-variable, --recursive]
+          - id: pytest
+            name: Runs all unit tests with pytest
+            entry: ./bin/o2a-run-all-unit-tests
+            language: script
+            pass_filenames: false
+            stages: [push]
+            always_run: true
+          - id: validate-all-workflows
+            name: Validates all oozie workflows
+            language: system
+            entry: ./bin/o2a-validate-all-workflows
+            files: \workflow.xml$

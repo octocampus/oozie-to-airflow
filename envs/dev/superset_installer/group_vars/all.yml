@@ -15,6 +15,6 @@ superset_port: 8088
 
 
 postgresql:
-  superset_user: superset
-  superset_password: superset
-  superset_db: superset
+    superset_user: superset
+    superset_password: superset
+    superset_db: superset

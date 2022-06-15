@@ -14,11 +14,11 @@
 # limitations under the License.
 
 all:
-  hosts:
-    edge.dev:
-      ansible_user: root
-      ansible_host: 19.168.33.15
-      ansible_python_interpreter: /usr/local/bin/python3
+    hosts:
+        edge.dev:
+            ansible_user: root
+            ansible_host: 19.168.33.15
+            ansible_python_interpreter: /usr/local/bin/python3
 
 
 # export ANSIBLE_HOST_KEY_CHECKING=false
