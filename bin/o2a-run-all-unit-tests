@@ -17,5 +17,4 @@ MY_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 O2A_DIR="$( cd "${MY_DIR}/.." && pwd )"
 
 pushd "${O2A_DIR}"
-pytest --cov="${O2A_DIR}" tests
-popd
+pytest --cov="${O2A_DIR}" --tb=short tests
