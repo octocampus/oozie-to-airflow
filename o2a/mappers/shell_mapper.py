@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Maps Shell action into Airflow's DAG"""
-from typing import List, Set, Type
+from typing import List, Type
 from xml.etree.ElementTree import Element
 
 

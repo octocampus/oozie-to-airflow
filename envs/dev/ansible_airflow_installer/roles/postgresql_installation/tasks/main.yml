@@ -3,8 +3,8 @@
 
 - name: Install postgresql packages for centos 7
   yum:
-    validate_certs: False
-    disable_gpg_check: True
+    validate_certs: false
+    disable_gpg_check: true
     name:
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/postgresql10-libs-10.10-1PGDG.rhel7.x86_64.rpm
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/postgresql10-10.10-1PGDG.rhel7.x86_64.rpm
@@ -17,8 +17,8 @@
 
 - name: Install postgresql packages for centos 8
   yum:
-    disable_gpg_check: True
-    validate_certs: False
+    disable_gpg_check: true
+    validate_certs: false
     name:
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-8-x86_64/postgresql10-libs-10.10-1PGDG.rhel8.x86_64.rpm
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-8-x86_64/postgresql10-10.10-1PGDG.rhel8.x86_64.rpm
@@ -49,7 +49,7 @@
 
 - name: Enable postgresql service
   service:
-    enabled: yes
+    enabled: true
     name: postgresql-10
     state: started
 
@@ -64,9 +64,3 @@
   register: service_status
 
 - debug: msg="{{ service_status.stdout_lines }}"
-
-
-
-
-
-

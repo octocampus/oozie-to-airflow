@@ -35,4 +35,3 @@ WITH SERDEPROPERTIES (
 )
 STORED AS TEXTFILE
 LOCATION '/awb_${hivevar:env}/awb_ingestion/data/mouvement_comptable';
-

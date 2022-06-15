@@ -15,7 +15,7 @@
     sudo yum -y makecache
     sudo yum install -y erlang
 
-  ignore_errors: yes
+  ignore_errors: true
   when: ansible_distribution_major_version == '8'
 
 - name: Install rabbitmq-server for centos 8
@@ -52,12 +52,11 @@
 
 - name: Check rabbitmq service status
   shell: |
-      systemctl status rabbitmq-server
-      if [ $? -eq 0 ]; then
-        echo "Rabbitmq  service is running"
-      else
-        echo "Rabbitmq service is not running"
-      fi
+    systemctl status rabbitmq-server
+    if [ $? -eq 0 ]; then
+      echo "Rabbitmq  service is running"
+    else
+      echo "Rabbitmq service is not running"
+    fi
   register: rabbitmq_service_status
 - debug: var=rabbitmq_service_status.stdout_lines
-

@@ -24,5 +24,3 @@
     hiveconfs={{ props_macro.props(action_node_properties=action_node_properties, xml_escaped=True) }},
     mapred_job_name={{ task_id | to_python }},
 )
-
-

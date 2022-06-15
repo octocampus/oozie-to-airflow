@@ -1,32 +1,19 @@
-# Copyright 2019 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 ---
 # tasks file for postgres
 - name: Check if postgres 10 is installed
   command: /usr/pgsql-10/bin/postgresql-10-setup --version
   register: postgres_version
-  ignore_errors: yes
+  ignore_errors: true
 
 - block:
-  - name: Install postgresql packages for centos 7
-    shell: yum --disablerepo=* localinstall /tmp/packages/postgresql/*.rpm -y --skip-broken
+    - name: Install postgresql packages for centos 7
+      shell: yum --disablerepo=* localinstall /tmp/packages/postgresql/*.rpm -y
+        --skip-broken
 
-  - name: Init postgres db
-    shell: |
-      rm -rf /var/lib/pgsql/10/data
-      /usr/pgsql-10/bin/postgresql-10-setup initdb
+    - name: Init postgres db
+      shell: |
+        rm -rf /var/lib/pgsql/10/data
+        /usr/pgsql-10/bin/postgresql-10-setup initdb
 
   when: postgres_version.rc != 0
 
@@ -46,7 +33,7 @@
 
 - name: Enable postgresql service
   service:
-    enabled: yes
+    enabled: true
     name: postgresql-10
     state: started
 

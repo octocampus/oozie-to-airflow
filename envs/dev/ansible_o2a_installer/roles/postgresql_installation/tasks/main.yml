@@ -1,24 +1,10 @@
-# Copyright 2019 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 ---
 # tasks file for postgres
 
 - name: Install postgresql packages for centos 7
   yum:
-    validate_certs: False
-    disable_gpg_check: True
+    validate_certs: false
+    disable_gpg_check: true
     name:
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/postgresql10-libs-10.10-1PGDG.rhel7.x86_64.rpm
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/postgresql10-10.10-1PGDG.rhel7.x86_64.rpm
@@ -31,8 +17,8 @@
 
 - name: Install postgresql packages for centos 8
   yum:
-    disable_gpg_check: True
-    validate_certs: False
+    disable_gpg_check: true
+    validate_certs: false
     name:
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-8-x86_64/postgresql10-libs-10.10-1PGDG.rhel8.x86_64.rpm
       - https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-8-x86_64/postgresql10-10.10-1PGDG.rhel8.x86_64.rpm
@@ -63,7 +49,7 @@
 
 - name: Enable postgresql service
   service:
-    enabled: yes
+    enabled: true
     name: postgresql-10
     state: started
 

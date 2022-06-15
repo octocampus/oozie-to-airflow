@@ -660,7 +660,7 @@ class DatasetsTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
                 initial_instance="initial_instance",
                 timezone="timezone",
                 uri_template="uri_template",
-                done_flag="done_flag",
+                done_flag={"x": "val", "y": "val"},
             ),
             Dataset(
                 name="inputdataset2",
@@ -668,7 +668,7 @@ class DatasetsTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
                 initial_instance="initial_instance",
                 timezone="timezone",
                 uri_template="uri_template",
-                done_flag="done_flag",
+                done_flag={"x": "val", "y": "val"},
             ),
         ]
     }

@@ -1,12 +1,13 @@
+---
 airflow:
 
   airflow_version: 2.2.5
   airflow_home: /home/airflow
   airflow_sys_password: airflow
   airflow_queue: airflow.queue
-  airflow_load_examples: True
+  airflow_load_examples: true
 
-  airflow_fernet_key: "q9CkpS4WcYin3YATacDnzZ05bYB1OOdCGV5wnVLqVQM="
+  airflow_fernet_key: q9CkpS4WcYin3YATacDnzZ05bYB1OOdCGV5wnVLqVQM=
 
   webserver:
     admin_username: airflow

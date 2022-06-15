@@ -34,7 +34,6 @@ If you want to contribute to the project, please take a look at [CONTRIBUTING.md
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [Background](#background)
 - [Running the Program](#running-the-program)
   - [Installing from PyPi](#installing-from-pypi)

@@ -42,8 +42,8 @@ INSTALLATION
 
 1- First, update the inventory.yml file with the target machine ip address.
 ```
-  hosts: 
-    HOST_NAME:  
+  hosts:
+    HOST_NAME:
        ansible_user: root
        ansible_host: IP_ADDRESS
 
@@ -116,5 +116,3 @@ TROUBLESHOOTING
 
 FAQ
 ---
-
-

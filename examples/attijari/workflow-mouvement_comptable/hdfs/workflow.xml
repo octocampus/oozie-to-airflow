@@ -69,11 +69,11 @@
 		<ok to="sub-wf-checkInputFile"/>
 		<error to="sub-wf-checkInputFile"/>
 	</action>
-	
+
 	<!--
 		Spark Check sub-workflow
     -->
-	
+
 	<action name="sub-wf-checkInputFile" cred="hive-creds,hs2-creds">
 		<sub-workflow>
 			<app-path>${sworkflowAppUri}/${sworkflow}
@@ -83,7 +83,7 @@
 		<ok to="dateAndNumberOfLines"/>
 		<error to="fail"/>
 	</action>
-	
+
 	<!--
         When: Check done
         What: Get data and number of lines
@@ -119,12 +119,12 @@
 		<ok to="copyData"/>
 		<error to="fail"/>
 	</action>
-	
+
 	<!--
         When: Technical date & number of lines extracted
         What: Insert data from External to ORC
     -->
-	
+
 <action name = "copyData" cred="hs2-creds">
 		<hive2 xmlns = "uri:oozie:hive2-action:0.1">
 			<prepare>
@@ -144,7 +144,7 @@
 		<ok to = "createJudgeFile" />
 		<error to = "fail" />
 	</action>
-	
+
 	<!--
         When: Live data updated
         What: Creates a judge file

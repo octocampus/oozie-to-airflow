@@ -30,5 +30,3 @@ output-artifacts/
 *.tgz
 
 roles/*/files/packages/
-
-

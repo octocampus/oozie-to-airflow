@@ -1,23 +1,9 @@
-# Copyright 2019 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 ---
 
 - name: Check yum mirror list
   shell: yum install -y vi
   register: yum_worked
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Fix yum mirror list
   shell: |
@@ -28,8 +14,8 @@
 
 - name: Copy packages to the host
   copy:
-    src: "packages/centos{{ ansible_distribution_major_version }}/packages"
-    dest: "/tmp/"
+    src: packages/centos{{ ansible_distribution_major_version }}/packages
+    dest: /tmp/
     owner: root
     group: root
 
@@ -48,9 +34,9 @@
 
 - name: Check if python3.8 is installed
 
-  shell: "python3.8 --version"
+  shell: python3.8 --version
   register: python3_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Python installation
   vars:
@@ -61,11 +47,11 @@
   when: python3_check.rc != 0
 
 - name: Upgrade pip3
-  shell: "python3.8 -m pip install --upgrade pip"
-  ignore_errors: yes
+  shell: python3.8 -m pip install --upgrade pip
+  ignore_errors: true
 
 - name: Install pyvenv
-  shell: "python3.8 -m pip install   virtualenv --no-index --find-links /tmp/packages/pip"
+  shell: python3.8 -m pip install   virtualenv --no-index --find-links /tmp/packages/pip
 
 - name: Install dataclasses
-  shell: "python3.8 -m pip install dataclasses --no-index --find-links /tmp/packages/pip"
+  shell: python3.8 -m pip install dataclasses --no-index --find-links /tmp/packages/pip

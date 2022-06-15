@@ -48,8 +48,8 @@ INSTALLATION
 
 1- First, update the inventory.yml file with the target machine ip address.
 ```
-  hosts: 
-    HOST_NAME:  
+  hosts:
+    HOST_NAME:
        ansible_user: root
        ansible_host: IP_ADDRESS
 
@@ -83,7 +83,7 @@ Here is a list of the services that are installed and running on the target mach
 You can start or stop some service with these commands
 ```
   systemctl start <service_name>
-  systemctl stop <service_name> 
+  systemctl stop <service_name>
 ```
 
 
@@ -136,6 +136,3 @@ TROUBLESHOOTING
 
 FAQ
 ---
-
-
-
