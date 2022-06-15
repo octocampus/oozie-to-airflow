@@ -7,7 +7,7 @@ repos:
             name: Formats python files using black
             language_version: python3.9.4
     - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-      rev: 0.2.1  # or other specific tag
+      rev: 0.2.1
       hooks:
           - id: yamlfmt
     - repo: https://github.com/pre-commit/pre-commit-hooks
