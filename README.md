@@ -14,18 +14,14 @@
   limitations under the License.
 -->
 # Oozie to Airflow
-
-[![Build Status](https://travis-ci.org/GoogleCloudPlatform/oozie-to-airflow.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/oozie-to-airflow)
+[![.github/workflows/CI.yml](https://github.com/octocampus/oozie-to-airflow/actions/workflows/CI.yml/badge.svg?branch=dev)](https://github.com/octocampus/oozie-to-airflow/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/GoogleCloudPlatform/oozie-to-airflow/branch/master/graph/badge.svg)](https://codecov.io/gh/GoogleCloudPlatform/oozie-to-airflow)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=GoogleCloudPlatform/oozie-to-airflow)](https://dependabot.com)
-[![Python 3](https://pyup.io/repos/github/GoogleCloudPlatform/oozie-to-airflow/python-3-shield.svg)](https://pyup.io/repos/github/GoogleCloudPlatform/oozie-to-airflow/)
 
 A tool to easily convert between [Apache Oozie](http://oozie.apache.org/) workflows
 and [Apache Airflow](https://airflow.apache.org) workflows.
 
-The program targets Apache Airflow >= 1.10 and Apache Oozie 1.0 XML schema.
+The program targets Apache Airflow >= 2.25 and Apache Oozie 5.0 XML schema.
 
 If you want to contribute to the project, please take a look at [CONTRIBUTING.md](CONTRIBUTING.md)
 
@@ -33,6 +29,7 @@ If you want to contribute to the project, please take a look at [CONTRIBUTING.md
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 
 - [Background](#background)
 - [Running the Program](#running-the-program)
