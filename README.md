@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 # Oozie to Airflow
-
+[![.github/workflows/CI.yml](https://github.com/octocampus/oozie-to-airflow/actions/workflows/CI.yml/badge.svg?branch=dev)](https://github.com/octocampus/oozie-to-airflow/actions/workflows/CI.yml)
 [![Build Status](https://travis-ci.org/GoogleCloudPlatform/oozie-to-airflow.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/oozie-to-airflow)
 [![codecov](https://codecov.io/gh/GoogleCloudPlatform/oozie-to-airflow/branch/master/graph/badge.svg)](https://codecov.io/gh/GoogleCloudPlatform/oozie-to-airflow)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
