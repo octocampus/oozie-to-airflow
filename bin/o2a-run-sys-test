@@ -487,13 +487,6 @@ function verify_arguments {
         exit 1
     fi
 
-    if [[ ${_ALLOWED_APPLICATIONS:=} != *" ${LOCAL_APP_NAME} "* ]]; then
-        echo
-        echo "ERROR! Allowed applications are [${_ALLOWED_APPLICATIONS}]. Used: '${LOCAL_APP_NAME}'"
-        echo
-        usage
-        exit 1
-    fi
 }
 
 function header {
