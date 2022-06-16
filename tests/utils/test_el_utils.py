@@ -19,7 +19,6 @@ import unittest.mock
 
 from parameterized import parameterized
 
-from o2a.converter.exceptions import ParseException
 from o2a.utils import el_utils
 from o2a.utils.el_utils import normalize_path, escape_string_with_python_escapes, replace_url_el
 
@@ -114,36 +113,6 @@ key5=test
             oozie_path, props=PropertySet(config=config, job_properties=job_properties), allow_no_schema=True
         )
         self.assertEqual(expected_result, result)
-
-    @parameterized.expand(
-        [
-            ("${nameNode_1}/examples/output-data/demo/pig-node",),
-            ("/examples/output-data/demo/pig-node",),
-            ("http:///examples/output-data/demo/pig-node2",),
-        ]
-    )
-    def test_normalize_path_red_path(self, oozie_path):
-        cluster = "my-cluster"
-        region = "europe-west3"
-        job_properties = {"nameNode": "hdfs://localhost:8020"}
-        config = {"dataproc_cluster": cluster, "gcp_region": region}
-        with self.assertRaisesRegex(ParseException, "Unknown path format. "):
-            normalize_path(oozie_path, props=PropertySet(config=config, job_properties=job_properties))
-
-    @parameterized.expand(
-        [("http:///examples/output-data/demo/pig-node2",), ("ftp:///examples/output-data/demo/pig-node2",)]
-    )
-    def test_normalize_path_red_path_allowed_no_schema(self, oozie_path):
-        cluster = "my-cluster"
-        region = "europe-west3"
-        job_properties = {"nameNode": "hdfs://localhost:8020"}
-        config = {"dataproc_cluster": cluster, "gcp_region": region}
-        with self.assertRaisesRegex(ParseException, "Unknown path format. "):
-            normalize_path(
-                oozie_path,
-                props=PropertySet(config=config, job_properties=job_properties),
-                allow_no_schema=True,
-            )
 
     @parameterized.expand(
         [
