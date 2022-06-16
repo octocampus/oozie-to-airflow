@@ -17,7 +17,6 @@
 [![.github/workflows/CI.yml](https://github.com/octocampus/oozie-to-airflow/actions/workflows/CI.yml/badge.svg?branch=dev)](https://github.com/octocampus/oozie-to-airflow/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/GoogleCloudPlatform/oozie-to-airflow/branch/master/graph/badge.svg)](https://codecov.io/gh/GoogleCloudPlatform/oozie-to-airflow)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=GoogleCloudPlatform/oozie-to-airflow)](https://dependabot.com)
 
 A tool to easily convert between [Apache Oozie](http://oozie.apache.org/) workflows
 and [Apache Airflow](https://airflow.apache.org) workflows.
