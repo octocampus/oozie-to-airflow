@@ -41,7 +41,6 @@ jobs:
     IntegrationTest:
         name: Run Conversion Tests
         runs-on: ${{ matrix.os }}
-        needs: [Unittests]
         strategy:
             matrix:
                 os: [ubuntu-latest]
@@ -63,5 +62,5 @@ jobs:
             - name: Run conversions
               run: |-
                   ./bin/o2a-run-all-conversions py
-                  rm -rf output
+                  rm -rf output/*
                   ./bin/o2a-run-all-conversions dot
