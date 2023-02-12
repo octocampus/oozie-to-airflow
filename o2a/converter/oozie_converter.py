@@ -129,6 +129,7 @@ class OozieConverter:
             oozie_node.tasks = tasks
 
             dependencies = oozie_node.mapper.required_imports()
+            logging.info(oozie_node.mapper.__class__.__name__)
 
             oozie_node.relations = relations
             self.workflow.task_groups[name] = self._get_task_group_type(oozie_node)(
