@@ -45,7 +45,6 @@ class HiveMapper(ActionMapper):
         "local": HiveLocalTask,
         "ssh": Task,
         "gcp": Task,
-
     }
 
     def __init__(self, oozie_node: Element, name: str, props: PropertySet, **kwargs):
@@ -116,4 +115,3 @@ class HiveMapper(ActionMapper):
         prepare_dependencies = self.prepare_extension.required_imports()
 
         return dependencies.union(prepare_dependencies)
-

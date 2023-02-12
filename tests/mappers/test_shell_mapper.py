@@ -118,7 +118,7 @@ class TestShellMapper(unittest.TestCase):
                         "env": {
                             "VAR1": "value1",
                             "VAR2": "value2",
-                        }
+                        },
                     },
                 ),
             ],

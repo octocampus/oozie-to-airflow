@@ -16,7 +16,7 @@
 Converts Oozie application workflow into Airflow's DAG
 """
 import shutil
-from typing import Dict, Type, List, Union
+from typing import Dict, List, Type
 
 import os
 

@@ -459,7 +459,6 @@ class TestOozieExamples(unittest.TestCase):
                         "fail": NodeExpectedResult(downstream_names=[]),
                         "shell1-node": NodeExpectedResult(downstream_names=["shell2-node"], error_xml="fail"),
                         "shell2-node": NodeExpectedResult(downstream_names=["end"], error_xml="fail"),
-
                     },
                     job_properties={"nameNode": "hdfs://"},
                     config={},

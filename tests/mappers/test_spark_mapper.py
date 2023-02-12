@@ -19,7 +19,6 @@ from xml.etree import ElementTree as ET
 
 
 from o2a.converter.task import Task
-from o2a.converter.relation import Relation
 from o2a.mappers import spark_mapper
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.tasks.spark_local_task import SparkLocalTask
@@ -144,7 +143,7 @@ class TestSparkMapperWithPrepare(unittest.TestCase):
                         "application": "/user/{{userName}}/{{examplesRoot}}/apps/spark/lib/oozie-examples-4.3.0.jar",
                         "conf": {
                             "spark.executor.extraJavaOptions": "-XX:+HeapDumpOnOutOfMemoryError "
-                                                               "-XX:HeapDumpPath=/tmp"
+                            "-XX:HeapDumpPath=/tmp"
                         },
                         "spark_conn_id": "spark_default",
                         "jars": [],
@@ -155,8 +154,6 @@ class TestSparkMapperWithPrepare(unittest.TestCase):
                             "value=2",
                             "/user/{{userName}}/{{examplesRoot}}/apps/spark/lib/oozie-examples-4.3.0.jar",
                         ],
-
-
                     },
                 )
             ],

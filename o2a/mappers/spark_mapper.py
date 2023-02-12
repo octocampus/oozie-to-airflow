@@ -48,7 +48,6 @@ class SparkMapper(ActionMapper):
         "local": SparkLocalTask,
         "ssh": Task,
         "gcp": Task,
-
     }
 
     def __init__(self, oozie_node: ET.Element, name: str, props: PropertySet, **kwargs):
@@ -144,4 +143,3 @@ class SparkMapper(ActionMapper):
         prepare_dependencies = self.prepare_extension.required_imports()
 
         return dependencies.union(prepare_dependencies)
-

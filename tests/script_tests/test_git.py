@@ -28,7 +28,9 @@ GIT_SH_FILE = path.abspath(
 
 class GitTestCase(ShellScriptTestCase):
     pass
-'''
+
+
+"""
     def test_success_execution(self):
         with mock_app("gcloud"):
             return_code = self.run_bash_command(
@@ -125,4 +127,4 @@ class GitTestCase(ShellScriptTestCase):
             return_code = self.run_bash_command(command)
 
         self.assertEqual(1, return_code)
-'''
+"""
