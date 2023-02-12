@@ -1,8 +1,0 @@
----
-
-    - hosts: all
-      gather_facts: true
-      roles:
-          - required_dependencies_installation
-          - postgresql_installation
-          - superset_installation

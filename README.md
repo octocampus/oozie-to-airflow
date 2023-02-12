@@ -511,7 +511,7 @@ on-premise setup. Here are some details about the environment that is supported:
 * primary disk size, 50 GB
 * Image 1.3.29-debian9
 * Hadoop version
-* Init action: [oozie-5.1.sh](dataproc/oozie-5.1.sh)
+* Init action: [oozie-5.1.sh](install/dataproc/oozie-5.1.sh)
 
 Those are the steps you should follow to set it up:
 
@@ -528,7 +528,7 @@ Those are the steps you should follow to set it up:
 We prepared Dataproc [initialization action](https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/init-actions)
 that allows to run Oozie 5.1.0 on Dataproc.
 
-Please upload [oozie-5.1.sh](dataproc/oozie-5.1.sh) to your GCS bucket and create cluster using following command:
+Please upload [oozie-5.1.sh](install/dataproc/oozie-5.1.sh) to your GCS bucket and create cluster using following command:
 
 Note that you need at least 20GB RAM to run Oozie jobs on the cluster. The custom machine type below has enough RAM
 to handle oozie.
@@ -545,7 +545,7 @@ gcloud dataproc clusters create <CLUSTER_NAME> --region europe-west1 --subnet de
   [single-node cluster](https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/single-node-clusters)
   and Dataproc 1.3
 
-Once cluster is created, steps from [example map reduce job](dataproc/example-map-reduce-job.sh) can be
+Once cluster is created, steps from [example map reduce job](install/dataproc/example-map-reduce-job.sh) can be
 run on master node to execute Oozie's example Map-Reduce job.
 
 Oozie is serving web UI on port 11000. To enable access to it please follow
