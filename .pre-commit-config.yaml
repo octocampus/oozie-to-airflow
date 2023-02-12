@@ -29,7 +29,7 @@ repos:
     - repo: meta
       hooks:
           - id: check-hooks-apply
-    - repo: git://github.com/luismayta/pre-commit-mypy
+    - repo: https://github.com/luismayta/pre-commit-mypy
       rev: 0.1.1
       hooks:
           - id: mypy
