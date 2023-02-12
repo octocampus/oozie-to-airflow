@@ -55,7 +55,7 @@ jobs:
     needs: [ unittest ]
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-20.04]
         python-version: ['3.9.4']
 
     steps:
