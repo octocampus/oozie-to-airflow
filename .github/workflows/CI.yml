@@ -1,6 +1,6 @@
 ---
 
-# python project CI workflow
+# python project CI  workflow
 on:
     push:
         branches:
