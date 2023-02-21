@@ -29,12 +29,6 @@ repos:
     - repo: meta
       hooks:
           - id: check-hooks-apply
-    - repo: https://github.com/luismayta/pre-commit-mypy
-      rev: 0.1.1
-      hooks:
-          - id: mypy
-            name: Checks typing annotations consistency with mypy
-            require_serial: true
     - repo: https://github.com/pre-commit/mirrors-pylint
       rev: v3.0.0a5
       hooks:

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
+from typing import Any, Dict, Set
 from airflow.utils.trigger_rule import TriggerRule
 from o2a.converter.task import Task
 
@@ -32,5 +32,5 @@ class SparkLocalTask(Task):
         super().__init__(task_id, template_name, trigger_rule, template_params)
 
     @staticmethod
-    def required_imports() -> set[str]:
+    def required_imports() -> Set[str]:
         return {"from airflow.providers.apache.spark.operators import spark_submit"}
