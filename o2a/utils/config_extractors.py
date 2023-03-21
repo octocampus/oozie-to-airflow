@@ -18,7 +18,7 @@ from os import path
 from typing import Dict, List
 import xml.etree.ElementTree as ET
 
-from o2a.converter.constants import HDFS_FOLDER
+
 from o2a.converter.exceptions import ParseException
 from o2a.o2a_libs import el_parser
 
@@ -73,7 +73,7 @@ def extract_properties_from_job_xml_nodes(job_xml_nodes: List[ET.Element], input
                 'Element "job-xml" should have content, however its value is empty. Make sure the element '
                 "has the correct content."
             )
-        file_path = path.join(input_directory_path, HDFS_FOLDER, file_name)
+        file_path = path.join(input_directory_path, file_name)
         config_tree = ET.parse(file_path)
         config_node = config_tree.getroot()
         if not config_node:
