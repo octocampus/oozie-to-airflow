@@ -55,7 +55,7 @@ class WorkflowXmlParser:
         transformers: List[BaseWorkflowTransformer] = None,
     ):
         self.workflow = workflow
-        self.workflow_file = os.path.join(workflow.input_directory_path, "workflow.xml")  # remove hdfs
+        self.workflow_file = os.path.join(workflow.input_directory_path, "workflow.xml")
         self.props = props
         self.action_map = action_mapper
         self.renderer = renderer

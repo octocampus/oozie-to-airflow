@@ -59,7 +59,7 @@ class Workflow:
             "from airflow.utils import dates",
             "from airflow.operators import bash_operator, dummy_operator",
         }
-        self.library_folder = os.path.join(self.input_directory_path, LIB_FOLDER)  # remove hdfs
+        self.library_folder = os.path.join(self.input_directory_path, LIB_FOLDER)
         self.jar_files = get_lib_files(self.library_folder, extension=".jar")
 
         self.coordinator: Optional[Coordinator] = coordinator
