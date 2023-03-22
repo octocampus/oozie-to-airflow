@@ -180,10 +180,12 @@ The input application directory has to follow the structure defined as follows:
 
 ```
 <APPLICATION>/
-             |- job.properties        - job properties that are used to run the job
-             |- hdfs                  - folder with application - should be copied to HDFS
-             |     |- workflow.xml    - Oozie workflow xml (1.0 schema)
-             |     |- ...             - additional folders required to be copied to HDFS
+             |- job.properties            - job properties that are used to run the job
+             |- coordinator/
+             |    |- coord.xml            - Oozie Coordinator xml         
+             |    |- coord.properties     - properties for coordinator app 
+             |- workflow.xml              - Oozie workflow xml (1.0 schema)
+             |- ...                       - additional folders (libs, scripts...)
              |- configuration.template.properties - template of configuration values used during conversion
              |- configuration.properties          - generated properties for configuration values
 ```
