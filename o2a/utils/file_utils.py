@@ -16,6 +16,7 @@
 """Utilities to deal with files in workflow folders"""
 import os
 from typing import List
+from shutil import copy
 
 
 def get_lib_files(library_folder_path: str, extension: str) -> List[str]:
@@ -31,3 +32,13 @@ def get_lib_files(library_folder_path: str, extension: str) -> List[str]:
             return [file for file in os.listdir(library_folder_path) if file.endswith(extension)]
         raise Exception(f"The {library_folder_path} exists but it is not a directory!")
     return []
+
+
+def copy_lib_files(library_folder_path: str, output_folder_path: str, extension: str):
+    """Copies the lib files in the library input folder to the output folder"""
+    lib_files = get_lib_files(library_folder_path, extension)
+    if lib_files:
+        if not os.path.exists(os.path.join(output_folder_path, "lib")):
+            os.mkdir(os.path.join(output_folder_path, "lib"))
+        for file in lib_files:
+            copy(os.path.join(library_folder_path, file), os.path.join(output_folder_path, "lib", file))

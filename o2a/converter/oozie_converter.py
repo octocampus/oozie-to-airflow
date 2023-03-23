@@ -32,7 +32,7 @@ from o2a.converter.task_group import TaskGroup, ControlTaskGroup, ActionTaskGrou
 from o2a.converter.workflow import Workflow
 from o2a.converter.coordinator import Coordinator
 from o2a.utils import el_utils
-from o2a.utils.file_utils import get_lib_files
+from o2a.utils.file_utils import copy_lib_files
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.transformers.base_transformer import BaseWorkflowTransformer
 from o2a.o2a_libs.property_utils import PropertySet
@@ -105,7 +105,7 @@ class OozieConverter:
 
     def retrieve_lib_jar_libraries(self):
         logging.info(f"Looking for jar libraries for the workflow in {self.workflow.library_folder}.")
-        self.workflow.jar_files = get_lib_files(self.workflow.library_folder, extension=".jar")
+        copy_lib_files(self.workflow.library_folder, self.workflow.output_directory_path, extension=".jar")
 
     def recreate_output_directory(self):
         shutil.rmtree(self.workflow.output_directory_path, ignore_errors=True)
