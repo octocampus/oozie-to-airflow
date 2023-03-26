@@ -6,6 +6,7 @@ on:
         branches:
             - dev
             - master
+            - sprintA/fix-input-directory
 
     pull_request:
         branches:
