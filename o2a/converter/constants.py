@@ -14,7 +14,5 @@
 # limitations under the License.
 """Custom constants"""
 
-# Workflow.xml and all HDFS files should be located in this subfolder
-HDFS_FOLDER = "hdfs"
 # Lib files are added by default to the path of the mapper specified
 LIB_FOLDER = "lib"

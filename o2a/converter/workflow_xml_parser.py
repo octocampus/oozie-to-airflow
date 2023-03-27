@@ -25,7 +25,6 @@ from typing import Dict, List, Type
 
 from airflow.utils.trigger_rule import TriggerRule
 
-from o2a.converter.constants import HDFS_FOLDER
 from o2a.converter.oozie_node import OozieActionNode, OozieControlNode
 from o2a.converter.renderers import BaseRenderer
 from o2a.converter.workflow import Workflow
@@ -56,7 +55,7 @@ class WorkflowXmlParser:
         transformers: List[BaseWorkflowTransformer] = None,
     ):
         self.workflow = workflow
-        self.workflow_file = os.path.join(workflow.input_directory_path, HDFS_FOLDER, "workflow.xml")
+        self.workflow_file = os.path.join(workflow.input_directory_path, "workflow.xml")
         self.props = props
         self.action_map = action_mapper
         self.renderer = renderer

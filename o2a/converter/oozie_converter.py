@@ -214,6 +214,7 @@ class OozieConverter:
                 el_utils.resolve_job_properties_in_string(
                     os.path.join(self.workflow.output_directory_path, "scripts"), self.props
                 ),
+                dirs_exist_ok=True,
             )
         # for node in nodes.values():
         #    logging.info(f"Copies additional assets for the node: {node.name}")

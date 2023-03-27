@@ -18,7 +18,7 @@ from collections import OrderedDict
 from typing import Set, Dict, Type, List, Optional
 
 from o2a.converter.coordinator import Coordinator
-from o2a.converter.constants import HDFS_FOLDER, LIB_FOLDER
+from o2a.converter.constants import LIB_FOLDER
 from o2a.converter.oozie_node import OozieNode
 from o2a.converter.relation import Relation
 from o2a.converter.task_group import TaskGroup
@@ -59,7 +59,7 @@ class Workflow:
             "from airflow.utils import dates",
             "from airflow.operators import bash_operator, dummy_operator",
         }
-        self.library_folder = os.path.join(self.input_directory_path, HDFS_FOLDER, LIB_FOLDER)
+        self.library_folder = os.path.join(self.input_directory_path, LIB_FOLDER)
         self.jar_files = get_lib_files(self.library_folder, extension=".jar")
 
         self.coordinator: Optional[Coordinator] = coordinator
