@@ -13,13 +13,30 @@
   See the License for the specific language governing permissions and
   limitations under the License.
  #}
-
+{% if instance %}
 {{ task_id | to_var }} = HdfsSensor(
     task_id={{ task_id | to_python }},
-    filepath={{ filepath | to_python }},
+    filepath={{instance | to_python}},
     mode={{ mode | to_python }},
     doc={{ doc | to_python }},
     poke_interval={{ poke_interval }}, # seconds
     timeout={{ timeout }},
     hdfs_conn_id={{ hdfs_conn_id | to_python }}
 )
+{% endif %}
+
+{% if start_instance_n and end_instance_n %}
+input_events = []
+for i in range({{ start_instance_n }} , {{ end_instance_n }}+1 ) :
+    {{ task_id | to_var }} = HdfsSensor(
+        task_id={{ task_id | to_python }} +"_"+str(i),
+        filepath= {%raw%}f"{{{{functions.coord.current(n={i})}}}}" {%endraw%},
+        mode={{ mode | to_python }},
+        doc={{ doc | to_python }},
+        poke_interval={{ poke_interval }}, # seconds
+        timeout={{ timeout }},
+        hdfs_conn_id={{ hdfs_conn_id | to_python }}
+    )
+    input_events.append({{ task_id | to_var }})
+{{task_id | to_var}} = input_events
+{% endif %}

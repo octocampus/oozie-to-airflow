@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """All Coord EL functions"""
+import re
+from datetime import datetime, timedelta
+
 from airflow import AirflowException
 from airflow.models import BaseOperator
 from jinja2 import contextfunction
@@ -46,7 +49,7 @@ def end_of_months(n: str) -> str:  # pylint:disable=invalid-name
 
 
 @contextfunction
-def current(context=None, n: str = None):  # pylint:disable=invalid-name
+def current(context=None, n: int = None):  # pylint:disable=invalid-name
     """
     DS_II : dataset initial-instance (datetime)
     DS_FREQ: dataset frequency (minutes)
@@ -64,6 +67,29 @@ def current(context=None, n: str = None):  # pylint:disable=invalid-name
         dataset = find_dataset_by_name(datasets, dataset_name)
 
         if dataset:
-            return f"{dataset.name}-{n}"
+            exec_time = context.get("ts")[:16]
+            dag_run = datetime.strptime(exec_time, "%Y-%m-%dT%H:%M")
+            initial_instance = datetime.strptime(dataset.initial_instance[:-1], "%Y-%m-%dT%H:%M")
+            template = dataset.uri_template
+            template = template.replace("{", "")
+            template = template.replace("}", "")
+            frequency = int(dataset.frequency)
+            current_n = initial_instance + timedelta(
+                minutes=frequency * (((dag_run - initial_instance).total_seconds() // 60) // frequency + n)
+            )
+            resolve_template_map = {
+                r"\$MINUTE": str(current_n.minute)
+                if len(str(current_n.minute)) > 1
+                else "0" + str(current_n.minute),
+                r"\$HOUR": str(current_n.hour) if len(str(current_n.hour)) > 1 else "0" + str(current_n.hour),
+                r"\$DAY": str(current_n.day) if len(str(current_n.day)) > 1 else "0" + str(current_n.day),
+                r"\$MONTH": str(current_n.month)
+                if len(str(current_n.month)) > 1
+                else "0" + str(current_n.month),
+                r"\$YEAR": str(current_n.year),
+            }
+            for word, replacement in resolve_template_map.items():
+                template = re.sub(word, replacement, template)
+            return template
 
     return None

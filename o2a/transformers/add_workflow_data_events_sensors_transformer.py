@@ -15,6 +15,7 @@
 """
 Add Data events Transformer
 """
+import re
 from typing import Optional, List
 
 from o2a.converter.data_events import InputEvent
@@ -74,7 +75,13 @@ class AddWorkflowDataEventsSensorsTransformer(BaseWorkflowTransformer):
                 task_id=input_event.name,
                 template_name="input_events_sensor.tpl",
                 template_params=dict(
-                    filepath=dataset.uri_template,  # type: ignore
+                    instance=input_event.instance if input_event.instance else None,
+                    start_instance_n=re.findall(r"-?\d+", input_event.start_instance)[0]
+                    if input_event.start_instance
+                    else None,
+                    end_instance_n=re.findall(r"-?\d+", input_event.end_instance)[0]
+                    if input_event.end_instance
+                    else None,
                     doc=f"dataset_name={dataset.name}",  # type: ignore
                     poke_interval="60",
                     timeout=props.config["data_events_sensors_timeout"]
