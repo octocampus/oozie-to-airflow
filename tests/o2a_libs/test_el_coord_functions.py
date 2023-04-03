@@ -16,10 +16,13 @@
 import datetime
 import unittest
 
+from airflow import AirflowException
+from airflow.models import BaseOperator
 from parameterized import parameterized
 
 import o2a.o2a_libs.functions as functions
-from o2a.o2a_libs.el_coord_functions import calculate_current_n, resolve_dataset_template
+from o2a.converter.dataset import Dataset
+from o2a.o2a_libs.el_coord_functions import calculate_current_n, resolve_dataset_template, current
 
 
 class TestElCoordFunctions(unittest.TestCase):
@@ -108,3 +111,46 @@ class TestElCoordFunctions(unittest.TestCase):
     )
     def test_resolve_dataset_template(self, template, date, expected):
         self.assertEqual(expected, resolve_dataset_template(template, date))
+
+    def test_current_should_raise_exception_when_no_datasets(self):
+        context = {
+            "ts": "2023-04-03T11:12:16.590559+00:00",
+            "task": BaseOperator(task_id="test_task", doc="dataset_name=test_logs"),
+        }
+        with self.assertRaises(AirflowException):
+            current(context, 0)
+
+    def test_current_should_return_None_when_no_dataset_with_exact_name(self):
+        context = {
+            "ts": "2023-04-03T11:12:16.590559+00:00",
+            "task": BaseOperator(task_id="test_task", doc="dataset_name=test_logs"),
+            "datasets": [
+                Dataset(
+                    name="datain",
+                    frequency="10080",
+                    initial_instance="2009-01-08T00:00Z",
+                    timezone="",
+                    uri_template="hdfs://test/${YEAR}/${MONTH}",
+                    done_flag="",
+                )
+            ],
+        }
+        self.assertEqual(None, current(context, 0))
+
+    def test_current(self):
+        context = {
+            "ts": "2009-05-30T00:00:16.590559+00:00",
+            "task": BaseOperator(task_id="test_task", doc="dataset_name=test_logs"),
+            "datasets": [
+                Dataset(
+                    name="test_logs",
+                    frequency="10080",
+                    initial_instance="2009-01-08T00:00Z",
+                    timezone="",
+                    uri_template="hdfs://test/${YEAR}/${MONTH}/${DAY}",
+                    done_flag="",
+                )
+            ],
+        }
+        expected = "hdfs://test/2009/05/07"
+        self.assertEqual(expected, current(context, -3))
