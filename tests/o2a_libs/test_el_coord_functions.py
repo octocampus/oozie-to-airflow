@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for all functions module"""
+import datetime
 import unittest
 
 from parameterized import parameterized
 
 import o2a.o2a_libs.functions as functions
+from o2a.o2a_libs.el_coord_functions import calculate_current_n, resolve_dataset_template
 
 
 class TestElCoordFunctions(unittest.TestCase):
@@ -60,3 +62,49 @@ class TestElCoordFunctions(unittest.TestCase):
     def test_end_of_months(self, n):
         expected = f"59 23 L */{n} *"
         self.assertEqual(expected, functions.coord.end_of_months(n))
+
+    @parameterized.expand(
+        [
+            (
+                datetime.datetime(2009, 1, 2, 0, 0),
+                24 * 60,
+                datetime.datetime(2009, 5, 30, 0, 0),
+                0,
+                datetime.datetime(2009, 5, 30, 0, 0),
+            ),
+            (
+                datetime.datetime(2009, 1, 2, 0, 0),
+                24 * 60,
+                datetime.datetime(2009, 5, 30, 0, 0),
+                1,
+                datetime.datetime(2009, 5, 31, 0, 0),
+            ),
+            (
+                datetime.datetime(2009, 1, 8, 0, 0),
+                7 * 24 * 60,
+                datetime.datetime(2009, 5, 30, 0, 0),
+                -3,
+                datetime.datetime(2009, 5, 7, 0, 0),
+            ),
+        ]
+    )
+    def test_calculate_current_n(self, initial_instance, frequency, execution_time, n, expected):
+        self.assertEqual(expected, calculate_current_n(initial_instance, frequency, execution_time, n))
+
+    @parameterized.expand(
+        [
+            (
+                "hdfs://dataset/${YEAR}/${MONTH}",
+                datetime.datetime(2023, 5, 1, 5, 0),
+                "hdfs://dataset/2023/05",
+            ),
+            ("hdfs://test/data", datetime.datetime(2020, 1, 1, 0, 0), "hdfs://test/data"),
+            (
+                "hdfs://dataset/${YEAR}${MONTH}/${DAY}${HOUR}",
+                datetime.datetime(2023, 4, 3, 12, 0),
+                "hdfs://dataset/202304/0312",
+            ),
+        ]
+    )
+    def test_resolve_dataset_template(self, template, date, expected):
+        self.assertEqual(expected, resolve_dataset_template(template, date))
