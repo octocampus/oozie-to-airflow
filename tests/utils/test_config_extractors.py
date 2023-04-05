@@ -186,7 +186,7 @@ class ConfigExtractorsModuleTestCase(unittest.TestCase):
             job_xml_nodes, input_directory_path="/tmp/no-error-path"
         )
 
-        parse_mock.assert_called_once_with("/tmp/no-error-path/hdfs/aaa.xml")
+        parse_mock.assert_called_once_with("/tmp/no-error-path/aaa.xml")
         self.assertEqual(result, {"KEY1": "VALUE1", "KEY2": "VALUE2"})
 
     @mock.patch("o2a.utils.config_extractors.ET.parse")
@@ -234,7 +234,5 @@ class ConfigExtractorsModuleTestCase(unittest.TestCase):
             job_xml_nodes, input_directory_path="/tmp/no-error-path"
         )
 
-        parse_mock.assert_has_calls(
-            [call("/tmp/no-error-path/hdfs/aaa.xml"), call("/tmp/no-error-path/hdfs/bbb.xml")]
-        )
+        parse_mock.assert_has_calls([call("/tmp/no-error-path/aaa.xml"), call("/tmp/no-error-path/bbb.xml")])
         self.assertEqual(result, {"KEY1": "VALUE1", "KEY2": "VALUE2"})

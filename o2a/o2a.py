@@ -24,7 +24,6 @@ from subprocess import CalledProcessError, check_call
 
 from o2a.converter.mappers import ACTION_MAP
 from o2a.converter.oozie_converter import OozieConverter
-from o2a.converter.constants import HDFS_FOLDER
 from o2a.converter.renderers import PythonRenderer, DotRenderer
 from o2a.transformers.add_node_notificaton_transformer import AddNodeNotificationTransformer
 from o2a.transformers.add_workflow_data_events_sensors_transformer import (
@@ -89,7 +88,7 @@ Otherwise please provide it.
     validate_workflows_script = get_o2a_validate_workflows_script()
     if validate_workflows_script:
         try:
-            check_call([validate_workflows_script, f"{input_directory_path}/{HDFS_FOLDER}/{WORKFLOW_XML}"])
+            check_call([validate_workflows_script, f"{input_directory_path}/{WORKFLOW_XML}"])
         except CalledProcessError:
             logging.error(
                 "Workflow failed schema validation. " "Please correct the workflow XML and try again."

@@ -22,9 +22,9 @@ output-artifacts/
 .vagrant/
 
 *.box
-*.jar
+#*.jar
 *.rpm
-*.zip
+#*.zip
 *.whl
 *.tar.*
 *.tgz
