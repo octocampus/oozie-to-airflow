@@ -14,15 +14,27 @@
   limitations under the License.
  #}
 {% if instance %}
+{% if 'current' in instance %}
 {{ task_id | to_var }} = HdfsSensor(
-    task_id={{ task_id | to_python }},
-    filepath={{instance | to_python}},
-    mode={{ mode | to_python }},
-    doc={{ doc | to_python }},
-    poke_interval={{ poke_interval }}, # seconds
-    timeout={{ timeout }},
-    hdfs_conn_id={{ hdfs_conn_id | to_python }}
-)
+            task_id={{ task_id | to_python }},
+            filepath={% raw %}"{{{% endraw %}{{instance}}{% raw %}}}"{% endraw %},
+            mode={{ mode | to_python }},
+            doc={{ doc | to_python }},
+            poke_interval={{ poke_interval }}, # seconds
+            timeout={{ timeout }},
+            hdfs_conn_id={{ hdfs_conn_id | to_python }}
+        )
+    {% else %}
+{{ task_id | to_var }} = HdfsSensor(
+            task_id={{ task_id | to_python }},
+            filepath= {% raw %}"{{functions.coord.resolve_dataset_template{% endraw %}({{uri_template | to_python}},{% if instance[0] not in '0123456789' %} {{instance}} {% else %}'{{instance}}'{%endif%})}}" ,
+            mode={{ mode | to_python }},
+            doc={{ doc | to_python }},
+            poke_interval={{ poke_interval }}, # seconds
+            timeout={{ timeout }},
+            hdfs_conn_id={{ hdfs_conn_id | to_python }}
+        )
+    {% endif %}
 {% endif %}
 
 {% if start_instance_n and end_instance_n %}

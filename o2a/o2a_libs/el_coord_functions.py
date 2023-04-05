@@ -65,46 +65,47 @@ def calculate_current_n(
     return current_n
 
 
-def resolve_dataset_template(template: str, datetime_data: datetime) -> str:
+@contextfunction
+def resolve_dataset_template(context, template: str, datetime_data: str) -> str:
     """
     Given a template, resolve the variables MINUTE, HOUR, MONTH, DAY, YEAR using the datetime data provided
     :param template: string with variables MINUTE... inside ${...} e.g : hdfs://test/${YEAR}/${MONTH}
     :param datetime_data: datetime information e.g : 2023-05-01T05:00
     :return: string representing resolved template e.g : hdfs://test/2023/05
     """
-    template = template.replace("{", "")
-    template = template.replace("}", "")
+
+    datetime_data = datetime.strptime(datetime_data[:-1], "%Y-%m-%dT%H:%M")
     resolve_template_map = {
-        r"\$MINUTE": str(datetime_data.minute)
+        r"{{MINUTE}}": str(datetime_data.minute)
         if len(str(datetime_data.minute)) > 1
         else "0" + str(datetime_data.minute),
-        r"\$HOUR": str(datetime_data.hour)
+        r"{{HOUR}}": str(datetime_data.hour)
         if len(str(datetime_data.hour)) > 1
         else "0" + str(datetime_data.hour),
-        r"\$DAY": str(datetime_data.day) if len(str(datetime_data.day)) > 1 else "0" + str(datetime_data.day),
-        r"\$MONTH": str(datetime_data.month)
+        r"{{DAY}}": str(datetime_data.day)
+        if len(str(datetime_data.day)) > 1
+        else "0" + str(datetime_data.day),
+        r"{{MONTH}}": str(datetime_data.month)
         if len(str(datetime_data.month)) > 1
         else "0" + str(datetime_data.month),
-        r"\$YEAR": str(datetime_data.year),
+        r"{{YEAR}}": str(datetime_data.year),
     }
     for word, replacement in resolve_template_map.items():
         template = re.sub(word, replacement, template)
+    el = re.findall(r"\{{.*?\}}", template)
+
+    for w in el:
+        template = template.replace(w, context.get(w.strip("{}")))
     return template
 
 
 @contextfunction
-def current(context=None, n: int = None):  # pylint:disable=invalid-name
-    """
-    DS_II : dataset initial-instance (datetime)
-    DS_FREQ: dataset frequency (minutes)
-    CA_NT: coordinator action creation (materialization) nominal time
-    coord:current(int n) = DS_II + DS_FREQ * ( (CA_NT - DS_II) div DS_FREQ + n)
-    """
+def current(context, n: int):
     datasets: Optional[List[Dataset]] = context.get("datasets")
-    if datasets is None:
-        raise AirflowException("No datasets!")
-
+    if not datasets:
+        raise AirflowException("No datasets")
     task: Optional[BaseOperator] = context.get("task", None)  # pylint:disable
+
     if task:
         dataset_name = get_dataset_name_from_task_doc(task.doc)
 
@@ -117,7 +118,7 @@ def current(context=None, n: int = None):  # pylint:disable=invalid-name
             frequency = int(dataset.frequency)
             template = dataset.uri_template
             current_n = calculate_current_n(initial_instance, frequency, execution_time, n)
-            dataset_uri = resolve_dataset_template(template, current_n)
+            dataset_uri = resolve_dataset_template(context, template, current_n.strftime("%Y-%m-%dT%H:%MZ"))
             return dataset_uri
 
     return None

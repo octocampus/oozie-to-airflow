@@ -75,7 +75,8 @@ class AddWorkflowDataEventsSensorsTransformer(BaseWorkflowTransformer):
                 task_id=input_event.name,
                 template_name="input_events_sensor.tpl",
                 template_params=dict(
-                    instance=input_event.instance if input_event.instance else None,
+                    uri_template=dataset.uri_template,
+                    instance=input_event.instance.strip("{}") if input_event.instance else None,
                     start_instance_n=re.findall(r"-?\d+", input_event.start_instance)[0]
                     if input_event.start_instance
                     else None,

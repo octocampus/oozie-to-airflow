@@ -23,7 +23,7 @@ https://download.oracle.com/otn-pub/jcp/jsp-2.1-fr-spec-oth-JSpec/jsp-2_1-fr-spe
 
 __all__ = ["translate"]
 
-from typing import Union, Optional
+from typing import Union, Optional, List
 import re
 
 from lark import Lark, Tree, Token
@@ -347,3 +347,7 @@ def translate(expression: str, functions_module: str = "functions", quote: bool 
     if quote:
         return "'" + translation + "'"
     return translation
+
+
+def get_numerics_from_expression(expression: str) -> List[str]:
+    return re.findall(r"-?\d+", expression)
