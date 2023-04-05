@@ -132,7 +132,7 @@ class TestElCoordFunctions(unittest.TestCase):
                     frequency="10080",
                     initial_instance="2009-01-08T00:00Z",
                     timezone="",
-                    uri_template="hdfs://test/${YEAR}/${MONTH}",
+                    uri_template="hdfs://test/{{YEAR}}/{{MONTH}}",
                     done_flag="",
                 )
             ],
