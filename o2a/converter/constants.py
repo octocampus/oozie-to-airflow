@@ -16,3 +16,6 @@
 
 # Lib files are added by default to the path of the mapper specified
 LIB_FOLDER = "lib"
+
+# converted subworkflows will be stored to the path specified
+SUBDAGS_FOLDER = "output/subdags"

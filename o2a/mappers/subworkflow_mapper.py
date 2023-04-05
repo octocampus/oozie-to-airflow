@@ -19,6 +19,7 @@ from typing import Dict, List, Set, Type
 
 from xml.etree.ElementTree import Element
 
+from o2a.converter.constants import SUBDAGS_FOLDER
 from o2a.converter.oozie_converter import OozieConverter
 from o2a.converter.relation import Relation
 from o2a.converter.renderers import BaseRenderer
@@ -82,18 +83,23 @@ class SubworkflowMapper(ActionMapper):
         parent_path, _, _ = self.input_directory_path.rpartition("/")
 
         app_path = os.path.join(parent_path, self.app_name)
-
-        logging.info(f"Converting subworkflow from {app_path}")
-        converter = OozieConverter(
-            input_directory_path=app_path,
-            output_directory_path=self.output_directory_path,
-            renderer=self.renderer,
-            action_mapper=self.action_mapper,
-            dag_name=self.app_name,
-            initial_props=self.get_child_props(),
-            transformers=self.transformers,
-        )
-        converter.convert(as_subworkflow=True)
+        if not os.path.exists(SUBDAGS_FOLDER):
+            os.makedirs(SUBDAGS_FOLDER)
+        if not os.path.exists(os.path.join(SUBDAGS_FOLDER, self.app_name, f"subdag_{self.app_name}.py")):
+            os.makedirs(os.path.join(SUBDAGS_FOLDER, self.app_name), exist_ok=True)
+            logging.info(f"Converting subworkflow from {app_path}")
+            converter = OozieConverter(
+                input_directory_path=app_path,
+                output_directory_path=os.path.join(SUBDAGS_FOLDER, self.app_name),
+                renderer=self.renderer,
+                action_mapper=self.action_mapper,
+                dag_name=self.app_name,
+                initial_props=self.get_child_props(),
+                transformers=self.transformers,
+            )
+            converter.convert(as_subworkflow=True)
+        else:
+            logging.info(f"subworkflow {app_path} already converted")
 
     def get_child_props(self) -> PropertySet:
         propagate_configuration = self.oozie_node.find("propagate-configuration")
