@@ -87,6 +87,8 @@ class SubworkflowMapper(ActionMapper):
             os.makedirs(SUBDAGS_FOLDER)
         if not os.path.exists(os.path.join(SUBDAGS_FOLDER, self.app_name, f"subdag_{self.app_name}.py")):
             os.makedirs(os.path.join(SUBDAGS_FOLDER, self.app_name), exist_ok=True)
+            with open(os.path.join(SUBDAGS_FOLDER, "__init__.py"), "w"):
+                pass
             logging.info(f"Converting subworkflow from {app_path}")
             converter = OozieConverter(
                 input_directory_path=app_path,
@@ -122,5 +124,5 @@ class SubworkflowMapper(ActionMapper):
             "from airflow.utils import dates",
             "from airflow.contrib.operators import dataproc_operator",
             "from airflow.operators.subdag_operator import SubDagOperator",
-            f"import subdag_{self.app_name}",
+            f"import {SUBDAGS_FOLDER.replace('/', '.')}.{self.app_name}.subdag_{self.app_name}",
         }

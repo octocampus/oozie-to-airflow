@@ -18,6 +18,7 @@ from unittest import TestCase, mock
 from xml.etree.ElementTree import Element
 
 from o2a import o2a
+from o2a.converter.constants import SUBDAGS_FOLDER
 from o2a.converter.mappers import ACTION_MAP
 from o2a.converter.oozie_converter import OozieConverter
 from o2a.converter.oozie_node import OozieActionNode
@@ -316,7 +317,7 @@ class TestOozieConvertByExamples(TestCase):
                 "import datetime",
                 "import pendulum",
                 "import shlex",
-                "import subdag_childwf",
+                f"import {SUBDAGS_FOLDER.replace('/','.')}.childwf.subdag_childwf",
             },
             workflow.dependencies,
         )

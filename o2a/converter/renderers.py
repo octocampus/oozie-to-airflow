@@ -94,6 +94,8 @@ class PythonRenderer(BaseRenderer):
         )
 
     def create_subworkflow_file(self, workflow: Workflow, props: PropertySet):
+        with open(os.path.join(workflow.output_directory_path, "__init__.py"), "w"):
+            pass
         self._create_file(
             output_file_name=os.path.join(workflow.output_directory_path, f"subdag_{workflow.dag_name}.py"),
             template_name="subworkflow.tpl",

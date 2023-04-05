@@ -92,10 +92,11 @@ def resolve_dataset_template(context, template: str, datetime_data: str) -> str:
     }
     for word, replacement in resolve_template_map.items():
         template = re.sub(word, replacement, template)
-    el = re.findall(r"\{{.*?\}}", template)
+    # Get variables inside double brackets (resolved using the properties files) e.g : {{user}}
+    props_variables = re.findall(r"\{{.*?\}}", template)
 
-    for w in el:
-        template = template.replace(w, context.get(w.strip("{}")))
+    for variable in props_variables:
+        template = template.replace(variable, context.get(variable.strip("{}")))
     return template
 
 
