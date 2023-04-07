@@ -65,6 +65,7 @@ def main():
     start_days_ago = args.start_days_ago
     schedule_interval = args.schedule_interval
     dag_name = args.dag_name
+    subdag_folder = args.subdag_folder
 
     if not dag_name:
         dag_name = os.path.basename(input_directory_path)
@@ -127,6 +128,7 @@ Otherwise please provide it.
         renderer=renderer,
         transformers=transformers,
         user=args.user,
+        subdag_folder=subdag_folder,
     )
     converter.recreate_output_directory()
     converter.convert()
@@ -149,4 +151,5 @@ def parse_args(args):
         "-v", "--schedule-interval", help="Desired DAG schedule interval as number of days", default=0
     )
     parser.add_argument("-d", "--dot", help="Renders workflow files in DOT format", action="store_true")
+    parser.add_argument("-f", "--subdag-folder", help="Folder that contains subdags")
     return parser.parse_args(args)

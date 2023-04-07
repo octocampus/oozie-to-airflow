@@ -18,7 +18,6 @@ from unittest import TestCase, mock
 from xml.etree.ElementTree import Element
 
 from o2a import o2a
-from o2a.converter.constants import SUBDAGS_FOLDER
 from o2a.converter.mappers import ACTION_MAP
 from o2a.converter.oozie_converter import OozieConverter
 from o2a.converter.oozie_node import OozieActionNode
@@ -50,6 +49,13 @@ class TestOozieConverter(TestCase):
         user = "oozie_test"
         args = o2a.parse_args(["-i", input_dir, "-o", output_dir, "-u", user])
         self.assertEqual(args.user, user)
+
+    def test_parse_args_subdag_folder(self):
+        input_dir = "/tmp/does.not.exist"
+        output_dir = "/tmp/out/"
+        subdag_folder = "subdag_test"
+        args = o2a.parse_args(["-i", input_dir, "-o", output_dir, "-f", subdag_folder])
+        self.assertEqual(args.subdag_folder, subdag_folder)
 
     @mock.patch("o2a.converter.oozie_converter.workflow_xml_parser.WorkflowXmlParser")
     def test_convert(self, oozie_parser_mock):
@@ -317,7 +323,7 @@ class TestOozieConvertByExamples(TestCase):
                 "import datetime",
                 "import pendulum",
                 "import shlex",
-                f"import {SUBDAGS_FOLDER.replace('/','.')}.childwf.subdag_childwf",
+                "import tmp.childwf.subdag_childwf",
             },
             workflow.dependencies,
         )

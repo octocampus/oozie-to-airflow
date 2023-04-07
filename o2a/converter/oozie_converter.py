@@ -67,6 +67,7 @@ class OozieConverter:
         transformers: List[BaseWorkflowTransformer] = None,
         user: str = None,
         initial_props: PropertySet = None,
+        subdag_folder: str = None,
     ):
 
         self.coordinator = Coordinator(
@@ -78,6 +79,7 @@ class OozieConverter:
             input_directory_path=input_directory_path,
             output_directory_path=output_directory_path,
             coordinator=self.coordinator,
+            subdag_folder=subdag_folder,
         )
         self.renderer = renderer
 

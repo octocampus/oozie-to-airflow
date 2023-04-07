@@ -19,7 +19,6 @@ from contextlib import suppress
 from unittest import mock, TestCase
 from xml.etree import ElementTree as ET
 
-from o2a.converter.constants import SUBDAGS_FOLDER
 from o2a.converter.mappers import ACTION_MAP
 from o2a.converter.task import Task
 from o2a.definitions import EXAMPLE_SUBWORKFLOW_PATH
@@ -48,7 +47,7 @@ class TestSubworkflowMapper(TestCase):
         "gcp_uri_prefix": "gs://test_bucket/dags",
     }
 
-    SUBDAG_TEST_FILEPATH = os.path.join(SUBDAGS_FOLDER, "pig", "subdag_pig.py")
+    SUBDAG_TEST_FILEPATH = os.path.join("/tmp", "pig", "subdag_pig.py")
 
     @classmethod
     def setUpClass(cls):
@@ -136,4 +135,5 @@ class TestSubworkflowMapper(TestCase):
             action_mapper=ACTION_MAP,
             props=PropertySet(job_properties=self.main_properties, config=self.config),
             renderer=mock.MagicMock(),
+            subdag_folder="/tmp",
         )

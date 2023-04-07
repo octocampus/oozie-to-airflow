@@ -19,7 +19,6 @@ from typing import Dict, List, Set, Type
 
 from xml.etree.ElementTree import Element
 
-from o2a.converter.constants import SUBDAGS_FOLDER
 from o2a.converter.oozie_converter import OozieConverter
 from o2a.converter.relation import Relation
 from o2a.converter.renderers import BaseRenderer
@@ -46,6 +45,7 @@ class SubworkflowMapper(ActionMapper):
         dag_name: str,
         input_directory_path: str,
         output_directory_path: str,
+        subdag_folder: str,
         props: PropertySet,
         action_mapper: Dict[str, Type[ActionMapper]],
         renderer: BaseRenderer,
@@ -65,6 +65,7 @@ class SubworkflowMapper(ActionMapper):
         self.input_directory_path = input_directory_path
         self.output_directory_path = output_directory_path
         self.dag_name = dag_name
+        self.subdag_folder = subdag_folder
         self.action_mapper = action_mapper
         self.renderer = renderer
         self.transformers = transformers or []
@@ -83,21 +84,23 @@ class SubworkflowMapper(ActionMapper):
         parent_path, _, _ = self.input_directory_path.rpartition("/")
 
         app_path = os.path.join(parent_path, self.app_name)
-        if not os.path.exists(SUBDAGS_FOLDER):
-            os.makedirs(SUBDAGS_FOLDER)
-        if not os.path.exists(os.path.join(SUBDAGS_FOLDER, self.app_name, f"subdag_{self.app_name}.py")):
-            os.makedirs(os.path.join(SUBDAGS_FOLDER, self.app_name), exist_ok=True)
-            with open(os.path.join(SUBDAGS_FOLDER, "__init__.py"), "w"):
-                pass
+        if not os.path.exists(self.subdag_folder):
+            os.makedirs(self.subdag_folder)
+        if not os.path.exists(os.path.join(self.subdag_folder, self.app_name, f"subdag_{self.app_name}.py")):
+            os.makedirs(os.path.join(self.subdag_folder, self.app_name), exist_ok=True)
+            if self.subdag_folder != self.output_directory_path:
+                with open(os.path.join(self.subdag_folder, "__init__.py"), "w"):
+                    pass
             logging.info(f"Converting subworkflow from {app_path}")
             converter = OozieConverter(
                 input_directory_path=app_path,
-                output_directory_path=os.path.join(SUBDAGS_FOLDER, self.app_name),
+                output_directory_path=os.path.join(self.subdag_folder, self.app_name),
                 renderer=self.renderer,
                 action_mapper=self.action_mapper,
                 dag_name=self.app_name,
                 initial_props=self.get_child_props(),
                 transformers=self.transformers,
+                subdag_folder=os.path.join(self.subdag_folder, self.app_name),
             )
             converter.convert(as_subworkflow=True)
         else:
@@ -120,9 +123,10 @@ class SubworkflowMapper(ActionMapper):
         return tasks, relations
 
     def required_imports(self) -> Set[str]:
+        base_folder = os.path.basename(os.path.normpath(self.subdag_folder))
         return {
             "from airflow.utils import dates",
             "from airflow.contrib.operators import dataproc_operator",
             "from airflow.operators.subdag_operator import SubDagOperator",
-            f"import {SUBDAGS_FOLDER.replace('/', '.')}.{self.app_name}.subdag_{self.app_name}",
+            f"import {base_folder}.{self.app_name}.subdag_{self.app_name}",
         }

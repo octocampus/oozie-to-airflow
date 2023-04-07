@@ -33,6 +33,7 @@ class Workflow:
         input_directory_path: str,
         output_directory_path: str,
         dag_name: str,
+        subdag_folder: str = None,
         task_group_relations: Set[Relation] = None,
         nodes: Dict[str, OozieNode] = None,
         task_groups: Dict[str, TaskGroup] = None,
@@ -42,6 +43,7 @@ class Workflow:
         self.input_directory_path = input_directory_path
         self.output_directory_path = output_directory_path
         self.dag_name = dag_name
+        self.subdag_folder = subdag_folder if subdag_folder else output_directory_path
         self.task_group_relations = task_group_relations or set()
         # Dictionary is ordered purely for output being somewhat ordered the
         # same as how Oozie workflow was parsed.
