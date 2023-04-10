@@ -82,6 +82,7 @@ class BaseRenderer(ABC):
 
 class PythonRenderer(BaseRenderer):
     """
+
     Renderer responsible for generating files in the Python code
     """
 
@@ -94,8 +95,8 @@ class PythonRenderer(BaseRenderer):
         )
 
     def create_subworkflow_file(self, workflow: Workflow, props: PropertySet):
-        with open(os.path.join(workflow.output_directory_path, "__init__.py"), "w"):
-            pass
+        Path(workflow.output_directory_path).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(workflow.output_directory_path, "__init__.py")).touch(exist_ok=True)
         self._create_file(
             output_file_name=os.path.join(workflow.output_directory_path, f"subdag_{workflow.dag_name}.py"),
             template_name="subworkflow.tpl",

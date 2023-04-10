@@ -15,6 +15,7 @@
 """Maps subworkflow of Oozie to Airflow's sub-dag"""
 import logging
 import os
+from pathlib import Path
 from typing import Dict, List, Set, Type
 
 from xml.etree.ElementTree import Element
@@ -89,8 +90,7 @@ class SubworkflowMapper(ActionMapper):
         if not os.path.exists(os.path.join(self.subdag_folder, self.app_name, f"subdag_{self.app_name}.py")):
             os.makedirs(os.path.join(self.subdag_folder, self.app_name), exist_ok=True)
             if self.subdag_folder != self.output_directory_path:
-                with open(os.path.join(self.subdag_folder, "__init__.py"), "w"):
-                    pass
+                Path(os.path.join(self.subdag_folder, "__init__.py")).touch(exist_ok=True)
             logging.info(f"Converting subworkflow from {app_path}")
             converter = OozieConverter(
                 input_directory_path=app_path,
