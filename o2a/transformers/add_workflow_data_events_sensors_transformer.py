@@ -15,7 +15,6 @@
 """
 Add Data events Transformer
 """
-import re
 from typing import Optional, List
 
 from o2a.converter.data_events import InputEvent
@@ -23,6 +22,7 @@ from o2a.converter.dataset import find_dataset_by_name, Dataset
 from o2a.converter.task import Task
 from o2a.converter.task_group import TaskGroup
 from o2a.converter.workflow import Workflow
+from o2a.o2a_libs.el_parser import get_numerics_from_expression
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.transformers.base_transformer import BaseWorkflowTransformer
 
@@ -73,14 +73,14 @@ class AddWorkflowDataEventsSensorsTransformer(BaseWorkflowTransformer):
             dataset: Optional[Dataset] = find_dataset_by_name(datasets=datasets, name=input_event.dataset)
             task = Task(
                 task_id=input_event.name,
-                template_name="input_events_sensor.tpl",
+                template_name="input_events/input_events_sensor.tpl",
                 template_params=dict(
                     uri_template=dataset.uri_template,
                     instance=input_event.instance.strip("{}") if input_event.instance else None,
-                    start_instance_n=re.findall(r"-?\d+", input_event.start_instance)[0]
+                    start_instance_n=get_numerics_from_expression(input_event.start_instance)[0]
                     if input_event.start_instance
                     else None,
-                    end_instance_n=re.findall(r"-?\d+", input_event.end_instance)[0]
+                    end_instance_n=get_numerics_from_expression(input_event.end_instance)[0]
                     if input_event.end_instance
                     else None,
                     doc=f"dataset_name={dataset.name}",  # type: ignore

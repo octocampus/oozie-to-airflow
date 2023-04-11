@@ -88,7 +88,6 @@ class SubworkflowMapper(ActionMapper):
         if not os.path.exists(self.subdag_folder):
             os.makedirs(self.subdag_folder)
         if not os.path.exists(os.path.join(self.subdag_folder, self.app_name, f"subdag_{self.app_name}.py")):
-            os.makedirs(os.path.join(self.subdag_folder, self.app_name), exist_ok=True)
             if self.subdag_folder != self.output_directory_path:
                 Path(os.path.join(self.subdag_folder, "__init__.py")).touch(exist_ok=True)
             logging.info(f"Converting subworkflow from {app_path}")

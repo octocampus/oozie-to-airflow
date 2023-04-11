@@ -16,7 +16,7 @@
 {% if instance %}
 {{ task_id | to_var }} = HdfsSensor(
             task_id={{ task_id | to_python }},
-            filepath={% include 'filepath.tpl' %},
+            filepath={% include 'input_events/sensor_filepath.tpl' %},
             mode={{ mode | to_python }},
             doc={{ doc | to_python }},
             poke_interval={{ poke_interval }}, # seconds
