@@ -65,6 +65,10 @@ def calculate_current_n(
     return current_n
 
 
+def get_vars_between_brackets(template: str) -> List[str]:
+    return re.findall(r"\{{.*?\}}", template)
+
+
 @contextfunction
 def resolve_dataset_template(context, template: str, datetime_data: str) -> str:
     """
@@ -91,11 +95,9 @@ def resolve_dataset_template(context, template: str, datetime_data: str) -> str:
         r"{{YEAR}}": str(datetime_data.year),
     }
     for word, replacement in resolve_template_map.items():
-        template = re.sub(word, replacement, template)
-    # Get variables inside double brackets (resolved using the properties files) e.g : {{user}}
-    props_variables = re.findall(r"\{{.*?\}}", template)
-
-    for variable in props_variables:
+        template = template.replace(word, replacement)
+    context_variables_left = get_vars_between_brackets(template)
+    for variable in context_variables_left:
         template = template.replace(variable, context.get(variable.strip("{}")))
     return template
 

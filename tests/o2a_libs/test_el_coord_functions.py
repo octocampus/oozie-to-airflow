@@ -22,7 +22,12 @@ from parameterized import parameterized
 
 import o2a.o2a_libs.functions as functions
 from o2a.converter.dataset import Dataset
-from o2a.o2a_libs.el_coord_functions import calculate_current_n, resolve_dataset_template, current
+from o2a.o2a_libs.el_coord_functions import (
+    calculate_current_n,
+    resolve_dataset_template,
+    current,
+    get_vars_between_brackets,
+)
 
 
 class TestElCoordFunctions(unittest.TestCase):
@@ -65,6 +70,12 @@ class TestElCoordFunctions(unittest.TestCase):
     def test_end_of_months(self, n):
         expected = f"59 23 L */{n} *"
         self.assertEqual(expected, functions.coord.end_of_months(n))
+
+    @parameterized.expand(
+        [("hdfs://{{user}}/user/{{rootDirectory}}", ["{{user}}", "{{rootDirectory}}"]), ("hdfs://user", [])]
+    )
+    def test_get_vars_between_brackets(self, template, expected):
+        self.assertEqual(expected, get_vars_between_brackets(template))
 
     @parameterized.expand(
         [
