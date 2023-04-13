@@ -29,7 +29,7 @@ TASK_MAP={{ task_map | to_python }}
 
 
 
-TEMPLATE_ENV = {**CONFIG, **JOB_PROPS, "functions": functions, "task_map": TASK_MAP, "datasets": DATASETS }
+TEMPLATE_ENV = {**CONFIG, **JOB_PROPS, "functions": functions, "task_map": TASK_MAP {% if datasets %}, "datasets": DATASETS {% endif %}}
 
 with models.DAG(
     {{ dag_name | to_python }},

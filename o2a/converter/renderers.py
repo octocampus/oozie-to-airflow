@@ -82,20 +82,23 @@ class BaseRenderer(ABC):
 
 class PythonRenderer(BaseRenderer):
     """
+
     Renderer responsible for generating files in the Python code
     """
 
     def create_workflow_file(self, workflow: Workflow, props: PropertySet):
         self._create_file(
-            output_file_name=os.path.join(self.output_directory_path, workflow.dag_name) + ".py",
+            output_file_name=os.path.join(workflow.output_directory_path, workflow.dag_name) + ".py",
             template_name="workflow.tpl",
             workflow=workflow,
             props=props,
         )
 
     def create_subworkflow_file(self, workflow: Workflow, props: PropertySet):
+        Path(workflow.output_directory_path).mkdir(parents=True, exist_ok=True)
+        Path(os.path.join(workflow.output_directory_path, "__init__.py")).touch(exist_ok=True)
         self._create_file(
-            output_file_name=os.path.join(self.output_directory_path, f"subdag_{workflow.dag_name}.py"),
+            output_file_name=os.path.join(workflow.output_directory_path, f"subdag_{workflow.dag_name}.py"),
             template_name="subworkflow.tpl",
             workflow=workflow,
             props=props,
@@ -176,13 +179,14 @@ class DotRenderer(BaseRenderer):
     """
 
     def create_workflow_file(self, workflow: Workflow, props: PropertySet):
-        output_file_name = os.path.join(self.output_directory_path, workflow.dag_name) + ".dot"
+        output_file_name = os.path.join(workflow.output_directory_path, workflow.dag_name) + ".dot"
         self._create_file(
             output_file_name=output_file_name, template_name="workflow_dot.tpl", workflow=workflow
         )
 
     def create_subworkflow_file(self, workflow: Workflow, props: PropertySet):
-        output_file_name = os.path.join(self.output_directory_path, f"subdag_{workflow.dag_name}.dot")
+        Path(workflow.output_directory_path).mkdir(parents=True, exist_ok=True)
+        output_file_name = os.path.join(workflow.output_directory_path, f"subdag_{workflow.dag_name}.dot")
         self._create_file(
             output_file_name=output_file_name, template_name="workflow_dot.tpl", workflow=workflow
         )

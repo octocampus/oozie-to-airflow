@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """All Coord EL functions"""
+import re
+from datetime import datetime, timedelta
+
 from airflow import AirflowException
 from airflow.models import BaseOperator
 from jinja2 import contextfunction
@@ -45,25 +48,80 @@ def end_of_months(n: str) -> str:  # pylint:disable=invalid-name
     return f"59 23 L */{n} *"
 
 
-@contextfunction
-def current(context=None, n: str = None):  # pylint:disable=invalid-name
+def calculate_current_n(
+    initial_instance: datetime, frequency: int, execution_time: datetime, n: int
+) -> datetime:
     """
-    DS_II : dataset initial-instance (datetime)
-    DS_FREQ: dataset frequency (minutes)
-    CA_NT: coordinator action creation (materialization) nominal time
-    coord:current(int n) = DS_II + DS_FREQ * ( (CA_NT - DS_II) div DS_FREQ + n)
+    Calculate the datetime of the dataset produced shifted by n
+    calculated using the following formula :
+    initial_instance : dataset initial-instance (datetime)
+    frequency : dataset frequency (minutes)
+    execution_time: coordinator action creation (materialization) nominal time <=> Dag execution time
+    return initial_instance + frequency * ((execution_time - initial_instance) div frequency + n)
     """
-    datasets: Optional[List[Dataset]] = context.get("datasets")
-    if datasets is None:
-        raise AirflowException("No datasets!")
+    current_n = initial_instance + timedelta(
+        minutes=frequency * (((execution_time - initial_instance).total_seconds() // 60) // frequency + n)
+    )
+    return current_n
 
+
+def get_vars_between_brackets(template: str) -> List[str]:
+    return re.findall(r"\{{.*?\}}", template)
+
+
+@contextfunction
+def resolve_dataset_template(context, template: str, datetime_data: str) -> str:
+    """
+    Given a template, resolve the variables MINUTE, HOUR, MONTH, DAY, YEAR using the datetime data provided
+    :param template: string with variables MINUTE... inside ${...} e.g : hdfs://test/${YEAR}/${MONTH}
+    :param datetime_data: datetime information e.g : 2023-05-01T05:00
+    :return: string representing resolved template e.g : hdfs://test/2023/05
+    """
+
+    datetime_data = datetime.strptime(datetime_data[:-1], "%Y-%m-%dT%H:%M")
+    resolve_template_map = {
+        r"{{MINUTE}}": str(datetime_data.minute)
+        if len(str(datetime_data.minute)) > 1
+        else "0" + str(datetime_data.minute),
+        r"{{HOUR}}": str(datetime_data.hour)
+        if len(str(datetime_data.hour)) > 1
+        else "0" + str(datetime_data.hour),
+        r"{{DAY}}": str(datetime_data.day)
+        if len(str(datetime_data.day)) > 1
+        else "0" + str(datetime_data.day),
+        r"{{MONTH}}": str(datetime_data.month)
+        if len(str(datetime_data.month)) > 1
+        else "0" + str(datetime_data.month),
+        r"{{YEAR}}": str(datetime_data.year),
+    }
+    for word, replacement in resolve_template_map.items():
+        template = template.replace(word, replacement)
+    context_variables_left = get_vars_between_brackets(template)
+    for variable in context_variables_left:
+        template = template.replace(variable, context.get(variable.strip("{}")))
+    return template
+
+
+@contextfunction
+def current(context, n: int):
+    datasets: Optional[List[Dataset]] = context.get("datasets")
+    if not datasets:
+        raise AirflowException("No datasets")
     task: Optional[BaseOperator] = context.get("task", None)  # pylint:disable
+
     if task:
         dataset_name = get_dataset_name_from_task_doc(task.doc)
 
         dataset = find_dataset_by_name(datasets, dataset_name)
 
         if dataset:
-            return f"{dataset.name}-{n}"
+            execution_time = context.get("ts")[:16]
+            execution_time = datetime.strptime(execution_time, "%Y-%m-%dT%H:%M")
+            initial_instance = datetime.strptime(dataset.initial_instance[:-1], "%Y-%m-%dT%H:%M")
+            frequency = int(dataset.frequency)
+            template = dataset.uri_template
+            current_n = calculate_current_n(initial_instance, frequency, execution_time, n)
+            dataset_uri = resolve_dataset_template(context, template, current_n.strftime("%Y-%m-%dT%H:%MZ"))
+            return dataset_uri
 
     return None
