@@ -91,7 +91,17 @@ class ActionMapper(BaseMapper, ABC):
         new_relations: List[Relation] = deepcopy(relations)
         new_tasks: List[Task] = deepcopy(tasks)
         new_tasks.insert(0, task_to_prepend)
-        new_relations.insert(0, Relation(from_task_id=task_to_prepend.task_id, to_task_id=tasks[0].task_id))
+        n = len(new_tasks)
+        if n > 2:
+            for i in range(1, n - 1):
+                new_relations.insert(
+                    0, Relation(from_task_id=task_to_prepend.task_id, to_task_id=new_tasks[i].task_id)
+                )
+        else:
+            new_relations.insert(
+                0, Relation(from_task_id=task_to_prepend.task_id, to_task_id=tasks[0].task_id)
+            )
+
         return new_tasks, new_relations
 
     def required_imports(self) -> Set[str]:

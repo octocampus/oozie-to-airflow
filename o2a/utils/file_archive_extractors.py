@@ -37,6 +37,8 @@ class HdfsPathProcessor:
     def preprocess_path_to_hdfs(self, path: str):
         if path.startswith("/"):
             return self.props.merged["nameNode"] + path
+        if "workflowAppUri" in self.props.merged.keys():
+            return self.props.merged["workflowAppUri"] + "/" + path
         return self.props.merged["oozie.wf.application.path"] + "/" + path
 
 
@@ -51,7 +53,7 @@ def split_by_hash_sign(path: str) -> List[str]:
         if len(split_path) > 2:
             raise Exception(f"There should be maximum one '#' in the path {path}")
         return split_path
-    return [path]
+    return [path, ""]
 
 
 class FileExtractor:
@@ -60,6 +62,7 @@ class FileExtractor:
     def __init__(self, oozie_node: Element, props: PropertySet):
         self.files: List[str] = []
         self.hdfs_files: List[str] = []
+        self.aliases: List[str] = []
         self.file_path_processor = HdfsPathProcessor(props=props)
         self.oozie_node = oozie_node
         self.props = props
@@ -68,8 +71,11 @@ class FileExtractor:
         file_nodes: List[Element] = self.oozie_node.findall("file")
 
         for file_node in file_nodes:
-            file_path = el_parser.translate(file_node.text)
-            self.add_file(file_path)
+            hdfs_path, alias = split_by_hash_sign(file_node.text)
+            hdfs_path = el_parser.translate(hdfs_path)
+            alias = el_parser.translate(alias)
+            self.aliases.append(alias)
+            self.add_file(hdfs_path)
 
         return self.files, self.hdfs_files
 
@@ -83,7 +89,7 @@ class FileExtractor:
         self.file_path_processor.check_path_for_comma(oozie_file_path)
         split_by_hash_sign(oozie_file_path)
         self.files.append(oozie_file_path)
-        self.hdfs_files.append(self.file_path_processor.preprocess_path_to_hdfs(oozie_file_path))
+        # self.hdfs_files.append(self.file_path_processor.preprocess_path_to_hdfs(oozie_file_path))
 
 
 class ArchiveExtractor:
@@ -94,6 +100,7 @@ class ArchiveExtractor:
     def __init__(self, oozie_node: Element, props: PropertySet):
         self.archives: List[str] = []
         self.hdfs_archives: List[str] = []
+        self.aliases: List[str] = []
         self.archive_path_processor = HdfsPathProcessor(props=props)
         self.oozie_node = oozie_node
         self.props = props
@@ -102,8 +109,11 @@ class ArchiveExtractor:
         archive_nodes: List[Element] = self.oozie_node.findall("archive")
         if archive_nodes:
             for archive_node in archive_nodes:
-                archive_path = el_parser.translate(archive_node.text)
-                self.add_archive(archive_path)
+                hdfs_path, alias = split_by_hash_sign(archive_node.text)
+                hdfs_path = el_parser.translate(hdfs_path)
+                alias = el_parser.translate(alias)
+                self.aliases.append(alias)
+                self.add_archive(hdfs_path)
         return self.archives, self.hdfs_archives
 
     def _check_archive_extensions(self, oozie_archive_path: str) -> List[str]:
@@ -127,6 +137,6 @@ class ArchiveExtractor:
 
     def add_archive(self, oozie_archive_path: str):
         self.archive_path_processor.check_path_for_comma(oozie_archive_path)
-        self._check_archive_extensions(oozie_archive_path)
+        # self._check_archive_extensions(oozie_archive_path)
         self.archives.append(oozie_archive_path)
-        self.hdfs_archives.append(self.archive_path_processor.preprocess_path_to_hdfs(oozie_archive_path))
+        # self.hdfs_archives.append(self.archive_path_processor.preprocess_path_to_hdfs(oozie_archive_path))

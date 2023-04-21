@@ -22,6 +22,7 @@ from o2a.converter.relation import Relation
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.mappers.extensions.prepare_mapper_extension import PrepareMapperExtension
 from o2a.o2a_libs.property_utils import PropertySet
+from o2a.utils.file_archive_extractors import FileExtractor, ArchiveExtractor
 from o2a.utils.xml_utils import get_tag_el_text, get_tags_el_array_from_text, find_nodes_by_tag
 from o2a.o2a_libs import el_parser
 from o2a.tasks.shell.shell_local_task import ShellLocalTask
@@ -46,6 +47,8 @@ class ShellMapper(ActionMapper):
 
     def __init__(self, oozie_node: Element, name: str, props: PropertySet, **kwargs):
         ActionMapper.__init__(self, oozie_node=oozie_node, name=name, props=props, **kwargs)
+        self.file_extractor = FileExtractor(oozie_node=oozie_node, props=self.props)
+        self.archive_extractor = ArchiveExtractor(oozie_node=oozie_node, props=self.props)
         self._parse_oozie_node()
         self.prepare_extension: PrepareMapperExtension = PrepareMapperExtension(self)
         self.env_vars = self.get_env_vars()
@@ -53,7 +56,10 @@ class ShellMapper(ActionMapper):
     def _parse_oozie_node(self):
         self.resource_manager = get_tag_el_text(self.oozie_node, TAG_RESOURCE)
         self.name_node = get_tag_el_text(self.oozie_node, TAG_NAME)
-
+        self.files, self.hdfs_files = self.file_extractor.parse_node()
+        self.file_aliases = self.file_extractor.aliases
+        self.archives, self.hdfs_archives = self.archive_extractor.parse_node()
+        self.archive_aliases = self.archive_extractor.aliases
         cmd_txt = get_tag_el_text(self.oozie_node, TAG_CMD)
         args = get_tags_el_array_from_text(self.oozie_node, TAG_ARG)
         translated_args = [el_parser.translate(arg) for arg in args]
@@ -87,8 +93,32 @@ class ShellMapper(ActionMapper):
                 env=self.env_vars,
             ),
         )
-        tasks = [action_task]
-        relations: List[Relation] = []
+        files_archives_copy = []
+        files_archives_relations = []
+        if self.files:
+            files_archives_copy.append(
+                Task(
+                    task_id=self.name + "_copy_files",
+                    template_name="operators/file_oozie_operator.tpl",
+                    template_params=dict(files=self.files, aliases=self.file_aliases),
+                )
+            )
+            files_archives_relations.append(
+                Relation(from_task_id=self.name + "_copy_files", to_task_id=self.name)
+            )
+        if self.archives:
+            files_archives_copy.append(
+                Task(
+                    task_id=self.name + "_copy_archives",
+                    template_name="operators/archive_oozie_operator.tpl",
+                    template_params=dict(archives=self.archives, aliases=self.archive_aliases),
+                )
+            )
+            files_archives_relations.append(
+                Relation(from_task_id=self.name + "_copy_archives", to_task_id=self.name)
+            )
+        tasks = files_archives_copy + [action_task]
+        relations: List[Relation] = files_archives_relations
         prepare_task = self.prepare_extension.get_prepare_task()
         if prepare_task:
             tasks, relations = self.prepend_task(prepare_task, tasks, relations)
@@ -97,5 +127,6 @@ class ShellMapper(ActionMapper):
     def required_imports(self):
         dependencies = self.get_task_class(self.TASK_MAPPER).required_imports()
         prepare_dependencies = self.prepare_extension.required_imports()
-
+        if self.files or self.archives:
+            dependencies.add("from o2a.o2a_libs import operators")
         return dependencies.union(prepare_dependencies)
