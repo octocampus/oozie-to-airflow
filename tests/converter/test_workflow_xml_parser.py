@@ -207,8 +207,8 @@ class TestWorkflowXmlParser(unittest.TestCase):
         self.assertIn(node_name, self.parser.workflow.nodes)
         self.assertEqual(["end1"], p_op.downstream_names)
         self.assertEqual("fail1", p_op.error_downstream_name)
-        self.assertEqual(["myNameNode/test_dir/test.txt#test_link.txt"], p_op.mapper.hdfs_files)
-        self.assertEqual(["myNameNode/test_dir/test2.zip#test_zip_dir"], p_op.mapper.hdfs_archives)
+        self.assertEqual(["/test_dir/test.txt"], p_op.mapper.files)
+        self.assertEqual(["/test_dir/test2.zip"], p_op.mapper.archives)
 
     def test_parse_mapreduce_node(self):
         self.parser.job_properties = {"nameNode": "hdfs://"}

@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional, Type
 from xml.etree.ElementTree import Element
 
 from o2a.converter.exceptions import ParseException
+from o2a.converter.relation import Relation
 from o2a.converter.task import Task
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.mappers.extensions.prepare_mapper_extension import PrepareMapperExtension
@@ -35,6 +36,11 @@ from o2a.tasks.hive.hive_local_task import HiveLocalTask
 
 TAG_SCRIPT = "script"
 TAG_QUERY = "query"
+TAG_NAMENODE = "name-node"
+TAG_RESOURCE_MANAGER = "resource-manager"
+TAG_JOB_TRACKER = "job-tracker"
+TAG_JDBC_URL = "jdbc-url"
+TAG_PASSWORD = "password"
 
 
 class HiveMapper(ActionMapper):
@@ -48,13 +54,22 @@ class HiveMapper(ActionMapper):
         "gcp": Task,
     }
 
-    def __init__(self, oozie_node: Element, name: str, props: PropertySet, **kwargs):
+    def __init__(self, oozie_node: Element, name: str, props: PropertySet, action_name: str, **kwargs):
         ActionMapper.__init__(self, oozie_node=oozie_node, name=name, props=props, **kwargs)
+        self.name_node: str = None
+        self.job_tracker: str = None
+        self.resource_manager: str = None
+        self.jdbc_url: str = None
+        self.action_name = action_name
         self.variables: Optional[Dict[str, str]] = None
         self.query: Optional[str] = None
         self.script: Optional[str] = None
+        self.files: Optional[str] = None
+        self.file_aliases: Optional[List[str]] = None
         self.hdfs_files: Optional[List[str]] = None
+        self.archives: Optional[str] = None
         self.hdfs_archives: Optional[List[str]] = None
+        self.archive_aliases: Optional[List[str]] = None
         self.file_extractor = FileExtractor(oozie_node=oozie_node, props=self.props)
         self.archive_extractor = ArchiveExtractor(oozie_node=oozie_node, props=self.props)
         self.prepare_extension: PrepareMapperExtension = PrepareMapperExtension(self)
@@ -63,6 +78,12 @@ class HiveMapper(ActionMapper):
         # TODO parse resource manager, job-tracker
         super().on_parse_node()
         self._parse_config()
+        self.name_node = get_tag_el_text(self.oozie_node, TAG_NAMENODE)
+        self.job_tracker = get_tag_el_text(self.oozie_node, TAG_JOB_TRACKER)
+        self.resource_manager = get_tag_el_text(self.oozie_node, TAG_RESOURCE_MANAGER)
+        self.jdbc_url = get_tag_el_text(self.oozie_node, TAG_JDBC_URL)
+        if self.action_name == "hive2" and not self.jdbc_url:
+            raise ParseException("jdbc-url is required when using hive2 actions")
         self.query = get_tag_el_text(self.oozie_node, TAG_QUERY)
 
         self.script = self.__get_output_script_path(get_tag_el_text(self.oozie_node, TAG_SCRIPT))
@@ -77,8 +98,10 @@ class HiveMapper(ActionMapper):
             )
 
         self.variables = extract_param_values_from_action_node(self.oozie_node)
-        _, self.hdfs_files = self.file_extractor.parse_node()
-        _, self.hdfs_archives = self.archive_extractor.parse_node()
+        self.files, self.hdfs_files = self.file_extractor.parse_node()
+        self.archives, self.hdfs_archives = self.archive_extractor.parse_node()
+        self.file_aliases = self.file_extractor.aliases
+        self.archive_aliases = self.archive_extractor.aliases
 
     def to_tasks_and_relations(self):
 
@@ -95,8 +118,32 @@ class HiveMapper(ActionMapper):
                 else "hive_cli_default",
             ),
         )
-        tasks = [action_task]
-        relations = []
+        files_archives_copy = []
+        files_archives_relations = []
+        if self.files:
+            files_archives_copy.append(
+                Task(
+                    task_id=self.name + "_copy_files",
+                    template_name="operators/file_oozie_operator.tpl",
+                    template_params=dict(files=self.files, aliases=self.file_aliases),
+                )
+            )
+            files_archives_relations.append(
+                Relation(from_task_id=self.name + "_copy_files", to_task_id=self.name)
+            )
+        if self.archives:
+            files_archives_copy.append(
+                Task(
+                    task_id=self.name + "_copy_archives",
+                    template_name="operators/archive_oozie_operator.tpl",
+                    template_params=dict(archives=self.archives, aliases=self.archive_aliases),
+                )
+            )
+            files_archives_relations.append(
+                Relation(from_task_id=self.name + "_copy_archives", to_task_id=self.name)
+            )
+        tasks = files_archives_copy + [action_task]
+        relations: List[Relation] = files_archives_relations
         prepare_task = self.prepare_extension.get_prepare_task()
         if prepare_task:
             tasks, relations = self.prepend_task(prepare_task, tasks, relations)

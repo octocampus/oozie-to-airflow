@@ -27,6 +27,9 @@ jobs:
               with:
                   python-version: ${{ matrix.python-version }}
 
+            - name: update packages
+              run: sudo apt-get update
+
             - name: install required packages
               run: sudo apt-get install -y libxml2-utils
 
@@ -52,6 +55,9 @@ jobs:
               uses: actions/setup-python@v3
               with:
                   python-version: ${{ matrix.python-version }}
+
+            - name: update packages
+              run: sudo apt-get update
 
             - name: install required packages
               run: sudo apt-get install -y libxml2-utils

@@ -230,6 +230,7 @@ class WorkflowXmlParser:
                 jar_files=self.workflow.jar_files,
                 transformers=self.transformers,
                 subdag_folder=self.workflow.subdag_folder,
+                action_name=action_name,
             )
 
         oozie_action_node = OozieActionNode(mapper)

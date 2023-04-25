@@ -52,6 +52,8 @@ class TestShellMapper(unittest.TestCase):
             <argument>$VAR2</argument>
             <env-var>VAR1=value1</env-var>
             <env-var>VAR2=value2</env-var>
+            <file>${scriptpath}#${scriptalias}</file>
+            <archive>${archivepath}#${archivealias}</archive>
 
         </shell>
         """
@@ -67,6 +69,10 @@ class TestShellMapper(unittest.TestCase):
         self.assertEqual("hdfs://localhost:8020", mapper.name_node)
         self.assertEqual("{{queueName}}", mapper.props.action_node_properties["mapred.job.queue.name"])
         self.assertEqual("echo arg1 $VAR2", mapper.bash_command)
+        self.assertEqual(["{{scriptpath}}"], mapper.files)
+        self.assertEqual(["{{scriptalias}}"], mapper.file_aliases)
+        self.assertEqual(["{{archivepath}}"], mapper.archives)
+        self.assertEqual(["{{archivealias}}"], mapper.archive_aliases)
 
     def test_create_mapper_jinja(self):
         # test jinja templating
@@ -109,6 +115,16 @@ class TestShellMapper(unittest.TestCase):
                         "mkdir": "/examples/input-data/demo/pig-node /examples/input-data/demo/pig-node2",
                     },
                 ),
+                Task(
+                    task_id="test_id_copy_files",
+                    template_name="operators/file_oozie_operator.tpl",
+                    template_params={"files": ["{{scriptpath}}"], "aliases": ["{{scriptalias}}"]},
+                ),
+                Task(
+                    task_id="test_id_copy_archives",
+                    template_name="operators/archive_oozie_operator.tpl",
+                    template_params={"archives": ["{{archivepath}}"], "aliases": ["{{archivealias}}"]},
+                ),
                 ShellLocalTask(
                     task_id="test_id",
                     template_name="shell/shell.tpl",
@@ -124,7 +140,15 @@ class TestShellMapper(unittest.TestCase):
             ],
             tasks,
         )
-        self.assertEqual(relations, [Relation(from_task_id="test_id_prepare", to_task_id="test_id")])
+        self.assertEqual(
+            [
+                Relation(from_task_id="test_id_prepare", to_task_id="test_id_copy_archives"),
+                Relation(from_task_id="test_id_prepare", to_task_id="test_id_copy_files"),
+                Relation(from_task_id="test_id_copy_files", to_task_id="test_id"),
+                Relation(from_task_id="test_id_copy_archives", to_task_id="test_id"),
+            ],
+            relations,
+        )
 
     def test_required_imports(self):
         job_properties = {"nameNode": "hdfs://localhost:9020/"}
