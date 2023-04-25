@@ -3,7 +3,7 @@ import subprocess
 import unittest
 from unittest.mock import mock_open
 
-import mock
+from unittest import mock
 from airflow import AirflowException
 
 from o2a.o2a_libs.operators import handle_archive, FilesOozieOperator, ArchivesOozieOperator
