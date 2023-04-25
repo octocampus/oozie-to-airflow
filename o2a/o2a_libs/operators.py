@@ -55,7 +55,7 @@ class FilesOozieOperator(BaseOperator):
 
     def execute(self, context):
         for index, file in enumerate(self.files):
-            file = construct_path(file)
+            file = construct_path(context, file)
             basename = os.path.basename(os.path.normpath(file))
             if self.aliases[index] is None:
                 self.aliases[index] = basename
@@ -67,7 +67,7 @@ class FilesOozieOperator(BaseOperator):
             )
             copy_out, copy_err = copy_file.communicate()
             if copy_err:
-                raise AirflowException("Error while copying hdfs files to worker: ", copy_err)
+                raise AirflowException("Error while copying hdfs files to worker: " + copy_err)
 
 
 class ArchivesOozieOperator(BaseOperator):
@@ -78,14 +78,14 @@ class ArchivesOozieOperator(BaseOperator):
 
     def execute(self, context):
         for index, archive in enumerate(self.archives):
-            archive = construct_path(archive)
+            archive = construct_path(context, archive)
             basename = os.path.basename(os.path.normpath(archive))
             copy_file = subprocess.Popen(
                 f"hadoop fs -get {archive} .", stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True
             )
             copy_out, copy_err = copy_file.communicate()
             if copy_err:
-                raise AirflowException("Error while copying hdfs files to worker: ", copy_err)
+                raise AirflowException("Error while copying hdfs files to worker: " + copy_err)
             if self.aliases[index] is None:
                 self.aliases[index] = basename
             handle_archive(basename, self.aliases[index])

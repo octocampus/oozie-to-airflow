@@ -57,7 +57,12 @@ FRAGMENT_SCRIPT = """
     <param>OUTPUT=/user/${userName}/${examplesRoot}/apps/hive/output/</param>
 </fragment>
 """
-
+# language=XML
+FRAGMENT_JDBC = """
+<jdbc-url>
+test
+</jdbc-url>
+"""
 
 # language=XML
 FRAGMENT_QUERY = """
@@ -193,9 +198,20 @@ class TestHiveMapper(unittest.TestCase):
 
         tasks, relations = mapper.to_tasks_and_relations()
 
-        self.assertEqual(1, len(tasks))
+        self.assertEqual(2, len(tasks))
         self.assertEqual(
             [
+                Task(
+                    task_id="test_id_copy_files",
+                    template_name="operators/file_oozie_operator.tpl",
+                    template_params=dict(
+                        files=[
+                            "test_dir/test.txt",
+                            "/user/{{userName}}/{{examplesRoot}}/apps/pig/test_dir/test2.zip",
+                        ],
+                        aliases=["test_link.txt", "test_link.zip"],
+                    ),
+                ),
                 HiveLocalTask(
                     task_id="test_id",
                     template_name="hive/hive.tpl",
@@ -208,12 +224,12 @@ class TestHiveMapper(unittest.TestCase):
                         "mapred_queue": "default",
                         "hive_cli_conn_id": "hive_cli_default",
                     },
-                )
+                ),
             ],
             tasks,
         )
 
-        self.assertEqual([], relations)
+        self.assertEqual([Relation(from_task_id="test_id_copy_files", to_task_id="test_id")], relations)
 
     def test_to_tasks_and_relations_should_parse_archive_element(self):
         self.hive_node.append(ET.fromstring(FRAGMENT_QUERY))
@@ -227,9 +243,17 @@ class TestHiveMapper(unittest.TestCase):
 
         tasks, relations = mapper.to_tasks_and_relations()
 
-        self.assertEqual(1, len(tasks))
+        self.assertEqual(2, len(tasks))
         self.assertEqual(
             [
+                Task(
+                    task_id="test_id_copy_archives",
+                    template_name="operators/archive_oozie_operator.tpl",
+                    template_params=dict(
+                        archives=["test_dir/test2.zip", "test_dir/test3.zip"],
+                        aliases=["test_zip_dir", "test3_zip_dir"],
+                    ),
+                ),
                 HiveLocalTask(
                     task_id="test_id",
                     template_name="hive/hive.tpl",
@@ -242,18 +266,25 @@ class TestHiveMapper(unittest.TestCase):
                         "mapred_queue": "default",
                         "hive_cli_conn_id": "hive_cli_default",
                     },
-                )
+                ),
             ],
             tasks,
         )
 
-        self.assertEqual([], relations)
+        self.assertEqual([Relation(from_task_id="test_id_copy_archives", to_task_id="test_id")], relations)
 
     def test_on_parse_should_raise_exception_missing_query_or_script(self):
         mapper = self._get_hive_mapper(job_properties=self.job_properties, config=self.config)
         with self.assertRaisesRegex(
             ParseException, "Action Configuration does not include script or query element"
         ):
+            mapper.on_parse_node()
+
+    def test_on_parse_should_raise_exception_when_jdbc_url_missing_when_hive2_used(self):
+        mapper = self._get_hive_mapper(
+            job_properties=self.job_properties, config=self.config, hive_version="hive2"
+        )
+        with self.assertRaisesRegex(ParseException, "jdbc-url is required when using hive2 actions"):
             mapper.on_parse_node()
 
     def test_on_parse_should_raise_exception_when_query_and_script_are_set_at_the_same_time(self):
@@ -276,12 +307,13 @@ class TestHiveMapper(unittest.TestCase):
         imp_str = "\n".join(imps)
         ast.parse(imp_str)
 
-    def _get_hive_mapper(self, job_properties, config):
+    def _get_hive_mapper(self, job_properties, config, hive_version="hive"):
         mapper = hive_mapper.HiveMapper(
             oozie_node=self.hive_node,
             name="test_id",
             dag_name="DAG_NAME_B",
             props=PropertySet(job_properties=job_properties, config=config),
             input_directory_path="/tmp/input-directory-path/",
+            action_name=hive_version,
         )
         return mapper

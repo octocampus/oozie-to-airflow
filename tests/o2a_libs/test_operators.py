@@ -6,10 +6,10 @@ from unittest.mock import mock_open
 import mock
 from airflow import AirflowException
 
-from o2a.o2a_libs.operators import handle_archive
+from o2a.o2a_libs.operators import handle_archive, FilesOozieOperator
 
 
-class TestOperators(unittest.TestCase):
+class TestHandleArchive(unittest.TestCase):
     @mock.patch.object(subprocess.Popen, "communicate", autospec=True)
     def test_handle_archive_should_call_Popen_communicate_when_jar_passed(self, mock_comm):
         mock_comm.return_value = ("success", None)
@@ -45,3 +45,28 @@ class TestOperators(unittest.TestCase):
         mock_gz.open.assert_called_with("test.gz", "rb")
         mock_file.assert_called_with("alias", "wb")
         mock_shutil.copyfileobj.assert_called_once()
+
+
+context = {"nameNode": "hdfs://test:6060", "oozie.wf.application.path": "hdfs://test:6060/wf"}
+
+
+class TestFilesOozieOperator(unittest.TestCase):
+    @mock.patch("o2a.o2a_libs.operators.subprocess")
+    def test_FilesOozieOperator_should_copy_files_to_worker(self, mock_subprocess):
+        task = FilesOozieOperator(task_id="test_id", files=["test.txt"], aliases=["alias.txt"])
+        mock_subprocess.Popen.return_value.communicate.return_value = ("success", None)
+        task.execute(context)
+
+        mock_subprocess.Popen.assert_called_with(
+            "hadoop fs -get hdfs://test:6060/wf/test.txt . && mv test.txt alias.txt",
+            stderr=mock_subprocess.PIPE,
+            stdout=mock_subprocess.PIPE,
+            shell=True,
+        )
+
+    @mock.patch("o2a.o2a_libs.operators.subprocess")
+    def test_FilesOozieOperator_should_raise_exception_when_error_occured_on_copying(self, mock_subprocess):
+        task = FilesOozieOperator(task_id="test_id", files=["test.txt"], aliases=["alias.txt"])
+        mock_subprocess.Popen.return_value.communicate.return_value = (None, "error")
+        with self.assertRaisesRegex(AirflowException, "Error while copying hdfs files to worker: error"):
+            task.execute(context)
