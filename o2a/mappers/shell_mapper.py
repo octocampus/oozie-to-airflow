@@ -46,6 +46,8 @@ class ShellMapper(ActionMapper):
 
     def __init__(self, oozie_node: Element, name: str, props: PropertySet, **kwargs):
         ActionMapper.__init__(self, oozie_node=oozie_node, name=name, props=props, **kwargs)
+        self.files = None
+        self.archives = None
         self._parse_oozie_node()
         self.prepare_extension: PrepareMapperExtension = PrepareMapperExtension(self)
         self.env_vars = self.get_env_vars()
@@ -57,10 +59,19 @@ class ShellMapper(ActionMapper):
         cmd_txt = get_tag_el_text(self.oozie_node, TAG_CMD)
         args = get_tags_el_array_from_text(self.oozie_node, TAG_ARG)
         translated_args = [el_parser.translate(arg) for arg in args]
-
+        self.files = self._parse_file_archive_nodes("file")
+        self.archives = self._parse_file_archive_nodes("archive")
         self.bash_command = " ".join([cmd_txt] + translated_args)
 
         self.env_vars = self.get_env_vars() or {}
+
+    def _parse_file_archive_nodes(self, node_tag: str):
+        nodes: List[Element] = self.oozie_node.findall(node_tag)
+        paths = []
+        for node in nodes:
+            path = el_parser.translate(node.text)
+            paths.append(path)
+        return paths
 
     def get_env_vars(self) -> dict:
         """
@@ -79,19 +90,21 @@ class ShellMapper(ActionMapper):
     def to_tasks_and_relations(self):
         task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
         print(self.env_vars)
+        relations: List[Relation] = []
+        delete_paths, mkdir_paths = self.prepare_extension.parse_prepare_node()
         action_task = task_class(
             task_id=self.name,
             template_name="shell/shell.tpl",
             template_params=dict(
                 bash_command=self.bash_command,
                 env=self.env_vars,
+                mkdir=mkdir_paths,
+                delete=delete_paths,
+                files=self.files,
+                archives=self.archives,
             ),
         )
         tasks = [action_task]
-        relations: List[Relation] = []
-        prepare_task = self.prepare_extension.get_prepare_task()
-        if prepare_task:
-            tasks, relations = self.prepend_task(prepare_task, tasks, relations)
         return tasks, relations
 
     def required_imports(self):
