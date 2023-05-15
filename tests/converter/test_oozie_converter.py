@@ -305,7 +305,7 @@ class TestOozieConvertByExamples(TestCase):
         )
         self.assertEqual(
             {
-                "from  airflow.operators import bash",
+                "from o2a.o2a_libs.operators.shell_oozie_operator import ShellOozieOperator",
                 "from airflow import models",
                 "from airflow.contrib.operators import dataproc_operator",
                 "from airflow.operators import bash",

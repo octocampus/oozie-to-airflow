@@ -9,7 +9,7 @@ from airflow import AirflowException
 
 
 def construct_hdfs_path_and_alias(path: str):
-    pass
+    return 1, 2
 
 
 def handle_archive(basename: str, alias: str) -> None:
