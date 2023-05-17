@@ -11,81 +11,40 @@ from o2a.o2a_libs.util_classes import PrepareAction, CopyToWorker
 class TestPrepareAction(unittest.TestCase):
     @mock.patch("o2a.o2a_libs.util_classes.SubprocessHook")
     @mock.patch("o2a.o2a_libs.util_classes.construct_hdfs_path_and_alias")
-    def test_prepare_mkdir_should_make_directory(self, mock_func, mock_subpr):
+    def test_prepare_command_with_command_mkdir(self, mock_func, mock_subpr):
         mock_subpr.return_value.run_command.return_value.exit_code = 0
-        mock_func.return_value = "hdfs://test", ""
-        prepare_action = PrepareAction(mkdir=["test"])
-        prepare_action.prepare_mkdir()
-        mock_func.assert_called_with("test")
+        mock_func.return_value = "hdfs://test", "alias"
+        prepare_action = PrepareAction()
+        prepare_action.prepare_command("test", "mkdir")
         mock_subpr.return_value.run_command.assert_called_with(
             command=[shutil.which("bash"), "-c", "hadoop fs -mkdir hdfs://test"]
         )
 
     @mock.patch("o2a.o2a_libs.util_classes.SubprocessHook")
     @mock.patch("o2a.o2a_libs.util_classes.construct_hdfs_path_and_alias")
-    def test_prepare_mkdir_should_raise_exception_when_mkdir_fail_creating_directory(
-        self, mock_func, mock_subpr
-    ):
-        mock_subpr.return_value.run_command.return_value.exit_code = 1
-        mock_func.return_value = "hdfs://test", ""
-        prepare_action = PrepareAction(mkdir=["test"])
-        with self.assertRaisesRegex(
-            AirflowException, "Error occured while creating hdfs directory <prepare mkdir tag>."
-        ):
-            prepare_action.prepare_mkdir()
-        mock_func.assert_called_with("test")
-
-    @mock.patch("o2a.o2a_libs.util_classes.SubprocessHook")
-    @mock.patch("o2a.o2a_libs.util_classes.construct_hdfs_path_and_alias")
-    def test_prepare_delete_should_delete_directory(self, mock_func, mock_subpr):
+    def test_prepare_command_with_command_delete(self, mock_func, mock_subpr):
         mock_subpr.return_value.run_command.return_value.exit_code = 0
-        mock_func.return_value = "hdfs://test", ""
-        prepare_action = PrepareAction(delete=["test"])
-        prepare_action.prepare_delete()
-        mock_func.assert_called_with("test")
+        mock_func.return_value = "hdfs://test", "alias"
+        prepare_action = PrepareAction()
+        prepare_action.prepare_command("test", "delete")
         mock_subpr.return_value.run_command.assert_called_with(
             command=[shutil.which("bash"), "-c", "hadoop fs -rm -rf hdfs://test"]
         )
 
     @mock.patch("o2a.o2a_libs.util_classes.SubprocessHook")
     @mock.patch("o2a.o2a_libs.util_classes.construct_hdfs_path_and_alias")
-    def test_prepare_delete_should_raise_exception_when_delete_fail_deleting_directory(
-        self, mock_func, mock_subpr
-    ):
+    def test_prepare_command_should_raise_exception_when_command_fails(self, mock_func, mock_subpr):
         mock_subpr.return_value.run_command.return_value.exit_code = 1
-        mock_func.return_value = "hdfs://test", ""
-        prepare_action = PrepareAction(delete=["test"])
-        with self.assertRaisesRegex(
-            AirflowException, "Error occured while deleting hdfs directory <prepare delete tag>."
-        ):
-            prepare_action.prepare_delete()
-        mock_func.assert_called_with("test")
+        mock_func.return_value = "hdfs://test", "alias"
+        prepare_action = PrepareAction()
+        with self.assertRaisesRegex(AirflowException, "Error occured while preparing worker, <prepare> tag"):
+            prepare_action.prepare_command("test", "delete")
 
-    @mock.patch.object(PrepareAction, "prepare_delete", autospec=True)
-    @mock.patch.object(PrepareAction, "prepare_mkdir", autospec=True)
-    def test_prepare_should_call_prepare_mkdir_when_mkdir_list_provided(self, mock_mkdir, mock_delete):
-        prepare_action = PrepareAction(mkdir=["test"])
+    @mock.patch.object(PrepareAction, "prepare_command", autospec=True)
+    def test_prepare(self, mock_prepare):
+        prepare_action = PrepareAction(prepare=[("mkdir", "test")])
         prepare_action.prepare()
-        mock_mkdir.assert_called_once()
-        mock_delete.assert_not_called()
-
-    @mock.patch.object(PrepareAction, "prepare_delete", autospec=True)
-    @mock.patch.object(PrepareAction, "prepare_mkdir", autospec=True)
-    def test_prepare_should_call_prepare_delete_when_delete_list_provided(self, mock_mkdir, mock_delete):
-        prepare_action = PrepareAction(delete=["test"])
-        prepare_action.prepare()
-        mock_delete.assert_called_once()
-        mock_mkdir.assert_not_called()
-
-    @mock.patch.object(PrepareAction, "prepare_delete", autospec=True)
-    @mock.patch.object(PrepareAction, "prepare_mkdir", autospec=True)
-    def test_prepare_should_call_prepare_mkdir_and_delete_when_both_lists_provided(
-        self, mock_mkdir, mock_delete
-    ):
-        prepare_action = PrepareAction(delete=["test"], mkdir=["test_mkdir"])
-        prepare_action.prepare()
-        mock_delete.assert_called_once()
-        mock_mkdir.assert_called_once()
+        mock_prepare.assert_called_with(prepare_action, "test", "mkdir")
 
 
 class TestCopyToWorker(unittest.TestCase):

@@ -75,8 +75,8 @@ class TestDistCpMapper(unittest.TestCase):
         self.assertEqual(mapper.oozie_node, self.distcp_node)
         self.assertIsNotNone(tasks)
         self.assertIsNotNone(relations)
-        self.assertEqual(2, len(tasks))
-        self.assertEqual(1, len(relations))
+        self.assertEqual(1, len(tasks))
+        self.assertEqual(0, len(relations))
         self.assertEqual(
             [
                 Task(
@@ -144,6 +144,7 @@ class TestDistCpMapperNoPrepare(unittest.TestCase):
                     template_name="distcp.tpl",
                     trigger_rule="one_success",
                     template_params={
+                        "prepare": [],
                         "props": PropertySet(
                             config={"dataproc_cluster": "my-cluster", "gcp_region": "europe-west3"},
                             job_properties={

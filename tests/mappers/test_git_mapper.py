@@ -121,16 +121,11 @@ class TestGitMapper(unittest.TestCase):
         self.assertEqual(
             [
                 Task(
-                    task_id="test_id_prepare",
-                    template_name="prepare/prepare.tpl",
-                    trigger_rule="one_success",
-                    template_params={"delete": "/tmp/d_path", "mkdir": "/tmp/mk_path"},
-                ),
-                Task(
                     task_id="test_id",
                     template_name="git.tpl",
                     trigger_rule="one_success",
                     template_params={
+                        "prepare": [],
                         "git_uri": "https://github.com/apache/oozie",
                         "git_branch": "{{branch}}",
                         "destination_path": "/my_git_repo_directory",

@@ -20,8 +20,5 @@
     trigger_rule={{ trigger_rule | to_python }},
     bash_command={{ bash_command | to_python }},
     {% if env %}   env={{ env | to_python }}, {% endif %}
-    {% if mkdir %}   mkdir={{ mkdir | to_python }}, {% endif %}
-    {% if delete %}   delete={{ delete | to_python }}, {% endif %}
-    {% if files %}   files={{ files | to_python }}, {% endif %}
-    {% if archives %}   archives={{ archives | to_python }}, {% endif %}
+    {% if prepare %} prepare={{ prepare | to_python}}, {% endif %}
 )

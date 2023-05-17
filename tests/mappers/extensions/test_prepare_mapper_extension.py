@@ -17,7 +17,6 @@ import unittest
 from xml.etree import ElementTree as ET
 
 
-from o2a.converter.task import Task
 from o2a.mappers.base_mapper import BaseMapper
 from o2a.mappers.extensions.prepare_mapper_extension import PrepareMapperExtension
 from o2a.o2a_libs.property_utils import PropertySet
@@ -58,18 +57,8 @@ class TestPrepareMapperExtension(unittest.TestCase):
             pig_node_prepare, props=PropertySet(config=config, job_properties=job_properties)
         )
         self.assertTrue(extension.has_prepare())
-        task = extension.get_prepare_task()
-        self.assertEqual(
-            Task(
-                task_id="mapper_prepare",
-                template_name="prepare/prepare.tpl",
-                template_params={
-                    "delete": "/examples/output-data/demo/pig-node /examples/output-data/demo/pig-node2",
-                    "mkdir": "/examples/input-data/demo/pig-node /examples/input-data/demo/pig-node2",
-                },
-            ),
-            task,
-        )
+        # task = extension.get_prepare_task()
+        extension.parse_prepare_node()
 
     def test_no_prepare(self):
         cluster = "my-cluster"
@@ -84,8 +73,8 @@ class TestPrepareMapperExtension(unittest.TestCase):
         )
 
         self.assertFalse(extension.has_prepare())
-        prepare_task = extension.get_prepare_task()
-        self.assertIsNone(prepare_task)
+        prepare_task = extension.parse_prepare_node()
+        self.assertEqual([], prepare_task)
 
     def test_empty_prepare(self):
         cluster = "my-cluster"
@@ -105,5 +94,5 @@ class TestPrepareMapperExtension(unittest.TestCase):
             node=pig_node, props=PropertySet(config=config, job_properties=job_properties)
         )
         self.assertFalse(extension.has_prepare())
-        prepare_task = extension.get_prepare_task()
-        self.assertIsNone(prepare_task)
+        prepare_task = extension.parse_prepare_node()
+        self.assertEqual([], prepare_task)

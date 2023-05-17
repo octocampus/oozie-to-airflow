@@ -83,7 +83,7 @@ class HiveMapper(ActionMapper):
     def to_tasks_and_relations(self):
 
         task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
-
+        prepare_commands = self.prepare_extension.parse_prepare_node()
         action_task = task_class(
             task_id=self.name,
             template_name="hive/hive.tpl",
@@ -93,13 +93,11 @@ class HiveMapper(ActionMapper):
                 hive_cli_conn_id=self.props.config["hive_cli_conn_id"]
                 if "hive_cli_conn_id" in self.props.config
                 else "hive_cli_default",
+                prepare=prepare_commands,
             ),
         )
         tasks = [action_task]
         relations = []
-        prepare_task = self.prepare_extension.get_prepare_task()
-        if prepare_task:
-            tasks, relations = self.prepend_task(prepare_task, tasks, relations)
 
         return tasks, relations
 

@@ -58,6 +58,7 @@ class PigMapper(ActionMapper):
         self.archives, self.hdfs_archives = self.archive_extractor.parse_node()
 
     def to_tasks_and_relations(self):
+        self.prepare_extension.parse_prepare_node()
         action_task = Task(
             task_id=self.name,
             template_name="pig.tpl",
@@ -70,9 +71,7 @@ class PigMapper(ActionMapper):
         )
         tasks = [action_task]
         relations: List[Relation] = []
-        prepare_task = self.prepare_extension.get_prepare_task()
-        if prepare_task:
-            tasks, relations = self.prepend_task(prepare_task, tasks, relations)
+
         return tasks, relations
 
     def _add_symlinks(self, destination_pig_file):

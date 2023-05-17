@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Prepare node mixin"""
-from typing import List, Tuple, Optional, Set
+from typing import List, Set, Tuple
 
-from o2a.converter.task import Task
 from o2a.mappers.base_mapper import BaseMapper
+from o2a.o2a_libs import el_parser
 from o2a.utils import xml_utils
-from o2a.utils.el_utils import normalize_path
 
 
 class PrepareMapperExtension:
@@ -36,20 +35,20 @@ class PrepareMapperExtension:
                 return True
         return False
 
-    def get_prepare_task(self) -> Optional[Task]:
-        delete_paths, mkdir_paths = self.parse_prepare_node()
-        if not delete_paths and not mkdir_paths:
-            return None
-        delete = " ".join(delete_paths) if delete_paths else None
-        mkdir = " ".join(mkdir_paths) if mkdir_paths else None
+    # def get_prepare_task(self) -> Optional[Task]:
+    #     delete_paths, mkdir_paths = self.parse_prepare_node()
+    #     if not delete_paths and not mkdir_paths:
+    #         return None
+    #     delete = " ".join(delete_paths) if delete_paths else None
+    #     mkdir = " ".join(mkdir_paths) if mkdir_paths else None
+    #
+    #     return Task(
+    #         task_id=self.mapper.name + "_prepare",
+    #         template_name="prepare/prepare.tpl",
+    #         template_params=dict(delete=delete, mkdir=mkdir),
+    #     )
 
-        return Task(
-            task_id=self.mapper.name + "_prepare",
-            template_name="prepare/prepare.tpl",
-            template_params=dict(delete=delete, mkdir=mkdir),
-        )
-
-    def parse_prepare_node(self) -> Tuple[List[str], List[str]]:
+    def parse_prepare_node(self) -> List[Tuple[str, str]]:
         """
         <prepare>
             <delete path="[PATH]"/>
@@ -58,25 +57,25 @@ class PrepareMapperExtension:
             ...
         </prepare>
         """
-        delete_paths = []
-        mkdir_paths = []
+        commands = []
         prepare_node = xml_utils.find_node_by_tag(self.mapper.oozie_node, "prepare")
         if prepare_node:
             # If there exists a prepare node, there will only be one, according
             # to oozie xml schema
             for node in prepare_node:
-                node_path = normalize_path(node.attrib["path"], props=self.mapper.props)
+                # node_path = normalize_path(node.attrib["path"], props=self.mapper.props)
+                node_path = el_parser.translate(node.attrib["path"])
                 if node.tag == "delete":
-                    delete_paths.append(node_path)
+                    commands.append(("delete", node_path))
                 elif node.tag == "mkdir":
-                    mkdir_paths.append(node_path)
+                    commands.append(("mkdir", node_path))
                 else:
                     raise Exception(f"Unknown XML node in prepare: {node.tag}")
-        return delete_paths, mkdir_paths
+        return commands
 
     @staticmethod
     def required_imports() -> Set[str]:
         """
         Returns set of dependencies for prepare task
         """
-        return {"from  airflow.operators import bash"}
+        return {"from airflow.operators import bash"}

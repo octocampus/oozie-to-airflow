@@ -69,6 +69,7 @@ class JavaMapper(ActionMapper):
         self._extract_java_data()
 
     def to_tasks_and_relations(self):
+        prepare_commands = self.prepare_extension.parse_prepare_node()
         action_task = Task(
             task_id=self.name,
             template_name="java.tpl",
@@ -79,13 +80,12 @@ class JavaMapper(ActionMapper):
                 main_class=self.main_class,
                 jar_files_in_hdfs=self.jar_files_in_hdfs,
                 args=self.args,
+                prepare=prepare_commands,
             ),
         )
         tasks = [action_task]
         relations: List[Relation] = []
-        prepare_task = self.prepare_extension.get_prepare_task()
-        if prepare_task:
-            tasks, relations = self.prepend_task(prepare_task, tasks, relations)
+
         return tasks, relations
 
     def required_imports(self) -> Set[str]:

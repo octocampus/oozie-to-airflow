@@ -103,6 +103,14 @@ class TestShellMapper(unittest.TestCase):
                     template_name="shell/shell.tpl",
                     trigger_rule="one_success",
                     template_params={
+                        "files": [],
+                        "archives": [],
+                        "prepare": [
+                            ("delete", "{{nameNode}}/examples/output-data/demo/pig-node"),
+                            ("delete", "{{nameNode}}/examples/output-data/demo/pig-node2"),
+                            ("mkdir", "{{nameNode}}/examples/input-data/demo/pig-node"),
+                            ("mkdir", "{{nameNode}}/examples/input-data/demo/pig-node2"),
+                        ],
                         "bash_command": "echo arg1 $VAR2",
                         "env": {
                             "VAR1": "value1",

@@ -4,41 +4,32 @@ import shutil
 
 from airflow import AirflowException
 from airflow.hooks.subprocess import SubprocessHook
-from typing import List, Optional
+from typing import List, Tuple
 
 from o2a.o2a_libs.utils import construct_hdfs_path_and_alias, handle_archive
 
 
 class PrepareAction:
-    def __init__(self, mkdir: Optional[List[str]] = None, delete: Optional[List[str]] = None):
-        self.mkdir = mkdir
-        self.delete = delete
+    def __init__(self, prepare: List[Tuple[str, str]] = None):
+        self.prepare_commands = prepare
         self.subprocess_hook = SubprocessHook()
-        self.bash_path = shutil.which("bash") or "bash"
+        self.hadoop_command_option = {"mkdir": "-mkdir", "delete": "-rm -rf"}
 
     def prepare(self):
-        if self.mkdir:
-            self.prepare_mkdir()
-        if self.delete:
-            self.prepare_delete()
+        for command, path in self.prepare_commands:
+            self.prepare_command(path, command)
 
-    def prepare_mkdir(self):
-        for path in self.mkdir:
-            hdfs_path, _ = construct_hdfs_path_and_alias(path)
-            result = self.subprocess_hook.run_command(
-                command=[self.bash_path, "-c", f"hadoop fs -mkdir {hdfs_path}"]
-            )
-            if result.exit_code != 0:
-                raise AirflowException("Error occured while creating hdfs directory <prepare mkdir tag>.")
-
-    def prepare_delete(self):
-        for path in self.delete:
-            hdfs_path, _ = construct_hdfs_path_and_alias(path)
-            result = self.subprocess_hook.run_command(
-                command=[self.bash_path, "-c", f"hadoop fs -rm -rf {hdfs_path}"]
-            )
-            if result.exit_code != 0:
-                raise AirflowException("Error occured while deleting hdfs directory <prepare delete tag>.")
+    def prepare_command(self, path: str, command: str):
+        hdfs_path, _ = construct_hdfs_path_and_alias(path)
+        result = self.subprocess_hook.run_command(
+            command=[
+                shutil.which("bash"),
+                "-c",
+                f"hadoop fs {self.hadoop_command_option[command]} {hdfs_path}",
+            ]
+        )
+        if result.exit_code != 0:
+            raise AirflowException("Error occured while preparing worker, <prepare> tag")
 
 
 class CopyToWorker:

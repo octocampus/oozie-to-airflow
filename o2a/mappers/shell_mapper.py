@@ -16,7 +16,7 @@
 from typing import List, Type
 from xml.etree.ElementTree import Element
 
-
+from o2a.converter.exceptions import ParseException
 from o2a.converter.task import Task
 from o2a.converter.relation import Relation
 from o2a.mappers.action_mapper import ActionMapper
@@ -69,8 +69,15 @@ class ShellMapper(ActionMapper):
         nodes: List[Element] = self.oozie_node.findall(node_tag)
         paths = []
         for node in nodes:
-            path = el_parser.translate(node.text)
-            paths.append(path)
+            splitted_text = node.text.split("#")
+            if len(splitted_text) > 2:
+                raise ParseException("only one # is supported")
+            elif len(splitted_text) == 2:
+                path = el_parser.translate(splitted_text[0])
+                alias = el_parser.translate(splitted_text[1])
+                paths.append(f"{path}#{alias}")
+            elif len(splitted_text) == 1:
+                paths.append(splitted_text[0])
         return paths
 
     def get_env_vars(self) -> dict:
@@ -89,19 +96,17 @@ class ShellMapper(ActionMapper):
 
     def to_tasks_and_relations(self):
         task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
-        print(self.env_vars)
         relations: List[Relation] = []
-        delete_paths, mkdir_paths = self.prepare_extension.parse_prepare_node()
+        prepare_commands = self.prepare_extension.parse_prepare_node()
         action_task = task_class(
             task_id=self.name,
             template_name="shell/shell.tpl",
             template_params=dict(
                 bash_command=self.bash_command,
                 env=self.env_vars,
-                mkdir=mkdir_paths,
-                delete=delete_paths,
-                files=self.files,
+                prepare=prepare_commands,
                 archives=self.archives,
+                files=self.files,
             ),
         )
         tasks = [action_task]

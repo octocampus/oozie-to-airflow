@@ -18,7 +18,6 @@ import unittest
 from xml.etree import ElementTree as ET
 
 
-from o2a.converter.task import Task
 from o2a.mappers import spark_mapper
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.tasks.spark_local_task import SparkLocalTask
@@ -101,16 +100,12 @@ class TestSparkMapperWithPrepare(unittest.TestCase):
 
         self.assertEqual(
             [
-                Task(
-                    task_id="test_id_prepare",
-                    template_name="prepare/prepare.tpl",
-                    template_params={"delete": "/tmp/d_path", "mkdir": "/tmp/mk_path"},
-                ),
                 SparkLocalTask(
                     task_id="test_id",
                     template_name="spark/spark.tpl",
                     trigger_rule="one_success",
                     template_params={
+                        "prepare": [("mkdir", "hdfs:///tmp/mk_path"), ("delete", "hdfs:///tmp/d_path")],
                         "conf": {
                             "nameNode": "hdfs://",
                             "userName": "test_user",
@@ -142,6 +137,7 @@ class TestSparkMapperWithPrepare(unittest.TestCase):
                     template_name="spark/spark.tpl",
                     trigger_rule="one_success",
                     template_params={
+                        "prepare": [],
                         "conf": {
                             "nameNode": "hdfs://",
                             "userName": "test_user",

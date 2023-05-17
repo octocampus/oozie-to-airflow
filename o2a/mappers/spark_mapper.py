@@ -116,6 +116,7 @@ class SparkMapper(ActionMapper):
     def to_tasks_and_relations(self):
 
         task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
+        prepare_commands = self.prepare_extension.parse_prepare_node()
         action_task = task_class(
             task_id=self.name,
             template_name="spark/spark.tpl",
@@ -128,14 +129,12 @@ class SparkMapper(ActionMapper):
                 else "spark_default_conn_id",
                 jars=self.java_jar,
                 application_args=self.application_args,
+                prepare=prepare_commands,
             ),
         )
 
         tasks = [action_task]
         relations: List[Relation] = []
-        prepare_task = self.prepare_extension.get_prepare_task()
-        if prepare_task:
-            tasks, relations = self.prepend_task(prepare_task, tasks, relations)
         return tasks, relations
 
     def required_imports(self) -> Any:

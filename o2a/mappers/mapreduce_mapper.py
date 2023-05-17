@@ -55,6 +55,7 @@ class MapReduceMapper(ActionMapper):
         _, self.hdfs_archives = self.archive_extractor.parse_node()
 
     def to_tasks_and_relations(self):
+        prepare_commands = self.prepare_extension.parse_prepare_node()
         action_task = Task(
             task_id=self.name,
             template_name="mapreduce.tpl",
@@ -64,13 +65,12 @@ class MapReduceMapper(ActionMapper):
                 hdfs_files=self.hdfs_files,
                 hdfs_archives=self.hdfs_archives,
                 action_node_properties=self.props.action_node_properties,
+                prepare=prepare_commands,
             ),
         )
         tasks = [action_task]
         relations: List[Relation] = []
-        prepare_task = self.prepare_extension.get_prepare_task()
-        if prepare_task:
-            tasks, relations = self.prepend_task(prepare_task, tasks, relations)
+
         return tasks, relations
 
     @staticmethod
