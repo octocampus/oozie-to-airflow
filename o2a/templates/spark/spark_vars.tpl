@@ -1,0 +1,14 @@
+{% if prepare %} prepare={{prepare | to_python}}, {% endif %}
+{% if conf %} conf= {{ conf | to_python }}, {% endif %}
+{% if queue %} queue= {{ queue | to_python }}, {% endif %}
+{% if master %} master= {{ master | to_python }}, {% endif %}
+{% if mode %} mode= {{ mode | to_python }}, {% endif %}
+{% if files %} files= {{ files | to_python }}, {% endif %}
+{% if archives %} archives= {{ archives | to_python }}, {% endif %}
+{% if driver_memory %} driver_memory= {{ driver_memory | to_python }}, {% endif %}
+{% if executor_memory %} executor_memory= {{ executor_memory | to_python }}, {% endif %}
+{% if executor_cores %} executor_cores= {{ executor_cores | to_python }}, {% endif %}
+{% if total_executor_cores %} total_executor_cores= {{ total_executor_cores | to_python }}, {% endif %}
+{% if num_executors %} num_executors= {{ num_executors | to_python }}, {% endif %}
+{% if oozie_files %} oozie_files= {{ oozie_files | to_python }}, {% endif %}
+{% if oozie_archives %} oozie_archives= {{ oozie_archives | to_python }}, {% endif %}

@@ -1,0 +1,32 @@
+# IntelliJ IDEA / PyCharm
+.idea
+*.iml
+
+# Python
+__pycache__
+*.pyc
+
+.coverage
+
+.mypy_cache
+.o2a-run-sys-test-cache-dir
+output/
+output-artifacts/
+/build/
+/dist/
+*.egg-info/
+/.eggs/
+/pip-wheel-metadata
+
+
+.vagrant/
+
+*.box
+#*.jar
+*.rpm
+#*.zip
+*.whl
+*.tar.*
+*.tgz
+
+roles/*/files/packages/

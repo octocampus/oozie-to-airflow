@@ -1,0 +1,154 @@
+# -*- coding: utf-8 -*-
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Maps Oozie pig node to Airflow's DAG"""
+import logging
+import os
+import shutil
+from typing import Any, Dict, List, Optional, Type
+
+from xml.etree.ElementTree import Element
+
+from o2a.converter.exceptions import ParseException
+from o2a.converter.relation import Relation
+from o2a.converter.task import Task
+from o2a.mappers.action_mapper import ActionMapper
+from o2a.mappers.extensions.prepare_mapper_extension import PrepareMapperExtension
+from o2a.o2a_libs.property_utils import PropertySet
+from o2a.utils import el_utils
+from o2a.utils.file_archive_extractors import ArchiveExtractor, FileExtractor
+
+# pylint: disable=too-many-instance-attributes
+from o2a.utils.param_extractor import extract_param_values_from_action_node
+from o2a.utils.xml_utils import get_tag_el_text
+from o2a.tasks.hive.hive_local_task import HiveLocalTask
+
+TAG_SCRIPT = "script"
+TAG_QUERY = "query"
+TAG_NAMENODE = "name-node"
+TAG_RESOURCE_MANAGER = "resource-manager"
+TAG_JOB_TRACKER = "job-tracker"
+TAG_JDBC_URL = "jdbc-url"
+TAG_PASSWORD = "password"
+
+
+class HiveMapper(ActionMapper):
+    """
+    Converts a Hive Oozie node to an Airflow task.
+    """
+
+    TASK_MAPPER = {
+        "local": HiveLocalTask,
+        "ssh": Task,
+        "gcp": Task,
+    }
+
+    def __init__(self, oozie_node: Element, name: str, props: PropertySet, action_name: str, **kwargs):
+        ActionMapper.__init__(self, oozie_node=oozie_node, name=name, props=props, **kwargs)
+        self.name_node: str = None
+        self.job_tracker: str = None
+        self.resource_manager: str = None
+        self.jdbc_url: str = None
+        self.action_name = action_name
+        self.variables: Optional[Dict[str, str]] = None
+        self.query: Optional[str] = None
+        self.script: Optional[str] = None
+        self.files: Optional[str] = None
+        self.file_aliases: Optional[List[str]] = None
+        self.hdfs_files: Optional[List[str]] = None
+        self.archives: Optional[str] = None
+        self.hdfs_archives: Optional[List[str]] = None
+        self.archive_aliases: Optional[List[str]] = None
+        self.file_extractor = FileExtractor(oozie_node=oozie_node, props=self.props)
+        self.archive_extractor = ArchiveExtractor(oozie_node=oozie_node, props=self.props)
+        self.prepare_extension: PrepareMapperExtension = PrepareMapperExtension(self)
+
+    def on_parse_node(self):
+        super().on_parse_node()
+        self._parse_config()
+        self.name_node = get_tag_el_text(self.oozie_node, TAG_NAMENODE)
+        self.job_tracker = get_tag_el_text(self.oozie_node, TAG_JOB_TRACKER)
+        self.resource_manager = get_tag_el_text(self.oozie_node, TAG_RESOURCE_MANAGER)
+        self.jdbc_url = get_tag_el_text(self.oozie_node, TAG_JDBC_URL)
+        if self.action_name == "hive2" and not self.jdbc_url:
+            raise ParseException("jdbc-url is required when using hive2 actions")
+        self.query = get_tag_el_text(self.oozie_node, TAG_QUERY)
+
+        self.script = self.__get_output_script_path(get_tag_el_text(self.oozie_node, TAG_SCRIPT))
+
+        if not (self.script or self.query):
+            raise ParseException(f"Action Configuration does not include {TAG_SCRIPT} or {TAG_QUERY} element")
+
+        if self.query and self.script:
+            raise ParseException(
+                f"Action Configuration include {TAG_SCRIPT} and {TAG_QUERY} element. "
+                f"Only one can be set at the same time."
+            )
+        self.files = self._parse_file_archive_nodes("file")
+        self.archives = self._parse_file_archive_nodes("archive")
+        self.variables = extract_param_values_from_action_node(self.oozie_node)
+        self.prepare = self.prepare_extension.parse_prepare_node()
+
+    def to_tasks_and_relations(self):
+
+        task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
+        prepare_cmds = self.prepare_extension.parse_prepare_as_list_of_tuples()
+        action_task = task_class(
+            task_id=self.name,
+            template_name="hive/hive.tpl",
+            template_params=dict(
+                hql=self.query or self.script,
+                mapred_queue=self.props.merged["queueName"],
+                hive_cli_conn_id=self.props.config["hive_cli_conn_id"]
+                if "hive_cli_conn_id" in self.props.config
+                else "hive_cli_default",
+                prepare=prepare_cmds,
+                files=self.files,
+                archives=self.archives,
+            ),
+        )
+
+        tasks = [action_task]
+        relations: List[Relation] = []
+
+        return tasks, relations
+
+    def copy_extra_assets(self, input_directory_path: str, output_directory_path: str):
+        if not self.script:
+            return
+        source_script_file_path = os.path.join(input_directory_path, self.script)
+        destination_script_file_path = os.path.join(output_directory_path, self.script)
+        os.makedirs(os.path.dirname(destination_script_file_path), exist_ok=True)
+        shutil.copy(
+            el_utils.resolve_job_properties_in_string(source_script_file_path, self.props),
+            el_utils.resolve_job_properties_in_string(destination_script_file_path, self.props),
+        )
+
+        logging.info(f"Copied {self.script} to {destination_script_file_path}")
+
+    def required_imports(self) -> Any:
+        dependencies = self.get_task_class(self.TASK_MAPPER).required_imports()
+        prepare_dependencies = self.prepare_extension.required_imports()
+
+        return dependencies.union(prepare_dependencies)  # pylint:disable
+
+    def __get_output_script_path(self, input_script_path: str) -> Optional[str]:
+        resolved_input_script_path = el_utils.resolve_job_properties_in_string(input_script_path, self.props)
+
+        if resolved_input_script_path:
+            _, _, script_name = resolved_input_script_path.rpartition("/")
+
+            return "/".join(["scripts", script_name])
+
+        return None
