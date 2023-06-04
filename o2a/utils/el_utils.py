@@ -202,3 +202,12 @@ def escape_string_with_python_escapes(string_to_escape: Optional[str]) -> Option
         return None
     escaped_bytes, _ = codecs.escape_encode(string_to_escape.encode())  # type: ignore # C-Api level
     return "'" + escaped_bytes.decode("utf-8") + "'"  # type: ignore
+
+
+def replace_jinja_vars_with_known_values_from_props(string: str, props: Dict[str, str]):
+    print(props, string)
+    strip_brackets = strip_el(string)
+    for key, val in props.items():
+        if not isinstance(val, dict):
+            strip_brackets = strip_brackets.replace(key, val)
+    return strip_brackets
