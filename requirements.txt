@@ -1,31 +1,34 @@
-apache-airflow # pyup: ignore
-autoflake==1.4
-black==21.10b0 # pyup: ignore
-flake8==3.8.4
-google-api-python-client==1.12.8
-isort==5.7.0
-j2cli==0.3.10
-Jinja2==2.11.2 # pyup: ignore
-lark-parser==0.11.1
-mypy==0.790
-parameterized==0.7.5
-paramiko==2.7.2
+apache-airflow
+apache-airflow-providers-apache-hive
+apache-airflow-providers-apache-spark
 
-pendulum~=2.1.2
-pre-commit==2.10.1
-pydeps==1.9.13
-pylint==2.6.0
-pytest==6.2.1
-pytest-cov==2.11.1
+autoflake
+black
+flake8
+google-api-python-client
+isort
+j2cli
+Jinja2
+lark-parser
+mypy
+parameterized
+paramiko
 
-python-dateutil~=2.8.2
-safety==1.10.3
-setuptools~=58.5.3
-sshtunnel==0.4.0
-twine==3.3.0
+pendulum
+pre-commit
+pydeps
+pylint
+pytest
+pytest-cov
+
+python-dateutil
+safety
+setuptools
+sshtunnel
+twine
 types-pytz
 
-typing~=3.7.4.3
-tzlocal==2.1 # pyup: ignore
-Werkzeug==1.0.1 # pyup: ignore
-yamllint==1.25.0
+typing
+tzlocal
+Werkzeug
+yamllint

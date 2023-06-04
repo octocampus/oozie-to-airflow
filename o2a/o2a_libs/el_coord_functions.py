@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 
 from airflow import AirflowException
 from airflow.models import BaseOperator
-from jinja2 import contextfunction
+from jinja2 import pass_context
 from typing import List, Optional
 
 from o2a.converter.dataset import Dataset, find_dataset_by_name, get_dataset_name_from_task_doc
@@ -69,7 +69,7 @@ def get_vars_between_brackets(template: str) -> List[str]:
     return re.findall(r"\{{.*?\}}", template)
 
 
-@contextfunction
+@pass_context
 def resolve_dataset_template(context, template: str, datetime_data: str) -> str:
     """
     Given a template, resolve the variables MINUTE, HOUR, MONTH, DAY, YEAR using the datetime data provided
@@ -102,7 +102,7 @@ def resolve_dataset_template(context, template: str, datetime_data: str) -> str:
     return template
 
 
-@contextfunction
+@pass_context
 def current(context, n: int):
     datasets: Optional[List[Dataset]] = context.get("datasets")
     if not datasets:
