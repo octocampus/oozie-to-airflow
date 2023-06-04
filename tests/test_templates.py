@@ -463,6 +463,9 @@ class ShellTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
         "bash_command": "BASH_CMD",
         "trigger_rule": "dummy",
         "env": {"key": "value"},
+        "prepare": [("mkdir", "test")],
+        "files": ["test"],
+        "archives": ["archive_test"],
     }
 
     def test_green_path(self):

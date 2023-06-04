@@ -17,6 +17,7 @@ from typing import List, Tuple, Optional, Set
 
 from o2a.converter.task import Task
 from o2a.mappers.base_mapper import BaseMapper
+from o2a.o2a_libs import el_parser
 from o2a.utils import xml_utils
 from o2a.utils.el_utils import normalize_path
 
@@ -73,6 +74,16 @@ class PrepareMapperExtension:
                 else:
                     raise Exception(f"Unknown XML node in prepare: {node.tag}")
         return delete_paths, mkdir_paths
+
+    def parse_prepare_as_list_of_tuples(self) -> List[Tuple[str, str]]:
+        prepare_commands = []
+        prepare_node = xml_utils.find_node_by_tag(self.mapper.oozie_node, "prepare")
+        if prepare_node:
+            for node in prepare_node:
+                if node.tag not in ["mkdir", "delete"]:
+                    raise Exception(f"Unknown XML node in prepare : {node.tag}")
+                prepare_commands.append((node.tag, el_parser.translate(node.attrib["path"])))
+        return prepare_commands
 
     @staticmethod
     def required_imports() -> Set[str]:

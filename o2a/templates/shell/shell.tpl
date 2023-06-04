@@ -15,9 +15,10 @@
   limitations under the License.
 #}
 {% import "macros/props.tpl" as props_macro %}
-{{ task_id | to_var }} = bash.BashOperator(
+{{ task_id | to_var }} = ShellOozieOperator(
     task_id={{ task_id | to_python }},
     trigger_rule={{ trigger_rule | to_python }},
     bash_command={{ bash_command | to_python }},
     {% if env %}   env={{ env | to_python }}, {% endif %}
+    {% include 'extra_vars.tpl' %}
 )

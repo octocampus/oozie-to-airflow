@@ -308,7 +308,7 @@ class TestOozieConvertByExamples(TestCase):
                 "from  airflow.operators import bash",
                 "from airflow import models",
                 "from airflow.contrib.operators import dataproc_operator",
-                "from airflow.operators import bash",
+                "from o2a.o2a_libs.operators.shell_oozie_operator import ShellOozieOperator",
                 "from airflow.operators import bash_operator",
                 "from airflow.operators import bash_operator, dummy_operator",
                 "from airflow.operators import dummy",

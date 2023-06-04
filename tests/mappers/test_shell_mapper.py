@@ -18,8 +18,6 @@ import unittest
 from xml.etree import ElementTree as ET
 
 
-from o2a.converter.task import Task
-from o2a.converter.relation import Relation
 from o2a.mappers import shell_mapper
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.tasks.shell.shell_local_task import ShellLocalTask
@@ -52,6 +50,8 @@ class TestShellMapper(unittest.TestCase):
             <argument>$VAR2</argument>
             <env-var>VAR1=value1</env-var>
             <env-var>VAR2=value2</env-var>
+            <file>${scriptpath}#${scriptalias}</file>
+            <archive>${archivepath}#${archivealias}</archive>
 
         </shell>
         """
@@ -100,15 +100,6 @@ class TestShellMapper(unittest.TestCase):
 
         self.assertEqual(
             [
-                Task(
-                    task_id="test_id_prepare",
-                    template_name="prepare/prepare.tpl",
-                    trigger_rule="one_success",
-                    template_params={
-                        "delete": "/examples/output-data/demo/pig-node /examples/output-data/demo/pig-node2",
-                        "mkdir": "/examples/input-data/demo/pig-node /examples/input-data/demo/pig-node2",
-                    },
-                ),
                 ShellLocalTask(
                     task_id="test_id",
                     template_name="shell/shell.tpl",
@@ -119,12 +110,20 @@ class TestShellMapper(unittest.TestCase):
                             "VAR1": "value1",
                             "VAR2": "value2",
                         },
+                        "prepare": [
+                            ("delete", "{{nameNode}}/examples/output-data/demo/pig-node"),
+                            ("delete", "{{nameNode}}/examples/output-data/demo/pig-node2"),
+                            ("mkdir", "{{nameNode}}/examples/input-data/demo/pig-node"),
+                            ("mkdir", "{{nameNode}}/examples/input-data/demo/pig-node2"),
+                        ],
+                        "files": ["{{scriptpath}}#{{scriptalias}}"],
+                        "archives": ["{{archivepath}}#{{archivealias}}"],
                     },
                 ),
             ],
             tasks,
         )
-        self.assertEqual(relations, [Relation(from_task_id="test_id_prepare", to_task_id="test_id")])
+        self.assertEqual(relations, [])
 
     def test_required_imports(self):
         job_properties = {"nameNode": "hdfs://localhost:9020/"}

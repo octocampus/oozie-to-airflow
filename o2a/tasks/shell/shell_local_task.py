@@ -32,4 +32,7 @@ class ShellLocalTask(Task):
 
     @staticmethod
     def required_imports() -> Set[str]:
-        return {"from airflow.utils import dates", "from airflow.operators import bash"}
+        return {
+            "from airflow.utils import dates",
+            "from o2a.o2a_libs.operators.shell_oozie_operator import ShellOozieOperator",
+        }

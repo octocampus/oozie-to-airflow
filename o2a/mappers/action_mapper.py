@@ -18,9 +18,11 @@ from copy import deepcopy
 from typing import Any, List, Tuple, Set
 from xml.etree.ElementTree import Element
 
+from o2a.converter.exceptions import ParseException
 from o2a.converter.relation import Relation
 from o2a.converter.task import Task
 from o2a.mappers.base_mapper import BaseMapper
+from o2a.o2a_libs import el_parser
 
 from o2a.o2a_libs.property_utils import PropertySet
 
@@ -72,6 +74,23 @@ class ActionMapper(BaseMapper, ABC):
         if configuration_node is not None:
             conf_node_properties = extract_properties_from_configuration_node(config_node=configuration_node)
             self.props.action_node_properties.update(conf_node_properties)
+
+    def _parse_file_archive_nodes(self, node_tag: str):
+        nodes: List[Element] = self.oozie_node.findall(node_tag)
+        paths = []
+        for node in nodes:
+            splitted_text = node.text.split("#")
+            if node.text == "":
+                raise ParseException(f"{node_tag} tag is empty")
+            if len(splitted_text) > 2:
+                raise ParseException("only one '#' is supported")
+            elif len(splitted_text) == 2:
+                path = el_parser.translate(splitted_text[0])
+                alias = el_parser.translate(splitted_text[1])
+                paths.append(f"{path}#{alias}")
+            elif len(splitted_text) == 1:
+                paths.append(el_parser.translate(splitted_text[0]))
+        return paths
 
     @staticmethod
     def prepend_task(

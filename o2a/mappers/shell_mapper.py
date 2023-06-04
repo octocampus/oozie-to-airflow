@@ -22,6 +22,7 @@ from o2a.converter.relation import Relation
 from o2a.mappers.action_mapper import ActionMapper
 from o2a.mappers.extensions.prepare_mapper_extension import PrepareMapperExtension
 from o2a.o2a_libs.property_utils import PropertySet
+from o2a.utils.file_archive_extractors import FileExtractor, ArchiveExtractor
 from o2a.utils.xml_utils import get_tag_el_text, get_tags_el_array_from_text, find_nodes_by_tag
 from o2a.o2a_libs import el_parser
 from o2a.tasks.shell.shell_local_task import ShellLocalTask
@@ -46,6 +47,8 @@ class ShellMapper(ActionMapper):
 
     def __init__(self, oozie_node: Element, name: str, props: PropertySet, **kwargs):
         ActionMapper.__init__(self, oozie_node=oozie_node, name=name, props=props, **kwargs)
+        self.file_extractor = FileExtractor(oozie_node=oozie_node, props=self.props)
+        self.archive_extractor = ArchiveExtractor(oozie_node=oozie_node, props=self.props)
         self._parse_oozie_node()
         self.prepare_extension: PrepareMapperExtension = PrepareMapperExtension(self)
         self.env_vars = self.get_env_vars()
@@ -53,7 +56,8 @@ class ShellMapper(ActionMapper):
     def _parse_oozie_node(self):
         self.resource_manager = get_tag_el_text(self.oozie_node, TAG_RESOURCE)
         self.name_node = get_tag_el_text(self.oozie_node, TAG_NAME)
-
+        self.files = self._parse_file_archive_nodes("file")
+        self.archives = self._parse_file_archive_nodes("archive")
         cmd_txt = get_tag_el_text(self.oozie_node, TAG_CMD)
         args = get_tags_el_array_from_text(self.oozie_node, TAG_ARG)
         translated_args = [el_parser.translate(arg) for arg in args]
@@ -78,6 +82,7 @@ class ShellMapper(ActionMapper):
 
     def to_tasks_and_relations(self):
         task_class: Type[Task] = self.get_task_class(self.TASK_MAPPER)
+        prepare_list = self.prepare_extension.parse_prepare_as_list_of_tuples()
         print(self.env_vars)
         action_task = task_class(
             task_id=self.name,
@@ -85,17 +90,18 @@ class ShellMapper(ActionMapper):
             template_params=dict(
                 bash_command=self.bash_command,
                 env=self.env_vars,
+                files=self.files,
+                archives=self.archives,
+                prepare=prepare_list,
             ),
         )
+
         tasks = [action_task]
         relations: List[Relation] = []
-        prepare_task = self.prepare_extension.get_prepare_task()
-        if prepare_task:
-            tasks, relations = self.prepend_task(prepare_task, tasks, relations)
+
         return tasks, relations
 
     def required_imports(self):
         dependencies = self.get_task_class(self.TASK_MAPPER).required_imports()
         prepare_dependencies = self.prepare_extension.required_imports()
-
         return dependencies.union(prepare_dependencies)
