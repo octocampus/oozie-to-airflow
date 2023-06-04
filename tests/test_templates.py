@@ -301,6 +301,9 @@ class HiveTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
         "hql": "id.q",
         "mapred_queue": "default",
         "hive_cli_conn_id": "hive_cli_default",
+        "prepare": [("mkdir", "test")],
+        "files": ["test"],
+        "archives": ["archive_test"],
     }
 
     def test_green_path(self):

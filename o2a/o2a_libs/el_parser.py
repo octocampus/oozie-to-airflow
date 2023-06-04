@@ -108,6 +108,7 @@ GRAMMAR = r"""
 
 
 def _parser(sentence: str) -> Tree:
+    sentence = re.sub("[\n]+", " ", sentence)
     return Lark(GRAMMAR, start="start", keep_all_tokens=True, ambiguity="resolve").parse(sentence)
 
 

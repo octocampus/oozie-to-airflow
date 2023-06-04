@@ -30,11 +30,9 @@ from o2a.transformers.add_workflow_data_events_sensors_transformer import (
     AddWorkflowDataEventsSensorsTransformer,
 )
 from o2a.transformers.add_workflow_notificaton_transformer import AddWorkflowNotificationTransformer
-from o2a.transformers.remove_end_transformer import RemoveEndTransformer
 from o2a.transformers.remove_fork_transformer import RemoveForkTransformer
 from o2a.transformers.remove_inaccessible_node_transformer import RemoveInaccessibleNodeTransformer
 from o2a.transformers.remove_join_transformer import RemoveJoinTransformer
-from o2a.transformers.remove_kill_transformer import RemoveKillTransformer
 from o2a.transformers.remove_start_transformer import RemoveStartTransformer
 from o2a.utils.constants import CONFIG, WORKFLOW_XML
 
@@ -111,8 +109,6 @@ Otherwise please provide it.
     transformers = [
         AddWorkflowDataEventsSensorsTransformer(),
         RemoveInaccessibleNodeTransformer(),
-        RemoveEndTransformer(),
-        RemoveKillTransformer(),
         RemoveStartTransformer(),
         RemoveJoinTransformer(),
         RemoveForkTransformer(),

@@ -219,6 +219,7 @@ class WorkflowXmlParser:
         else:
             map_class = self.action_map[action_name]
             mapper = map_class(
+                action_name=action_name,
                 oozie_node=action_operation_node,
                 name=action_node.attrib["name"],
                 props=self.props,

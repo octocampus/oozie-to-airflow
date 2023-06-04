@@ -34,5 +34,5 @@ class HiveLocalTask(Task):
     def required_imports() -> Set[str]:
         return {
             "from airflow.utils import dates",
-            "from airflow.providers.apache.hive.operators import hive",
+            "from o2a.o2a_libs.operators.hive_oozie_operator import HiveOozieOperator",
         }

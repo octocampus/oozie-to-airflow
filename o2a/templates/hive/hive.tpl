@@ -15,7 +15,7 @@
  #}
 
 {% import "macros/props.tpl" as props_macro %}
-{{ task_id | to_var }} = hive.HiveOperator(
+{{ task_id | to_var }} = HiveOozieOperator(
     task_id={{ task_id | to_python }},
     trigger_rule={{ trigger_rule | to_python }},
     hql={{ hql | to_python }},
@@ -23,4 +23,5 @@
     mapred_queue={{ mapred_queue | to_python }},
     hiveconfs={{ props_macro.props(action_node_properties=action_node_properties, xml_escaped=True) }},
     mapred_job_name={{ task_id | to_python }},
+    {% include 'extra_vars.tpl' %}
 )

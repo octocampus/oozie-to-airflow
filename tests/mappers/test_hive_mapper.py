@@ -21,9 +21,7 @@ from xml.etree import ElementTree as ET
 
 
 from o2a.converter.exceptions import ParseException
-from o2a.converter.task import Task
 from o2a.tasks.hive.hive_local_task import HiveLocalTask
-from o2a.converter.relation import Relation
 from o2a.mappers import hive_mapper
 from o2a.o2a_libs.property_utils import PropertySet
 
@@ -57,7 +55,12 @@ FRAGMENT_SCRIPT = """
     <param>OUTPUT=/user/${userName}/${examplesRoot}/apps/hive/output/</param>
 </fragment>
 """
-
+# language=XML
+FRAGMENT_JDBC = """
+<jdbc-url>
+test
+</jdbc-url>
+"""
 
 # language=XML
 FRAGMENT_QUERY = """
@@ -117,12 +120,15 @@ class TestHiveMapper(unittest.TestCase):
                     template_name="hive/hive.tpl",
                     trigger_rule="one_success",
                     template_params={
-                        "hql": "DROP TABLE IF EXISTS test_query;\nCREATE EXTERNAL TABLE test_query (a INT) "
-                        "STORED AS TEXTFILE\nLOCATION '/user/{{userName}}/{{examplesRoot}}/input/';"
-                        "\nINSERT OVERWRITE DIRECTORY '/user/{{userName}}/{{examplesRoot}}/output/' "
+                        "hql": "DROP TABLE IF EXISTS test_query; CREATE EXTERNAL TABLE test_query (a INT) "
+                        "STORED AS TEXTFILE LOCATION '/user/{{userName}}/{{examplesRoot}}/input/'; "
+                        "INSERT OVERWRITE DIRECTORY '/user/{{userName}}/{{examplesRoot}}/output/' "
                         "SELECT * FROM test_query;",
                         "mapred_queue": "default",
                         "hive_cli_conn_id": "hive_cli_default",
+                        "files": [],
+                        "archives": [],
+                        "prepare": [],
                     },
                 )
             ],
@@ -150,6 +156,9 @@ class TestHiveMapper(unittest.TestCase):
                         "hql": "scripts/script.q",
                         "mapred_queue": "default",
                         "hive_cli_conn_id": "hive_cli_default",
+                        "prepare": [],
+                        "files": [],
+                        "archives": [],
                     },
                 )
             ],
@@ -167,21 +176,36 @@ class TestHiveMapper(unittest.TestCase):
 
         tasks, relations = mapper.to_tasks_and_relations()
 
-        self.assertEqual(2, len(tasks))
+        self.assertEqual(1, len(tasks))
         self.assertEqual(
-            Task(
-                task_id="test_id_prepare",
-                template_name="prepare/prepare.tpl",
-                trigger_rule="one_success",
-                template_params={
-                    "delete": "/user/{{userName}}/{{examplesRoot}}/apps/pig/output",
-                    "mkdir": "/user/{{userName}}/{{examplesRoot}}/apps/pig/created-folder",
-                },
-            ),
-            tasks[0],
+            [
+                HiveLocalTask(
+                    task_id="test_id",
+                    template_name="hive/hive.tpl",
+                    trigger_rule="one_success",
+                    template_params={
+                        "hql": "DROP TABLE IF EXISTS test_query; CREATE EXTERNAL TABLE test_query (a INT) "
+                        "STORED AS TEXTFILE LOCATION '/user/{{userName}}/{{examplesRoot}}/input/'; "
+                        "INSERT OVERWRITE DIRECTORY '/user/{{userName}}/{{examplesRoot}}/output/' "
+                        "SELECT * FROM test_query;",
+                        "mapred_queue": "default",
+                        "hive_cli_conn_id": "hive_cli_default",
+                        "files": [],
+                        "archives": [],
+                        "prepare": [
+                            ("delete", "{{nameNode}}/user/{{userName}}/{{examplesRoot}}/apps/pig/output"),
+                            (
+                                "mkdir",
+                                "{{nameNode}}/user/{{userName}}/{{examplesRoot}}/apps/pig/created-folder",
+                            ),
+                        ],
+                    },
+                ),
+            ],
+            tasks,
         )
 
-        self.assertEqual([Relation(from_task_id="test_id_prepare", to_task_id="test_id")], relations)
+        self.assertEqual([], relations)
 
     def test_to_tasks_and_relations_should_parse_file_elements(self):
         self.hive_node.append(ET.fromstring(FRAGMENT_QUERY))
@@ -201,14 +225,20 @@ class TestHiveMapper(unittest.TestCase):
                     template_name="hive/hive.tpl",
                     trigger_rule="one_success",
                     template_params={
-                        "hql": "DROP TABLE IF EXISTS test_query;\nCREATE EXTERNAL TABLE test_query (a INT) "
-                        "STORED AS TEXTFILE\nLOCATION '/user/{{userName}}/{{examplesRoot}}/input/';"
-                        "\nINSERT OVERWRITE DIRECTORY '/user/{{userName}}/{{examplesRoot}}/output/' "
+                        "hql": "DROP TABLE IF EXISTS test_query; CREATE EXTERNAL TABLE test_query (a INT) "
+                        "STORED AS TEXTFILE LOCATION '/user/{{userName}}/{{examplesRoot}}/input/'; "
+                        "INSERT OVERWRITE DIRECTORY '/user/{{userName}}/{{examplesRoot}}/output/' "
                         "SELECT * FROM test_query;",
                         "mapred_queue": "default",
                         "hive_cli_conn_id": "hive_cli_default",
+                        "files": [
+                            "test_dir/test.txt#test_link.txt",
+                            "/user/{{userName}}/{{examplesRoot}}/apps/pig/test_dir/test2.zip#test_link.zip",
+                        ],
+                        "archives": [],
+                        "prepare": [],
                     },
-                )
+                ),
             ],
             tasks,
         )
@@ -235,14 +265,17 @@ class TestHiveMapper(unittest.TestCase):
                     template_name="hive/hive.tpl",
                     trigger_rule="one_success",
                     template_params={
-                        "hql": "DROP TABLE IF EXISTS test_query;\nCREATE EXTERNAL TABLE test_query (a INT) "
-                        "STORED AS TEXTFILE\nLOCATION '/user/{{userName}}/{{examplesRoot}}/input/';"
-                        "\nINSERT OVERWRITE DIRECTORY '/user/{{userName}}/{{examplesRoot}}/output/' "
+                        "hql": "DROP TABLE IF EXISTS test_query; CREATE EXTERNAL TABLE test_query (a INT) "
+                        "STORED AS TEXTFILE LOCATION '/user/{{userName}}/{{examplesRoot}}/input/'; "
+                        "INSERT OVERWRITE DIRECTORY '/user/{{userName}}/{{examplesRoot}}/output/' "
                         "SELECT * FROM test_query;",
                         "mapred_queue": "default",
                         "hive_cli_conn_id": "hive_cli_default",
+                        "prepare": [],
+                        "files": [],
+                        "archives": ["test_dir/test2.zip#test_zip_dir", "test_dir/test3.zip#test3_zip_dir"],
                     },
-                )
+                ),
             ],
             tasks,
         )
@@ -254,6 +287,13 @@ class TestHiveMapper(unittest.TestCase):
         with self.assertRaisesRegex(
             ParseException, "Action Configuration does not include script or query element"
         ):
+            mapper.on_parse_node()
+
+    def test_on_parse_should_raise_exception_when_jdbc_url_missing_when_hive2_used(self):
+        mapper = self._get_hive_mapper(
+            job_properties=self.job_properties, config=self.config, hive_version="hive2"
+        )
+        with self.assertRaisesRegex(ParseException, "jdbc-url is required when using hive2 actions"):
             mapper.on_parse_node()
 
     def test_on_parse_should_raise_exception_when_query_and_script_are_set_at_the_same_time(self):
@@ -276,12 +316,13 @@ class TestHiveMapper(unittest.TestCase):
         imp_str = "\n".join(imps)
         ast.parse(imp_str)
 
-    def _get_hive_mapper(self, job_properties, config):
+    def _get_hive_mapper(self, job_properties, config, hive_version="hive"):
         mapper = hive_mapper.HiveMapper(
             oozie_node=self.hive_node,
             name="test_id",
             dag_name="DAG_NAME_B",
             props=PropertySet(job_properties=job_properties, config=config),
             input_directory_path="/tmp/input-directory-path/",
+            action_name=hive_version,
         )
         return mapper
