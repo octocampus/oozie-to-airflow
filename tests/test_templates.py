@@ -504,6 +504,19 @@ class SparkTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
         "name": "Spark Examples",
         "application_args": ["inputpath=hdfs:///input/file.txt", "value=2"],
         "trigger_rule": "dummy",
+        "queue": "def",
+        "master": "master",
+        "mode": "mode",
+        "prepare": [("mkdir", "test")],
+        "oozie_files": ["oozie_files"],
+        "oozie_archives": ["oozie_archives"],
+        "files": ["test_files"],
+        "archives": ["test_archives"],
+        "driver_memory": None,
+        "executor_memory": None,
+        "executor_cores": None,
+        "total_executor_cores": None,
+        "num_executors": None,
     }
 
     def test_green_path(self):

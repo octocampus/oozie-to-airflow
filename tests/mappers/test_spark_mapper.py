@@ -18,7 +18,6 @@ import unittest
 from xml.etree import ElementTree as ET
 
 
-from o2a.converter.task import Task
 from o2a.mappers import spark_mapper
 from o2a.o2a_libs.property_utils import PropertySet
 from o2a.tasks.spark_local_task import SparkLocalTask
@@ -101,27 +100,34 @@ class TestSparkMapperWithPrepare(unittest.TestCase):
 
         self.assertEqual(
             [
-                Task(
-                    task_id="test_id_prepare",
-                    template_name="prepare/prepare.tpl",
-                    template_params={"delete": "/tmp/d_path", "mkdir": "/tmp/mk_path"},
-                ),
                 SparkLocalTask(
                     task_id="test_id",
                     template_name="spark/spark.tpl",
                     trigger_rule="one_success",
                     template_params={
                         "conf": {
-                            "nameNode": "hdfs://",
-                            "userName": "test_user",
-                            "examplesRoot": "examples",
                             "mapred.compress.map.output": "true",
+                            "spark.executor.extraJavaOptions": "-XX:+HeapDumpOnOutOfMemoryError "
+                            "-XX:HeapDumpPath=/tmp",
                         },
                         "name": "Spark Examples",
                         "java_class": "org.apache.spark.examples.mllib.JavaALS",
                         "spark_conn_id": "spark_default_conn_id",
                         "jars": "/lib/spark-examples_2.10-1.1.0.jar",
                         "application_args": ["inputpath=hdfs:///input/file.txt", "value=2"],
+                        "oozie_files": [],
+                        "oozie_archives": [],
+                        "files": None,
+                        "archives": None,
+                        "queue": None,
+                        "master": "local[*]",
+                        "mode": "client",
+                        "executor_memory": "20G",
+                        "num_executors": "50",
+                        "driver_memory": None,
+                        "executor_cores": None,
+                        "total_executor_cores": None,
+                        "prepare": [("mkdir", "hdfs:///tmp/mk_path"), ("delete", "hdfs:///tmp/d_path")],
                     },
                 ),
             ],
@@ -143,10 +149,9 @@ class TestSparkMapperWithPrepare(unittest.TestCase):
                     trigger_rule="one_success",
                     template_params={
                         "conf": {
-                            "nameNode": "hdfs://",
-                            "userName": "test_user",
-                            "examplesRoot": "examples",
                             "mapred.compress.map.output": "true",
+                            "spark.executor.extraJavaOptions": "-XX:+HeapDumpOnOutOfMemoryError "
+                            "-XX:HeapDumpPath=/tmp",
                         },
                         "name": "Spark Examples",
                         "java_class": "org.apache.spark.examples.mllib.JavaALS",
@@ -157,6 +162,19 @@ class TestSparkMapperWithPrepare(unittest.TestCase):
                             "value=2",
                             "/user/{{userName}}/{{examplesRoot}}/apps/spark/lib/oozie-examples-4.3.0.jar",
                         ],
+                        "oozie_files": [],
+                        "oozie_archives": [],
+                        "files": None,
+                        "archives": None,
+                        "queue": None,
+                        "master": "local[*]",
+                        "mode": "client",
+                        "executor_memory": "20G",
+                        "num_executors": "50",
+                        "driver_memory": None,
+                        "executor_cores": None,
+                        "total_executor_cores": None,
+                        "prepare": [],
                     },
                 )
             ],

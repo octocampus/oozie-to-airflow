@@ -14,14 +14,13 @@
   limitations under the License.
 #}
 
-{% import "macros/props.tpl" as props_macro %}
-{{ task_id | to_var }} = spark_submit.SparkSubmitOperator(
+{{ task_id | to_var }} = SparkOozieOperator(
     task_id={{ task_id | to_python }},
     trigger_rule={{ trigger_rule | to_python }},
-    conf={{ props_macro.props(action_node_properties=action_node_properties, xml_escaped=True) }},
     name={{ name | to_python }},
     java_class={{ java_class | to_python }},
     conn_id={{ spark_conn_id | to_python }},
     jars={{ jars | to_python }},
     application_args={{ application_args | to_python }},
+    {% include 'spark/spark_vars.tpl' %}
 )
