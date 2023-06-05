@@ -85,6 +85,7 @@ class SubworkflowMapper(ActionMapper):
         parent_path, _, _ = self.input_directory_path.rpartition("/")
 
         app_path = os.path.join(parent_path, self.app_name)
+        self.app_name = self.app_name.replace("-", "_")
         if not os.path.exists(self.subdag_folder):
             os.makedirs(self.subdag_folder)
         if not os.path.exists(os.path.join(self.subdag_folder, self.app_name, f"subdag_{self.app_name}.py")):
@@ -123,9 +124,15 @@ class SubworkflowMapper(ActionMapper):
 
     def required_imports(self) -> Set[str]:
         base_folder = os.path.basename(os.path.normpath(self.subdag_folder))
+        app_name = self.app_name.replace("-", "_")
+        if self.output_directory_path == self.subdag_folder:
+            import_statement = f"from {app_name} import subdag_{app_name}"
+        else:
+            import_statement = f"from {base_folder}.{app_name} import subdag_{app_name}"
+
         return {
             "from airflow.utils import dates",
             "from airflow.contrib.operators import dataproc_operator",
             "from airflow.operators.subdag_operator import SubDagOperator",
-            f"import {base_folder}.{self.app_name}.subdag_{self.app_name}",
+            import_statement,
         }

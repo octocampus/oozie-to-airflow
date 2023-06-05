@@ -59,7 +59,7 @@ class Workflow:
             "from airflow import models",
             "from airflow.utils.trigger_rule import TriggerRule",
             "from airflow.utils import dates",
-            "from airflow.operators import bash_operator, dummy_operator",
+            "from airflow.operators import bash, empty",
         }
         self.library_folder = os.path.join(self.input_directory_path, LIB_FOLDER)
         self.jar_files = get_lib_files(self.library_folder, extension=".jar")
