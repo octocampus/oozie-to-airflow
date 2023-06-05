@@ -55,13 +55,9 @@ def handle_archive(basename: str, alias: str) -> None:
             tar_object.extractall(path=alias)
 
 
-def get_upstream_state(dag_id, task_id, ok=None, error=None, **kwargs):
-    last_dag_run = DagRun.find(dag_id=dag_id)
+def skip_if_upstream_failed(id_dag, id_task):
+    last_dag_run = DagRun.find(dag_id=id_dag)
     last_dag_run.sort(key=lambda x: x.execution_date, reverse=True)
-    state = last_dag_run[0].get_task_instance(task_id).state
-    if state == "skipped":
+    state = last_dag_run[0].get_task_instance(id_task).state
+    if state == "upstream_failed":
         raise AirflowSkipException
-    if state == "success":
-        return ok[0]
-    elif state in ["failed"]:
-        return error

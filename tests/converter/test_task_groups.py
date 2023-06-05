@@ -46,7 +46,7 @@ class TestParserNodeMultipleOperators(unittest.TestCase):
             error_downstream_name="AAAA",
             tasks=[Task(task_id="TASK", template_name="dummy.tpl")],
         )
-        task_group.add_state_handler_if_needed()
+        task_group.add_state_handler_if_needed("A")
         self.assertEqual("TASK_GROUP_error", task_group.last_task_id_of_error_flow)
 
     def test_last_task_id_of_ok_flow(self):

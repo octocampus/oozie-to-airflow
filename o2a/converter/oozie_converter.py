@@ -199,7 +199,7 @@ class OozieConverter:
     def add_state_handlers(self) -> None:
         logging.info("Adding error handlers")
         for node in self.workflow.task_groups.values():
-            node.add_state_handler_if_needed()
+            node.add_state_handler_if_needed(self.workflow.dag_name)
 
     def copy_extra_assets(self):
         """

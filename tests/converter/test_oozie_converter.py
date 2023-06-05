@@ -222,8 +222,8 @@ class TestOozieConverter(TestCase):
         converter.workflow = workflow
         converter.add_state_handlers()
 
-        task_groups["TASK_A"].add_state_handler_if_needed.assert_called_once_with()
-        task_groups["TASK_B"].add_state_handler_if_needed.assert_called_once_with()
+        task_groups["TASK_A"].add_state_handler_if_needed.assert_called_once_with("A")
+        task_groups["TASK_B"].add_state_handler_if_needed.assert_called_once_with("A")
 
     @staticmethod
     def _create_converter():
@@ -310,7 +310,7 @@ class TestOozieConvertByExamples(TestCase):
                 "from airflow.contrib.operators import dataproc_operator",
                 "from o2a.o2a_libs.operators.shell_oozie_operator import ShellOozieOperator",
                 "from airflow.operators import bash",
-                "from airflow.operators import bash, empty",
+                "from airflow.operators import bash, empty, python",
                 "from airflow.operators import empty",
                 "from airflow.operators import empty",
                 "from airflow.operators import python",
@@ -324,6 +324,7 @@ class TestOozieConvertByExamples(TestCase):
                 "import pendulum",
                 "import shlex",
                 "from childwf import subdag_childwf",
+                "from o2a.o2a_libs.utils import skip_if_upstream_failed",
             },
             workflow.dependencies,
         )

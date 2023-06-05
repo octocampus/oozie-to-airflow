@@ -77,7 +77,7 @@ class TaskGroup:
             )
         return self.error_handler_task.task_id
 
-    def add_state_handler_if_needed(self):
+    def add_state_handler_if_needed(self, dag_name):
         """
         Add additional tasks and relations to handle error and ok flow.
 
@@ -91,7 +91,10 @@ class TaskGroup:
             return
         error_handler_task_id = self.name + "_error"
         error_handler = Task(
-            task_id=error_handler_task_id, template_name="dummy.tpl", trigger_rule=TriggerRule.ONE_FAILED
+            task_id=error_handler_task_id,
+            template_name="error.tpl",
+            trigger_rule=TriggerRule.ONE_FAILED,
+            template_params={"task": self.name, "dag": dag_name},
         )
         self.error_handler_task = error_handler
         new_relations = (
