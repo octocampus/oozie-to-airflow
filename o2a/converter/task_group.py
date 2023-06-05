@@ -36,11 +36,13 @@ class TaskGroup:
         self,
         name,
         tasks,
+        decision=False,
         relations=None,
         downstream_names=None,
         error_downstream_name=None,
         dependencies=None,
     ):
+        self.decision = decision
         self.name = name
         self.tasks: List[Task] = tasks or []
         self.relations: List[Relation] = relations or []
@@ -126,7 +128,8 @@ class TaskGroup:
             f"TaskGroup(name={self.name}, "
             f"downstream_names={self.downstream_names}, "
             f"error_downstream_name={self.error_downstream_name}, "
-            f"tasks={self.tasks}, relations={self.relations})"
+            f"tasks={self.tasks}, relations={self.relations}),"
+            f"dicision={self.decision}"
         )
 
     def __eq__(self, other):

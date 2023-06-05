@@ -31,6 +31,7 @@ from o2a.converter.renderers import BaseRenderer
 from o2a.converter.task_group import TaskGroup, ControlTaskGroup, ActionTaskGroup
 from o2a.converter.workflow import Workflow
 from o2a.converter.coordinator import Coordinator
+from o2a.mappers.decision_mapper import DecisionMapper
 from o2a.utils import el_utils
 from o2a.utils.file_utils import get_lib_files
 from o2a.mappers.action_mapper import ActionMapper
@@ -160,6 +161,7 @@ class OozieConverter:
                 dependencies=dependencies,
                 downstream_names=oozie_node.downstream_names,
                 error_downstream_name=oozie_node.error_downstream_name,
+                decision=isinstance(oozie_node.mapper, DecisionMapper),
             )
             # del self.workflow.nodes[name]
 
@@ -181,20 +183,28 @@ class OozieConverter:
     def convert_relations(self) -> None:
         logging.info("Converting relations between tasks groups.")
         for task_group in self.workflow.task_groups.values():
-            for downstream in task_group.downstream_names:
-                relation = Relation(
-                    from_task_id=task_group.last_task_id_of_ok_flow,
-                    to_task_id=self.workflow.task_groups[downstream].first_task_id,
-                )
-                self.workflow.task_group_relations.add(relation)
-            error_downstream = task_group.error_downstream_name
-            if error_downstream:
-                relation = Relation(
-                    from_task_id=task_group.last_task_id_of_error_flow,
-                    to_task_id=self.workflow.task_groups[error_downstream].first_task_id,
-                    is_error=True,
-                )
-                self.workflow.task_group_relations.add(relation)
+            if task_group.decision:
+                for index in range(len(task_group.downstream_names)):
+                    relation = Relation(
+                        from_task_id=task_group.downstream_names[index] + "_upstream",
+                        to_task_id=task_group.downstream_names[index],
+                    )
+                    self.workflow.task_group_relations.add(relation)
+            else:
+                for downstream in task_group.downstream_names:
+                    relation = Relation(
+                        from_task_id=task_group.last_task_id_of_ok_flow,
+                        to_task_id=self.workflow.task_groups[downstream].first_task_id,
+                    )
+                    self.workflow.task_group_relations.add(relation)
+                error_downstream = task_group.error_downstream_name
+                if error_downstream:
+                    relation = Relation(
+                        from_task_id=task_group.last_task_id_of_error_flow,
+                        to_task_id=self.workflow.task_groups[error_downstream].first_task_id,
+                        is_error=True,
+                    )
+                    self.workflow.task_group_relations.add(relation)
 
     def add_state_handlers(self) -> None:
         logging.info("Adding error handlers")

@@ -18,6 +18,7 @@ from typing import Dict, List, Set
 
 from xml.etree.ElementTree import Element
 
+from airflow.utils.trigger_rule import TriggerRule
 
 from o2a.converter.task import Task
 from o2a.converter.relation import Relation
@@ -74,18 +75,39 @@ class DecisionMapper(BaseMapper):
             if "case" in case.tag:
                 case_text = el_parser.translate(case.text.strip(), quote=False)
                 self.case_dict[case_text] = case.attrib["to"]
+                print(self.case_dict.values())
             else:  # Default return value
                 self.default_case = case.attrib["to"]
 
     def to_tasks_and_relations(self):
+        upstreams = [
+            Task(task_id=f"{name}_upstream", template_name="dummy.tpl", trigger_rule=TriggerRule.ALL_SUCCESS)
+            for name in list(self.case_dict.values())
+        ]
+
+        relations = [
+            Relation(from_task_id=self.name, to_task_id=f"{name}_upstream")
+            for name in list(self.case_dict.values())
+        ]
+        if self.default_case not in self.case_dict.values():
+            upstreams.append(
+                Task(
+                    task_id=f"{self.default_case}_upstream",
+                    template_name="dummy.tpl",
+                    trigger_rule=TriggerRule.ALL_SUCCESS,
+                )
+            )
+            relations.append(Relation(from_task_id=self.name, to_task_id=f"{self.default_case}_upstream"))
+        self.case_dict = {key: val + "_upstream" for key, val in self.case_dict.items()}
         tasks = [
             Task(
                 task_id=self.name,
                 template_name="decision.tpl",
-                template_params=dict(case_dict=self.case_dict, default_case=self.default_case),
-            )
+                template_params=dict(case_dict=self.case_dict, default_case=self.default_case + "_upstream"),
+            ),
+            *upstreams,
         ]
-        relations: List[Relation] = []
+        relations: List[Relation] = relations
         return tasks, relations
 
     def required_imports(self) -> Set[str]:

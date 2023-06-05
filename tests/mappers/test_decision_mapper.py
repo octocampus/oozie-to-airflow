@@ -19,6 +19,9 @@ from collections import OrderedDict
 
 from xml.etree import ElementTree as ET
 
+from airflow.utils.trigger_rule import TriggerRule
+
+from o2a.converter.relation import Relation
 from o2a.converter.task import Task
 from o2a.mappers import decision_mapper
 
@@ -58,15 +61,38 @@ class TestDecisionMapper(unittest.TestCase):
                     trigger_rule="one_success",
                     template_params={
                         "case_dict": OrderedDict(
-                            [("{{functions.first_not_null('','')}}", "task1"), ("True", "task2")]
+                            [
+                                ("{{functions.first_not_null('','')}}", "task1_upstream"),
+                                ("True", "task2_upstream"),
+                            ]
                         ),
-                        "default_case": "task3",
+                        "default_case": "task3_upstream",
                     },
-                )
+                ),
+                Task(
+                    task_id="task1_upstream",
+                    template_name="dummy.tpl",
+                    trigger_rule=TriggerRule.ALL_SUCCESS,
+                ),
+                Task(
+                    task_id="task2_upstream",
+                    template_name="dummy.tpl",
+                    trigger_rule=TriggerRule.ALL_SUCCESS,
+                ),
+                Task(
+                    task_id="task3_upstream",
+                    template_name="dummy.tpl",
+                    trigger_rule=TriggerRule.ALL_SUCCESS,
+                ),
             ],
             tasks,
         )
-        self.assertEqual(relations, [])
+        expected = [
+            Relation(from_task_id="test_id", to_task_id="task1_upstream"),
+            Relation(from_task_id="test_id", to_task_id="task2_upstream"),
+            Relation(from_task_id="test_id", to_task_id="task3_upstream"),
+        ]
+        self.assertEqual(expected, relations)
 
     def test_required_imports(self):
         mapper = self._get_decision_mapper()

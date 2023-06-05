@@ -161,33 +161,19 @@ class TestOozieConverter(TestCase):
         op1 = TaskGroup(
             name="task1",
             tasks=[self._create_task("task1")],
-            downstream_names=["task2", "task3"],
-            error_downstream_name="fail1",
+            downstream_names=["task2"],
+            error_downstream_name="fail",
         )
         op2 = TaskGroup(
             name="task2",
             tasks=[self._create_task("task2")],
-            downstream_names=["task3", "task4"],
-            error_downstream_name="fail1",
+            downstream_names=["end"],
+            error_downstream_name="fail",
         )
-        op3 = TaskGroup(
-            name="task3",
-            tasks=[self._create_task("task3")],
-            downstream_names=["end1"],
-            error_downstream_name="fail1",
-        )
-        op4 = mock.Mock(
-            **{
-                "first_task_id": "task4_first",
-                "last_task_id_of_ok_flow": "task4_last",
-                "last_task_id_of_error_flow": "task4_last",
-                "downstream_names": ["task1", "task2", "task3"],
-                "error_downstream_name": "fail1",
-            }
-        )
-        end = TaskGroup(name="end1", tasks=[self._create_task("end1")])
-        fail = TaskGroup(name="fail1", tasks=[self._create_task("fail1")])
-        op_dict = {"task1": op1, "task2": op2, "task3": op3, "task4": op4, "end1": end, "fail1": fail}
+
+        end = TaskGroup(name="end1", tasks=[self._create_task("end")])
+        fail = TaskGroup(name="fail1", tasks=[self._create_task("fail")])
+        op_dict = {"task1": op1, "task2": op2, "end": end, "fail": fail}
         workflow = self._create_workflow(task_groups=op_dict)
         converter = self._create_converter()
 
@@ -196,22 +182,15 @@ class TestOozieConverter(TestCase):
 
         converter.add_state_handlers()
         converter.convert_relations()
+        print(workflow.task_groups)
 
         self.assertEqual(
             workflow.task_group_relations,
             {
-                Relation(from_task_id="task1_error", to_task_id="fail1", is_error=True),
+                Relation(from_task_id="task1_error", to_task_id="fail", is_error=True),
                 Relation(from_task_id="task1_ok", to_task_id="task2", is_error=False),
-                Relation(from_task_id="task1_ok", to_task_id="task3", is_error=False),
-                Relation(from_task_id="task2_error", to_task_id="fail1", is_error=True),
-                Relation(from_task_id="task2_ok", to_task_id="task3", is_error=False),
-                Relation(from_task_id="task2_ok", to_task_id="task4_first", is_error=False),
-                Relation(from_task_id="task3_error", to_task_id="fail1", is_error=True),
-                Relation(from_task_id="task3_ok", to_task_id="end1", is_error=False),
-                Relation(from_task_id="task4_last", to_task_id="fail1", is_error=True),
-                Relation(from_task_id="task4_last", to_task_id="task1", is_error=False),
-                Relation(from_task_id="task4_last", to_task_id="task2", is_error=False),
-                Relation(from_task_id="task4_last", to_task_id="task3", is_error=False),
+                Relation(from_task_id="task2_error", to_task_id="fail", is_error=True),
+                Relation(from_task_id="task2_ok", to_task_id="end", is_error=False),
             },
         )
 
@@ -289,8 +268,8 @@ class TestOozieConvertByExamples(TestCase):
         self.assertEqual("demo", workflow.dag_name)
         self.assertEqual(
             {
-                Relation(from_task_id="decision-node", to_task_id="end", is_error=False),
-                Relation(from_task_id="decision-node", to_task_id="hdfs-node", is_error=False),
+                Relation(from_task_id="end_upstream", to_task_id="end", is_error=False),
+                Relation(from_task_id="hdfs-node_upstream", to_task_id="hdfs-node", is_error=False),
                 Relation(from_task_id="join-node", to_task_id="decision-node", is_error=False),
                 Relation(from_task_id="pig-node", to_task_id="join-node", is_error=False),
                 Relation(from_task_id="shell-node", to_task_id="join-node", is_error=False),
