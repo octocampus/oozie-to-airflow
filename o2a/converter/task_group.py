@@ -23,6 +23,7 @@ from o2a.converter.task import Task
 from o2a.converter.relation import Relation
 
 
+
 class TaskGroup:
     """Airflow's tasks group
 
@@ -37,12 +38,14 @@ class TaskGroup:
         name,
         tasks,
         decision=False,
+        subworkflow=False,
         relations=None,
         downstream_names=None,
         error_downstream_name=None,
         dependencies=None,
     ):
         self.decision = decision
+        self.subworkflow = subworkflow
         self.name = name
         self.tasks: List[Task] = tasks or []
         self.relations: List[Relation] = relations or []
@@ -79,7 +82,7 @@ class TaskGroup:
             )
         return self.error_handler_task.task_id
 
-    def add_state_handler_if_needed(self, dag_name):
+    def add_state_handler_if_needed(self, dag_name, as_subworkflow=False):
         """
         Add additional tasks and relations to handle error and ok flow.
 
@@ -92,22 +95,31 @@ class TaskGroup:
         if not self.error_downstream_name:
             return
         error_handler_task_id = self.name + "_error"
+        if self.subworkflow:
+            error_handler_task_id = self.name + "_state_error"
         error_handler = Task(
             task_id=error_handler_task_id,
             template_name="error.tpl",
             trigger_rule=TriggerRule.ONE_FAILED,
-            template_params={"task": self.name, "dag": dag_name},
+            template_params={"task": error_handler_task_id.rsplit("_", 1)[0], "dag": dag_name},
         )
+        if as_subworkflow:
+            error_handler.template_name = "error-subwf.tpl"
         self.error_handler_task = error_handler
-        new_relations = (
-            Relation(from_task_id=t.task_id, to_task_id=error_handler_task_id, is_error=True)
-            for t in self.tasks
-        )
-        self.relations.extend(new_relations)
+        if self.subworkflow:
+            self.relations.append(Relation(from_task_id=self.tasks[-1].task_id, to_task_id=error_handler_task_id))
+        else:
+            new_relations = (
+                Relation(from_task_id=t.task_id, to_task_id=error_handler_task_id, is_error=True)
+                for t in self.tasks
+            )
+            self.relations.extend(new_relations)
 
         if not self.downstream_names:
             return
         ok_handler_task_id = self.name + "_ok"
+        if self.subworkflow:
+            ok_handler_task_id = self.name + "_state_ok"
         ok_handler = Task(
             task_id=ok_handler_task_id, template_name="dummy.tpl", trigger_rule=TriggerRule.ONE_SUCCESS
         )

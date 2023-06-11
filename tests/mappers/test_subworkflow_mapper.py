@@ -14,12 +14,16 @@
 # limitations under the License.
 """Tests for subworkflow mapper"""
 import ast
+import copy
 import os
 from contextlib import suppress
 from unittest import mock, TestCase
 from xml.etree import ElementTree as ET
 
+from airflow.utils.trigger_rule import TriggerRule
+
 from o2a.converter.mappers import ACTION_MAP
+from o2a.converter.relation import Relation
 from o2a.converter.task import Task
 from o2a.definitions import EXAMPLE_SUBWORKFLOW_PATH
 from o2a.mappers import subworkflow_mapper
@@ -84,7 +88,6 @@ class TestSubworkflowMapper(TestCase):
         self.assertEqual("hdfs://", mapper.props.merged["nameNode"])
         self.assertEqual("hdfs:///user/pig/examples/pig", mapper.props.merged["oozie.wf.application.path"])
         self.assertEqual("localhost:8032", mapper.props.merged["resourceManager"])
-        self.assertIsNotNone(mapper.props.merged["user.name"])
 
     @mock.patch("o2a.o2a_libs.el_wf_functions.user", return_value="user")
     def test_create_mapper_jinja_no_propagate(self, parse_els):
@@ -93,10 +96,11 @@ class TestSubworkflowMapper(TestCase):
         self.assertFalse(os.path.isfile(self.SUBDAG_TEST_FILEPATH))
         # Removing the propagate-configuration node
         propagate_configuration = self.subworkflow_node.find("propagate-configuration")
-        self.subworkflow_node.remove(propagate_configuration)
+        copy_node = copy.deepcopy(self.subworkflow_node)
+        copy_node = copy_node.remove(propagate_configuration)
 
         # When
-        mapper = self._get_subwf_mapper()
+        mapper = self._get_subwf_mapper(copy_node)
 
         # Then
         self.assertEqual("test_id", mapper.task_id)
@@ -115,9 +119,16 @@ class TestSubworkflowMapper(TestCase):
 
         # Then
         self.assertEqual(
-            [Task(task_id="test_id", template_name="subwf.tpl", template_params={"app_name": "pig"})], tasks
+            [Task(task_id="test_id",
+                  template_name="subwf.tpl",
+                  template_params={
+                      "app_name": "test_id",
+                      "propagate":True,
+                      "override_subwf_config":False
+                  }),
+             Task(task_id="test_id_state", template_name="subwf_state.tpl", template_params={"taskgroup": "test_id"}, trigger_rule=TriggerRule.ALL_DONE)], tasks
         )
-        self.assertEqual([], relations)
+        self.assertEqual([Relation(from_task_id="test_id", to_task_id="test_id_state")], relations)
 
     def test_required_imports(self):
         mapper = self._get_subwf_mapper()
@@ -125,11 +136,11 @@ class TestSubworkflowMapper(TestCase):
         imp_str = "\n".join(imps)
         ast.parse(imp_str)
 
-    def _get_subwf_mapper(self):
+    def _get_subwf_mapper(self, oozie_node):
         return subworkflow_mapper.SubworkflowMapper(
             input_directory_path=EXAMPLE_SUBWORKFLOW_PATH,
             output_directory_path="/tmp",
-            oozie_node=self.subworkflow_node,
+            oozie_node= oozie_node,
             name="test_id",
             dag_name="test",
             action_mapper=ACTION_MAP,

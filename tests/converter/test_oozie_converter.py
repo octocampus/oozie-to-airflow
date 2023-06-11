@@ -201,8 +201,8 @@ class TestOozieConverter(TestCase):
         converter.workflow = workflow
         converter.add_state_handlers()
 
-        task_groups["TASK_A"].add_state_handler_if_needed.assert_called_once_with("A")
-        task_groups["TASK_B"].add_state_handler_if_needed.assert_called_once_with("A")
+        task_groups["TASK_A"].add_state_handler_if_needed.assert_called_once_with("A", False)
+        task_groups["TASK_B"].add_state_handler_if_needed.assert_called_once_with("A", False)
 
     @staticmethod
     def _create_converter():
@@ -273,7 +273,7 @@ class TestOozieConvertByExamples(TestCase):
                 Relation(from_task_id="join-node", to_task_id="decision-node", is_error=False),
                 Relation(from_task_id="pig-node", to_task_id="join-node", is_error=False),
                 Relation(from_task_id="shell-node", to_task_id="join-node", is_error=False),
-                Relation(from_task_id="subworkflow-node", to_task_id="join-node", is_error=False),
+                Relation(from_task_id="subworkflow-node_state", to_task_id="join-node", is_error=False)
             },
             workflow.task_group_relations,
         )
@@ -293,7 +293,6 @@ class TestOozieConvertByExamples(TestCase):
                 "from airflow.operators import empty",
                 "from airflow.operators import empty",
                 "from airflow.operators import python",
-                "from airflow.operators.subdag_operator import SubDagOperator",
                 "from airflow.utils import dates",
                 "from airflow.utils.trigger_rule import TriggerRule",
                 "from o2a.converter.dataset import Dataset",
@@ -302,8 +301,10 @@ class TestOozieConvertByExamples(TestCase):
                 "import datetime",
                 "import pendulum",
                 "import shlex",
-                "from childwf import subdag_childwf",
                 "from o2a.o2a_libs.utils import skip_if_upstream_failed",
+                "from airflow.utils.task_group import TaskGroup",
+                'from o2a.o2a_libs.utils import resolve_subwf_state_state',
+                "from childwf.subdag_childwf import subDAG, CONFIG as subwf_config, JOB_PROPS as subwf_props"
             },
             workflow.dependencies,
         )

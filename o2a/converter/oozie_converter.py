@@ -22,7 +22,6 @@ import os
 
 import logging
 
-
 from o2a.converter import workflow_xml_parser, coordinator_xml_parser
 from o2a.converter.oozie_node import OozieNode, OozieControlNode, OozieActionNode
 from o2a.converter.property_parser import PropertyParser
@@ -31,7 +30,6 @@ from o2a.converter.renderers import BaseRenderer
 from o2a.converter.task_group import TaskGroup, ControlTaskGroup, ActionTaskGroup
 from o2a.converter.workflow import Workflow
 from o2a.converter.coordinator import Coordinator
-from o2a.mappers.decision_mapper import DecisionMapper
 from o2a.utils import el_utils
 from o2a.utils.file_utils import get_lib_files
 from o2a.mappers.action_mapper import ActionMapper
@@ -59,16 +57,17 @@ class OozieConverter:
     """
 
     def __init__(
-        self,
-        dag_name: str,
-        input_directory_path: str,
-        output_directory_path: str,
-        action_mapper: Dict[str, Type[ActionMapper]],
-        renderer: BaseRenderer,
-        transformers: List[BaseWorkflowTransformer] = None,
-        user: str = None,
-        initial_props: PropertySet = None,
-        subdag_folder: str = None,
+            self,
+            dag_name: str,
+            input_directory_path: str,
+            output_directory_path: str,
+            action_mapper: Dict[str, Type[ActionMapper]],
+            renderer: BaseRenderer,
+            transformers: List[BaseWorkflowTransformer] = None,
+            user: str = None,
+            initial_props: PropertySet = None,
+            subdag_folder: str = None,
+            as_subworkflow: bool = False,
     ):
 
         self.coordinator = Coordinator(
@@ -105,6 +104,7 @@ class OozieConverter:
             workflow=self.workflow,
             transformers=self.transformers,
         )
+        self.as_subworkflow = as_subworkflow
 
     def retrieve_lib_jar_libraries(self):
         logging.info(f"Looking for jar libraries for the workflow in {self.workflow.library_folder}.")
@@ -146,6 +146,8 @@ class OozieConverter:
         It uses the mapper, which is stored in ParsedActionNode. The result is saved in ParsedActionNode.tasks
         and ParsedActionNode.relations
         """
+        from o2a.mappers.decision_mapper import DecisionMapper
+        from o2a.mappers.subworkflow_mapper import SubworkflowMapper
         logging.info("Converting nodes to tasks and inner relations")
         for name, oozie_node in self.workflow.nodes.copy().items():
             tasks, relations = oozie_node.mapper.to_tasks_and_relations()
@@ -162,8 +164,8 @@ class OozieConverter:
                 downstream_names=oozie_node.downstream_names,
                 error_downstream_name=oozie_node.error_downstream_name,
                 decision=isinstance(oozie_node.mapper, DecisionMapper),
+                subworkflow=isinstance(oozie_node.mapper, SubworkflowMapper)
             )
-            # del self.workflow.nodes[name]
 
     @staticmethod
     def _get_task_group_type(oozie_node: OozieNode) -> Type[TaskGroup]:
@@ -209,7 +211,7 @@ class OozieConverter:
     def add_state_handlers(self) -> None:
         logging.info("Adding error handlers")
         for node in self.workflow.task_groups.values():
-            node.add_state_handler_if_needed(self.workflow.dag_name)
+            node.add_state_handler_if_needed(self.workflow.dag_name, self.as_subworkflow)
 
     def copy_extra_assets(self):
         """
@@ -228,12 +230,6 @@ class OozieConverter:
                 ),
                 dirs_exist_ok=True,
             )
-        # for node in nodes.values():
-        #    logging.info(f"Copies additional assets for the node: {node.name}")
-        #    node.mapper.copy_extra_assets(
-        #        input_directory_path=os.path.join(self.workflow.input_directory_path, HDFS_FOLDER),
-        #        output_directory_path=self.workflow.output_directory_path,
-        #    )
         logging.info("Extra assets copied.")
 
     def apply_preconvert_transformers(self):

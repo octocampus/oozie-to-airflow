@@ -6,8 +6,9 @@ import subprocess
 import tarfile
 import zipfile
 from airflow.exceptions import AirflowSkipException
-from airflow import AirflowException
+from airflow import AirflowException, DAG
 from airflow.models import DagRun
+from airflow.utils.task_group import TaskGroup
 
 
 def construct_hdfs_path(context, path):
@@ -56,8 +57,26 @@ def handle_archive(basename: str, alias: str) -> None:
 
 
 def skip_if_upstream_failed(id_dag, id_task):
+    state = get_state_of_task(id_dag, id_task)
+    if state == "upstream_failed":
+        raise AirflowSkipException
+def get_state_of_task(id_dag, id_task):
     last_dag_run = DagRun.find(dag_id=id_dag)
     last_dag_run.sort(key=lambda x: x.execution_date, reverse=True)
     state = last_dag_run[0].get_task_instance(id_task).state
-    if state == "upstream_failed":
-        raise AirflowSkipException
+    return state
+
+def resolve_subwf_state_state(dag: DAG,taskgroup: TaskGroup):
+    upstream_tasks = get_leaves_tasks(taskgroup)
+    for task in upstream_tasks:
+        state = get_state_of_task(dag.dag_id, task.task_id)
+        if state == 'failed':
+            raise Exception("subDAG Failed")
+        if state == "success":
+            return
+
+def get_leaves_tasks(taskgroup: TaskGroup):
+    return taskgroup.get_leaves()
+
+def dag_failed_exception() :
+    raise Exception("DAG Failed")
