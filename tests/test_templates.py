@@ -597,7 +597,13 @@ class SshTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
 class SubwfTemplateTestCase(BaseTestCases.BaseTemplateTestCase):
     TEMPLATE_NAME = "subwf.tpl"
 
-    DEFAULT_TEMPLATE_PARAMS = {"task_id": "test_id", "trigger_rule": "dummy", "app_name": "DAG_NAME_A", "propagate": True, "override_subwf_config": {}}
+    DEFAULT_TEMPLATE_PARAMS = {
+        "task_id": "test_id",
+        "trigger_rule": "dummy",
+        "app_name": "DAG_NAME_A",
+        "propagate": True,
+        "override_subwf_config": {},
+    }
 
     def test_green_path(self):
         res = render_template(self.TEMPLATE_NAME, **self.DEFAULT_TEMPLATE_PARAMS)

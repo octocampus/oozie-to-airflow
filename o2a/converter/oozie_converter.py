@@ -57,17 +57,17 @@ class OozieConverter:
     """
 
     def __init__(
-            self,
-            dag_name: str,
-            input_directory_path: str,
-            output_directory_path: str,
-            action_mapper: Dict[str, Type[ActionMapper]],
-            renderer: BaseRenderer,
-            transformers: List[BaseWorkflowTransformer] = None,
-            user: str = None,
-            initial_props: PropertySet = None,
-            subdag_folder: str = None,
-            as_subworkflow: bool = False,
+        self,
+        dag_name: str,
+        input_directory_path: str,
+        output_directory_path: str,
+        action_mapper: Dict[str, Type[ActionMapper]],
+        renderer: BaseRenderer,
+        transformers: List[BaseWorkflowTransformer] = None,
+        user: str = None,
+        initial_props: PropertySet = None,
+        subdag_folder: str = None,
+        as_subworkflow: bool = False,
     ):
 
         self.coordinator = Coordinator(
@@ -148,6 +148,7 @@ class OozieConverter:
         """
         from o2a.mappers.decision_mapper import DecisionMapper
         from o2a.mappers.subworkflow_mapper import SubworkflowMapper
+
         logging.info("Converting nodes to tasks and inner relations")
         for name, oozie_node in self.workflow.nodes.copy().items():
             tasks, relations = oozie_node.mapper.to_tasks_and_relations()
@@ -164,7 +165,7 @@ class OozieConverter:
                 downstream_names=oozie_node.downstream_names,
                 error_downstream_name=oozie_node.error_downstream_name,
                 decision=isinstance(oozie_node.mapper, DecisionMapper),
-                subworkflow=isinstance(oozie_node.mapper, SubworkflowMapper)
+                subworkflow=isinstance(oozie_node.mapper, SubworkflowMapper),
             )
 
     @staticmethod

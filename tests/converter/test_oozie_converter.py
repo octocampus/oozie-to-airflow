@@ -273,7 +273,7 @@ class TestOozieConvertByExamples(TestCase):
                 Relation(from_task_id="join-node", to_task_id="decision-node", is_error=False),
                 Relation(from_task_id="pig-node", to_task_id="join-node", is_error=False),
                 Relation(from_task_id="shell-node", to_task_id="join-node", is_error=False),
-                Relation(from_task_id="subworkflow-node_state", to_task_id="join-node", is_error=False)
+                Relation(from_task_id="subworkflow-node_state", to_task_id="join-node", is_error=False),
             },
             workflow.task_group_relations,
         )
@@ -303,8 +303,8 @@ class TestOozieConvertByExamples(TestCase):
                 "import shlex",
                 "from o2a.o2a_libs.utils import skip_if_upstream_failed",
                 "from airflow.utils.task_group import TaskGroup",
-                'from o2a.o2a_libs.utils import resolve_subwf_state_state',
-                "from childwf.subdag_childwf import subDAG, CONFIG as subwf_config, JOB_PROPS as subwf_props"
+                "from o2a.o2a_libs.utils import resolve_subwf_state_state",
+                "from childwf.subdag_childwf import subDAG, CONFIG as subwf_config, JOB_PROPS as subwf_props",
             },
             workflow.dependencies,
         )

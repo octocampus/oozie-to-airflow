@@ -14,7 +14,6 @@
 # limitations under the License.
 """Tests for subworkflow mapper"""
 import ast
-import copy
 import os
 from contextlib import suppress
 from unittest import mock, TestCase
@@ -66,8 +65,20 @@ class TestSubworkflowMapper(TestCase):
         </property>
     </configuration>
 </sub-workflow>"""
+        subworkflow_node_no_propagate_str = """
+<sub-workflow>
+    <app-path>${nameNode}/user/${examplesRoot}/pig</app-path>
+    <configuration>
+        <property>
+            <name>resourceManager</name>
+            <value>${resourceManager}</value>
+        </property>
+    </configuration>
+</sub-workflow>"""
+
         super().setUpClass()
         cls.subworkflow_node = ET.fromstring(subworkflow_node_str)
+        cls.subworkflow_node_no_propagate = ET.fromstring(subworkflow_node_no_propagate_str)
 
     def tearDown(self) -> None:
         with suppress(OSError):
@@ -79,7 +90,7 @@ class TestSubworkflowMapper(TestCase):
 
         parse_els.side_effect = [self.subworkflow_properties, self.config]
         # When
-        mapper = self._get_subwf_mapper()
+        mapper = self._get_subwf_mapper(self.subworkflow_node)
 
         # Then
         self.assertEqual("test_id", mapper.task_id)
@@ -94,17 +105,13 @@ class TestSubworkflowMapper(TestCase):
         # Given
         parse_els.side_effect = [self.subworkflow_properties, self.config]
         self.assertFalse(os.path.isfile(self.SUBDAG_TEST_FILEPATH))
-        # Removing the propagate-configuration node
-        propagate_configuration = self.subworkflow_node.find("propagate-configuration")
-        copy_node = copy.deepcopy(self.subworkflow_node)
-        copy_node = copy_node.remove(propagate_configuration)
 
         # When
-        mapper = self._get_subwf_mapper(copy_node)
+        mapper = self._get_subwf_mapper(self.subworkflow_node_no_propagate)
 
         # Then
         self.assertEqual("test_id", mapper.task_id)
-        self.assertEqual(self.subworkflow_node, mapper.oozie_node)
+        self.assertEqual(self.subworkflow_node_no_propagate, mapper.oozie_node)
         self.assertEqual(self.main_properties, mapper.props.job_properties)
         # Propagate config node is missing, should NOT forward config job_properties
         self.assertEqual(PropertySet(config={}, job_properties={}), mapper.get_child_props())
@@ -113,25 +120,35 @@ class TestSubworkflowMapper(TestCase):
     def test_to_tasks_and_relations(self, parse_els):
         # Given
         parse_els.side_effect = [self.subworkflow_properties, self.config]
-        mapper = self._get_subwf_mapper()
+        mapper = self._get_subwf_mapper(self.subworkflow_node)
         # When
         tasks, relations = mapper.to_tasks_and_relations()
 
         # Then
         self.assertEqual(
-            [Task(task_id="test_id",
-                  template_name="subwf.tpl",
-                  template_params={
-                      "app_name": "test_id",
-                      "propagate":True,
-                      "override_subwf_config":False
-                  }),
-             Task(task_id="test_id_state", template_name="subwf_state.tpl", template_params={"taskgroup": "test_id"}, trigger_rule=TriggerRule.ALL_DONE)], tasks
+            [
+                Task(
+                    task_id="test_id",
+                    template_name="subwf.tpl",
+                    template_params={
+                        "app_name": "test_id",
+                        "propagate": True,
+                        "override_subwf_config": False,
+                    },
+                ),
+                Task(
+                    task_id="test_id_state",
+                    template_name="subwf_state.tpl",
+                    template_params={"taskgroup": "test_id"},
+                    trigger_rule=TriggerRule.ALL_DONE,
+                ),
+            ],
+            tasks,
         )
         self.assertEqual([Relation(from_task_id="test_id", to_task_id="test_id_state")], relations)
 
     def test_required_imports(self):
-        mapper = self._get_subwf_mapper()
+        mapper = self._get_subwf_mapper(self.subworkflow_node)
         imps = mapper.required_imports()
         imp_str = "\n".join(imps)
         ast.parse(imp_str)
@@ -140,7 +157,7 @@ class TestSubworkflowMapper(TestCase):
         return subworkflow_mapper.SubworkflowMapper(
             input_directory_path=EXAMPLE_SUBWORKFLOW_PATH,
             output_directory_path="/tmp",
-            oozie_node= oozie_node,
+            oozie_node=oozie_node,
             name="test_id",
             dag_name="test",
             action_mapper=ACTION_MAP,

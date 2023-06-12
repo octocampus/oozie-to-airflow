@@ -23,7 +23,6 @@ from o2a.converter.task import Task
 from o2a.converter.relation import Relation
 
 
-
 class TaskGroup:
     """Airflow's tasks group
 
@@ -107,7 +106,9 @@ class TaskGroup:
             error_handler.template_name = "error-subwf.tpl"
         self.error_handler_task = error_handler
         if self.subworkflow:
-            self.relations.append(Relation(from_task_id=self.tasks[-1].task_id, to_task_id=error_handler_task_id))
+            self.relations.append(
+                Relation(from_task_id=self.tasks[-1].task_id, to_task_id=error_handler_task_id)
+            )
         else:
             new_relations = (
                 Relation(from_task_id=t.task_id, to_task_id=error_handler_task_id, is_error=True)

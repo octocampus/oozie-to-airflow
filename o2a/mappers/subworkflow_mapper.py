@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Maps subworkflow of Oozie to Airflow's sub-dag"""
-import copy
 import logging
 import os
 from pathlib import Path
-from typing import Dict, List, Set, Type, Optional
+from typing import Dict, List, Set, Type
 
 from xml.etree.ElementTree import Element
 
@@ -42,18 +41,18 @@ class SubworkflowMapper(ActionMapper):
 
     # pylint: disable=too-many-arguments
     def __init__(
-            self,
-            oozie_node: Element,
-            name: str,
-            dag_name: str,
-            input_directory_path: str,
-            output_directory_path: str,
-            subdag_folder: str,
-            props: PropertySet,
-            action_mapper: Dict[str, Type[ActionMapper]],
-            renderer: BaseRenderer,
-            transformers: List[BaseWorkflowTransformer] = None,
-            **kwargs,
+        self,
+        oozie_node: Element,
+        name: str,
+        dag_name: str,
+        input_directory_path: str,
+        output_directory_path: str,
+        subdag_folder: str,
+        props: PropertySet,
+        action_mapper: Dict[str, Type[ActionMapper]],
+        renderer: BaseRenderer,
+        transformers: List[BaseWorkflowTransformer] = None,
+        **kwargs,
     ):
         ActionMapper.__init__(
             self,
@@ -103,7 +102,7 @@ class SubworkflowMapper(ActionMapper):
                 dag_name=self.app_name,
                 transformers=self.transformers,
                 subdag_folder=os.path.join(self.subdag_folder, self.app_name),
-                as_subworkflow=True
+                as_subworkflow=True,
             )
             self.converter.convert(as_subworkflow=True)
         else:
@@ -119,13 +118,26 @@ class SubworkflowMapper(ActionMapper):
         )
 
     def to_tasks_and_relations(self):
-        override_subwf_config = (self.props.job_properties.get("oozie.wf.subworkflow.classpath.first") == "true")
-        propagate_configuration = (self.oozie_node.find("propagate-configuration") is not None)
-        print(propagate_configuration)
+        override_subwf_config = (
+            self.props.job_properties.get("oozie.wf.subworkflow.classpath.first") == "true"
+        )
+        propagate_configuration = self.oozie_node.find("propagate-configuration") is not None
         tasks: List[Task] = [
-            Task(task_id=self.name, template_name="subwf.tpl",
-                 template_params=dict(app_name=self.name, propagate=propagate_configuration, override_subwf_config=override_subwf_config)),
-            Task(task_id=f"{self.name}_state", template_name="subwf_state.tpl", template_params={"taskgroup": self.name},trigger_rule=TriggerRule.ALL_DONE)
+            Task(
+                task_id=self.name,
+                template_name="subwf.tpl",
+                template_params=dict(
+                    app_name=self.name,
+                    propagate=propagate_configuration,
+                    override_subwf_config=override_subwf_config,
+                ),
+            ),
+            Task(
+                task_id=f"{self.name}_state",
+                template_name="subwf_state.tpl",
+                template_params={"taskgroup": self.name},
+                trigger_rule=TriggerRule.ALL_DONE,
+            ),
         ]
         relations: List[Relation] = [Relation(from_task_id=self.name, to_task_id=f"{self.name}_state")]
         return tasks, relations
@@ -134,11 +146,14 @@ class SubworkflowMapper(ActionMapper):
         base_folder = os.path.basename(os.path.normpath(self.subdag_folder))
         app_name = self.app_name.replace("-", "_")
         if self.output_directory_path == self.subdag_folder:
-            import_statement = f"from {app_name}.subdag_{app_name} import subDAG, CONFIG as subwf_config, JOB_PROPS as subwf_props"
+            import_statement = (
+                f"from {app_name}.subdag_{app_name} import subDAG,"
+                f" CONFIG as subwf_config, JOB_PROPS as subwf_props"
+            )
         else:
-            import_statement = f"from {base_folder}.{app_name}.subdag_{app_name} import subDAG, CONFIG as subwf_config, JOB_PROPS as subwf_props"
+            import_statement = (
+                f"from {base_folder}.{app_name}.subdag_{app_name} import subDAG,"
+                f" CONFIG as subwf_config, JOB_PROPS as subwf_props"
+            )
 
-        return {
-            import_statement,
-            'from o2a.o2a_libs.utils import resolve_subwf_state_state'
-        }
+        return {import_statement, "from o2a.o2a_libs.utils import resolve_subwf_state_state"}

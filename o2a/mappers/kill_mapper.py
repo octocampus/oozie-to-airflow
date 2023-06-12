@@ -28,7 +28,9 @@ class KillMapper(DummyMapper):
     """
 
     def to_tasks_and_relations(self):
-        tasks: List[Task] = [Task(task_id=self.name, template_name="fail.tpl", trigger_rule= TriggerRule.ONE_SUCCESS)]
+        tasks: List[Task] = [
+            Task(task_id=self.name, template_name="fail.tpl", trigger_rule=TriggerRule.ONE_SUCCESS)
+        ]
         relations: List[Relation] = []
         return tasks, relations
 
